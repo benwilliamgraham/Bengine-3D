@@ -9,7 +9,7 @@ import org.lwjgl.opengl.PixelFormat;
 
 public class DisplayManager {
 	
-	public static final float FPS = 256;
+	public static final float FPS = 60;
 	
 	public static void createDisplay(int width, int height){
 		

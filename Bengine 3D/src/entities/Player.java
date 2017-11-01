@@ -17,6 +17,9 @@ public class Player{
 		this.position = position;
 		this.rotation = rotation;
 		camera = new Camera();
+		
+		Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+		Mouse.setGrabbed(true);
 	}
 
 	public void update(){
@@ -28,6 +31,7 @@ public class Player{
 		
 		rotation.y += mouseXChange * 1 / DisplayManager.FPS;
 		rotation.x += mouseYChange * 1 / DisplayManager.FPS;
+		rotation.x = (float) Math.min(Math.max(rotation.x, -Math.PI / 2.5), Math.PI / 2.5);
 		
 		Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
 		

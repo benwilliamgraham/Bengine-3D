@@ -1,5 +1,6 @@
 package world;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,13 +18,13 @@ import toolBox.OpenSimplexNoise;
 
 public class World {
 	
-	public static final int XSIZE = 128;
-	public static final int YSIZE = 64;
-	public static final int ZSIZE = 128;
+	public static final int XSIZE = 40;
+	public static final int YSIZE = 40;
+	public static final int ZSIZE = 40;
 	
 	public static final Vector3f SUN = new Vector3f(XSIZE * 1.5f, 1000f, ZSIZE / 2);
 	
-	public boolean[][][] voxels;
+	public Voxel[][][] voxels;
 	
 	public TexturedModel model;
 	
@@ -37,9 +38,16 @@ public class World {
 		rand = new Random(Sys.getTime());
 		OpenSimplexNoise noise = new OpenSimplexNoise(Sys.getTime());
 		
-		voxels = new boolean[XSIZE][YSIZE][ZSIZE];
+		voxels = new Voxel[XSIZE][YSIZE][ZSIZE];
+		
+		try {
+			LevelLoader.loadLevel(this);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		//fill
+		/*
 		float gradient = 16;
 		for(int x = 0; x < XSIZE; x++){
 			for(int y = 0; y < YSIZE; y++){
@@ -52,6 +60,7 @@ public class World {
 				}
 			}
 		}
+		*/
 		
 		//create face map
 		createFaceMap();
@@ -70,7 +79,10 @@ public class World {
 		for(int x = 0; x < XSIZE; x++){
 			for(int y = 0; y < YSIZE; y++){
 				for(int z = 0; z < ZSIZE; z++){
-					if(voxels[x][y][z] == true){
+					if(voxels[x][y][z].solid){
+						
+						//set tileset
+						int tileset = voxels[x][y][z].tileset;
 						
 						//x+
 						if(!checkSolid(x + 1, y, z)){
@@ -84,7 +96,7 @@ public class World {
 							if(!checkSolid(x, y, z - 1)) LRUD += 100;
 							if(!checkSolid(x, y + 1, z)) LRUD += 10;
 							if(!checkSolid(x, y - 1, z)) LRUD += 1;
-							createFace(p1, p2, p3, p4, LRUD,
+							createFace(p1, p2, p3, p4, LRUD, tileset,
 									vertices, textures, shades, indices);
 						}
 						
@@ -100,7 +112,7 @@ public class World {
 							if(!checkSolid(x, y, z + 1)) LRUD += 100;
 							if(!checkSolid(x, y + 1, z)) LRUD += 10;
 							if(!checkSolid(x, y - 1, z)) LRUD += 1;
-							createFace(p1, p2, p3, p4, LRUD,
+							createFace(p1, p2, p3, p4, LRUD, tileset,
 									vertices, textures, shades, indices);
 						}
 						
@@ -116,7 +128,7 @@ public class World {
 							if(!checkSolid(x, y, z - 1)) LRUD += 100;
 							if(!checkSolid(x - 1, y, z)) LRUD += 10;
 							if(!checkSolid(x + 1, y, z)) LRUD += 1;
-							createFace(p1, p2, p3, p4, LRUD,
+							createFace(p1, p2, p3, p4, LRUD, tileset,
 									vertices, textures, shades, indices);
 						}
 						
@@ -132,7 +144,7 @@ public class World {
 							if(!checkSolid(x, y, z - 1)) LRUD += 100;
 							if(!checkSolid(x + 1, y, z)) LRUD += 10;
 							if(!checkSolid(x - 1, y, z)) LRUD += 1;
-							createFace(p1, p2, p3, p4, LRUD,
+							createFace(p1, p2, p3, p4, LRUD, tileset,
 									vertices, textures, shades, indices);
 						}
 						
@@ -148,7 +160,7 @@ public class World {
 							if(!checkSolid(x + 1, y, z)) LRUD += 100;
 							if(!checkSolid(x, y + 1, z)) LRUD += 10;
 							if(!checkSolid(x, y - 1, z)) LRUD += 1;
-							createFace(p1, p2, p3, p4, LRUD,
+							createFace(p1, p2, p3, p4, LRUD, tileset,
 									vertices, textures, shades, indices);
 						}
 						
@@ -164,7 +176,7 @@ public class World {
 							if(!checkSolid(x - 1, y, z)) LRUD += 100;
 							if(!checkSolid(x, y + 1, z)) LRUD += 10;
 							if(!checkSolid(x, y - 1, z)) LRUD += 1;
-							createFace(p1, p2, p3, p4, LRUD,
+							createFace(p1, p2, p3, p4, LRUD, tileset,
 									vertices, textures, shades, indices);
 						}
 						
@@ -195,13 +207,13 @@ public class World {
 		}
 		
 		RawModel rawModel = loader.loadToVAO(verticesArray, texturesArray, indicesArray);
-		ModelTexture texture = new ModelTexture(loader.loadTexture("sandstone"));
+		ModelTexture texture = new ModelTexture(loader.loadTexture("Tiles"));
 		
 		model = new TexturedModel(rawModel, texture);
 	}
 	
 	
-	private void createFace(Vector3f p1, Vector3f p2, Vector3f p3, Vector3f p4, int LRUD,
+	private void createFace(Vector3f p1, Vector3f p2, Vector3f p3, Vector3f p4, int LRUD, int tileset,
 			List<Vector3f> vertices, List<Vector2f> textures, List<Float> shades, List<Integer> indices){
 		int index = vertices.size();
 		
@@ -216,7 +228,7 @@ public class World {
 		shades.add(calcShade(normal, p3));
 		shades.add(calcShade(normal, p4));
 		
-		setCoords(LRUD, textures);
+		setCoords(LRUD, tileset, textures);
 		
 		indices.add(index + 0);
 		indices.add(index + 1);
@@ -227,92 +239,91 @@ public class World {
 	}
 	
 	
-	private void setCoords(int LRUD, List<Vector2f> textures){
-		Vector2f bc = getBaseCoords(0);
-		
-		
+	private void setCoords(int LRUD, int tileset, List<Vector2f> textures){		
+		Vector2f bc = getBaseCoords(0, tileset);
 		
 		switch(LRUD){
 		case 0:
 			int[] opt = {11, 12, 13, 21, 22, 23, 31, 32, 33};
-			bc = getBaseCoords(randInSet(opt));
+			bc = getBaseCoords(randInSet(opt), tileset);
 			break;
 		case 1:
 			int[] opt1 = {41, 42, 43};
-			bc = getBaseCoords(randInSet(opt1));
+			bc = getBaseCoords(randInSet(opt1), tileset);
 			break;
 		case 10:
 			int[] opt2 = {1, 2, 3};
-			bc = getBaseCoords(randInSet(opt2));
+			bc = getBaseCoords(randInSet(opt2), tileset);
 			break;
 		case 11:
 			int[] opt3 = {37};
-			bc = getBaseCoords(randInSet(opt3));
+			bc = getBaseCoords(randInSet(opt3), tileset);
 			break;
 		case 100:
 			int[] opt4 = {14, 24, 34};
-			bc = getBaseCoords(randInSet(opt4));
+			bc = getBaseCoords(randInSet(opt4), tileset);
 			break;
 		case 101:
 			int[] opt5 = {44};
-			bc = getBaseCoords(randInSet(opt5));
+			bc = getBaseCoords(randInSet(opt5), tileset);
 			break;
 		case 110:
 			int[] opt6 = {4};
-			bc = getBaseCoords(randInSet(opt6));
+			bc = getBaseCoords(randInSet(opt6), tileset);
 			break;
 		case 111:
 			int[] opt7 = {39};
-			bc = getBaseCoords(randInSet(opt7));
+			bc = getBaseCoords(randInSet(opt7), tileset);
 			break;
 		case 1000:
 			int[] opt8 = {10, 20, 30};
-			bc = getBaseCoords(randInSet(opt8));
+			bc = getBaseCoords(randInSet(opt8), tileset);
 			break;
 		case 1001:
 			int[] opt9 = {40};
-			bc = getBaseCoords(randInSet(opt9));
+			bc = getBaseCoords(randInSet(opt9), tileset);
 			break;
 		case 1010:
 			int[] opt10 = {0};
-			bc = getBaseCoords(randInSet(opt10));
+			bc = getBaseCoords(randInSet(opt10), tileset);
 			break;
 		case 1011:
 			int[] opt11 = {36};
-			bc = getBaseCoords(randInSet(opt11));
+			bc = getBaseCoords(randInSet(opt11), tileset);
 			break;
 		case 1100:
 			int[] opt12 = {28};
-			bc = getBaseCoords(randInSet(opt12));
+			bc = getBaseCoords(randInSet(opt12), tileset);
 			break;
 		case 1101:
 			int[] opt13 = {48};
-			bc = getBaseCoords(randInSet(opt13));
+			bc = getBaseCoords(randInSet(opt13), tileset);
 			break;
 		case 1110:
 			int[] opt14 = {18};
-			bc = getBaseCoords(randInSet(opt14));
+			bc = getBaseCoords(randInSet(opt14), tileset);
 			break;
 		case 1111:
 			int[] opt15 = {38};
-			bc = getBaseCoords(randInSet(opt15));
+			bc = getBaseCoords(randInSet(opt15), tileset);
 			break;
 		}
 			
 		
-		float v = 10f / 128f;
-		textures.add(new Vector2f(bc.x + v, bc.y + 0));
+		float xv = 10f / 128f;
+		float yv = 10f / 512f;
+		textures.add(new Vector2f(bc.x + xv, bc.y + 0));
 		textures.add(new Vector2f(bc.x + 0, bc.y + 0));
-		textures.add(new Vector2f(bc.x + 0, bc.y + v));
-		textures.add(new Vector2f(bc.x + v, bc.y + v));
+		textures.add(new Vector2f(bc.x + 0, bc.y + yv));
+		textures.add(new Vector2f(bc.x + xv, bc.y + yv));
 	}
 	
 	
-	private Vector2f getBaseCoords(int n){
-		int col = n % 10;
-		int row = n / 10;
+	private Vector2f getBaseCoords(int selection, int tileset){
+		int col = selection % 10;
+		int row = selection / 10;
 		
-		return new Vector2f((float) col * 10f / 128f, (float) row * 10f / 128f);
+		return new Vector2f((float) col * 10f / 128f, (float) row * 10f / 512f + tileset / 8f);
 	}
 	
 	
@@ -332,6 +343,6 @@ public class World {
 		if(x < 0 || x >= XSIZE || y < 0 || y >= YSIZE || z < 0 || z >= ZSIZE){
 			return true;
 		}
-		return voxels[x][y][z];
+		return voxels[x][y][z].solid;
 	}
 }

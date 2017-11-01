@@ -28,85 +28,6 @@ public class GameLoop {
 		StaticShader shader = new StaticShader();
 		
 		Renderer renderer = new Renderer(shader);
-		
-		float[] vertices = {			
-				-0.5f,0.5f,-0.5f,	
-				-0.5f,-0.5f,-0.5f,	
-				0.5f,-0.5f,-0.5f,	
-				0.5f,0.5f,-0.5f,		
-				
-				-0.5f,0.5f,0.5f,	
-				-0.5f,-0.5f,0.5f,	
-				0.5f,-0.5f,0.5f,	
-				0.5f,0.5f,0.5f,
-				
-				0.5f,0.5f,-0.5f,	
-				0.5f,-0.5f,-0.5f,	
-				0.5f,-0.5f,0.5f,	
-				0.5f,0.5f,0.5f,
-				
-				-0.5f,0.5f,-0.5f,	
-				-0.5f,-0.5f,-0.5f,	
-				-0.5f,-0.5f,0.5f,	
-				-0.5f,0.5f,0.5f,
-				
-				-0.5f,0.5f,0.5f,
-				-0.5f,0.5f,-0.5f,
-				0.5f,0.5f,-0.5f,
-				0.5f,0.5f,0.5f,
-				
-				-0.5f,-0.5f,0.5f,
-				-0.5f,-0.5f,-0.5f,
-				0.5f,-0.5f,-0.5f,
-				0.5f,-0.5f,0.5f
-				
-		};
-		
-		float[] textureCoords = {
-				
-				0,0,
-				0,1,
-				1,1,
-				1,0,			
-				0,0,
-				0,1,
-				1,1,
-				1,0,			
-				0,0,
-				0,1,
-				1,1,
-				1,0,
-				0,0,
-				0,1,
-				1,1,
-				1,0,
-				0,0,
-				0,1,
-				1,1,
-				1,0,
-				0,0,
-				0,1,
-				1,1,
-				1,0
-
-				
-		};
-		
-		int[] indices = {
-				0,1,3,	
-				3,1,2,	
-				4,5,7,
-				7,5,6,
-				8,9,11,
-				11,9,10,
-				12,13,15,
-				15,13,14,	
-				16,17,19,
-				19,17,18,
-				20,21,23,
-				23,21,22
-		};
-
 
 		World world = new World(loader);
 		
@@ -114,6 +35,8 @@ public class GameLoop {
 		
 		Player player = new Player(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0));
 		
+		long startTime = Sys.getTime();
+		int frames = 0;
 		while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)){
 			long time = Sys.getTime();
 			
@@ -125,17 +48,15 @@ public class GameLoop {
 			shader.stop();
 			DisplayManager.updateDisplay();
 			
-			float fps = -1;
-			float finFPS = -1;
-			if(Sys.getTime() - time != 0){
-				fps = 1000f / (Sys.getTime() - time);
-			}
-			while(1000f / (Sys.getTime() - time) > DisplayManager.FPS){
-				finFPS = 1000f / (Sys.getTime() - time);
+			
+			while(1000f / (Sys.getTime() + 1 - time) > DisplayManager.FPS){
+				
 			}
 			
-			System.out.println(fps + ", " + finFPS);
+			frames++;
 		}
+		float totTime = 1f/1000f * (Sys.getTime() - startTime);
+		System.out.println(totTime + " seconds for " + frames + " frames: " + frames / totTime + " fps");
 		
 		shader.cleanUp();
 		loader.cleanUp();
