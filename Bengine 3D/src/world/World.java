@@ -338,8 +338,19 @@ public class World {
 		return set[rand.nextInt(set.length)];
 	}
 	
+	public boolean checkSolid(Vector3f position){
+		int x = (int) (position.x + 0.5f);
+		int y = (int) (position.y + 0.5f);
+		int z = (int) (position.z + 1.5f);
+		
+		if(x < 0 || x >= XSIZE || y < 0 || y >= YSIZE || z < 0 || z >= ZSIZE){
+			return true;
+		}
+		return voxels[x][y][z].solid;
+	}
 	
-	private boolean checkSolid(int x, int y, int z){
+	
+	public boolean checkSolid(int x, int y, int z){
 		if(x < 0 || x >= XSIZE || y < 0 || y >= YSIZE || z < 0 || z >= ZSIZE){
 			return true;
 		}

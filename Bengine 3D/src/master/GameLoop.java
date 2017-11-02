@@ -33,7 +33,7 @@ public class GameLoop {
 		
 		Entity ent = new Entity(world.model, new Vector3f(0, 0, -1), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
 		
-		Player player = new Player(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0));
+		Player player = new Player(new Vector3f(0, 5, 0), new Vector3f(0, 0, 0));
 		
 		long startTime = Sys.getTime();
 		int frames = 0;
@@ -41,7 +41,7 @@ public class GameLoop {
 			long time = Sys.getTime();
 			
 			renderer.prepare();
-			player.update();
+			player.update(world);
 			shader.start();
 			shader.loadViewMatrix(player.camera);
 			renderer.render(ent, shader);
