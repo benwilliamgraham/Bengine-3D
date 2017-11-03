@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 public class LevelLoader{
 	
 	public static void loadLevel(World world) throws IOException{
-		File file= new File("assets/Stairs.png");
+		File file= new File("assets/pt.png");
 		BufferedImage image = ImageIO.read(file);
 		
 		for(int x = 0; x < World.XSIZE; x++){
@@ -18,7 +18,7 @@ public class LevelLoader{
 				int ny = World.YSIZE - 1 - y / World.YSIZE;
 				int nz = y % World.XSIZE;
 				
-				int tileset = 0;
+				int tileset = 4;
 				switch (c.getRed()){
 				case 131:
 					tileset = 0;

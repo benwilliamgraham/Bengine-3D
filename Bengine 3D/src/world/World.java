@@ -18,9 +18,9 @@ import toolBox.OpenSimplexNoise;
 
 public class World {
 	
-	public static final int XSIZE = 40;
-	public static final int YSIZE = 40;
-	public static final int ZSIZE = 40;
+	public static final int XSIZE = 32;
+	public static final int YSIZE = 32;
+	public static final int ZSIZE = 32;
 	
 	public static final Vector3f SUN = new Vector3f(XSIZE * 1.5f, 1000f, ZSIZE / 2);
 	

@@ -31,9 +31,9 @@ public class GameLoop {
 
 		World world = new World(loader);
 		
-		Entity ent = new Entity(world.model, new Vector3f(0, 0, -1), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
+		Entity ent = new Entity(world.model, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
 		
-		Player player = new Player(new Vector3f(0, 5, 0), new Vector3f(0, 0, 0));
+		Player player = new Player(new Vector3f(World.XSIZE / 2, World.YSIZE - 4, World.ZSIZE / 2), new Vector3f(0, 0, 0));
 		
 		long startTime = Sys.getTime();
 		int frames = 0;

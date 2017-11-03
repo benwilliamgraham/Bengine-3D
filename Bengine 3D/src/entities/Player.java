@@ -12,7 +12,7 @@ import world.World;
 public class Player{
 	
 	//define player constants
-	private static final Vector3f DIMENSIONS = new Vector3f(0.98f, 1.98f, 0.98f);
+	private static final Vector3f DIMENSIONS = new Vector3f(1f, 2f, 1f);
 	private static final float RUN_SPEED = 20;
 	private static final float STRAFE_SPEED = 17;
 	private static final float TURN_SPEED = 0.8f;
@@ -77,9 +77,13 @@ public class Player{
 		
 		if(!checkCollision(world, new Vector3f(xChange / DisplayManager.FPS, 0, 0), DIMENSIONS)){
 			position.x += xChange / DisplayManager.FPS;
+		}else if(!checkCollision(world, new Vector3f(xChange / DisplayManager.FPS, 1, 0), DIMENSIONS)){
+			position.y += 1;
 		}
 		if(!checkCollision(world, new Vector3f(0, 0, zChange / DisplayManager.FPS), DIMENSIONS)){
 			position.z += zChange / DisplayManager.FPS;
+		}else if(!checkCollision(world, new Vector3f(0, 1, zChange / DisplayManager.FPS), DIMENSIONS)){
+			position.y += 1;
 		}
 		
 		if(!checkCollision(world, new Vector3f(0, velocity.y / DisplayManager.FPS, 0), DIMENSIONS)){
@@ -102,10 +106,10 @@ public class Player{
 	public boolean checkCollision(World world, Vector3f change, Vector3f dimensions){
 		Vector3f checkPos = Vector3f.add(position, change, null);
 		
-		for(float x = checkPos.x - (dimensions.x / 2f); x <= checkPos.x + (dimensions.x / 2f); x++){
-			for(float y = checkPos.y - (dimensions.y / 2f); y <= checkPos.y + (dimensions.y / 2f); y++){
-				for(float z = checkPos.z - (dimensions.z / 2f); z <= checkPos.z + (dimensions.z / 2f); z++){
-					if(world.checkSolid((int) (x + 0.5f), (int) (y + 0.5f), (int) (z + 2f))){
+		for(float x = checkPos.x - (dimensions.x / 2f); x <= checkPos.x + (dimensions.x / 2f); x += 1f){
+			for(float y = checkPos.y - (dimensions.y / 2f); y <= checkPos.y + (dimensions.y / 2f); y += 1f){
+				for(float z = checkPos.z - (dimensions.z / 2f); z <= checkPos.z + (dimensions.z / 2f); z += 1f){
+					if(world.checkSolid((int) (x + 0.5f), (int) (y + 0.5f), (int) (z + 0.5f))){
 						return true;
 					}
 				}
