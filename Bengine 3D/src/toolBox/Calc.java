@@ -28,8 +28,12 @@ public class Calc {
 		return viewMatrix;
 	}
 	
+	public static float calculateMagnitude(Vector3f vector){
+		return (float) Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+	}
+	
 	public static Vector3f normaliseVector(Vector3f vector){
-		float mag = (float) Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+		float mag = calculateMagnitude(vector);
 		return new Vector3f(vector.x / mag, vector.y / mag, vector.z / mag);
 	}
 	

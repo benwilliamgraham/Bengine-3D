@@ -16,8 +16,9 @@ public class DisplayManager {
 		ContextAttribs attribs = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
 		
 		try {
-			Display.setFullscreen(true);
-			Display.setDisplayMode(Display.getDesktopDisplayMode());
+			//Display.setFullscreen(true);
+			//Display.setDisplayMode(Display.getDesktopDisplayMode());
+			Display.setDisplayMode(new DisplayMode(width, height));
 			Display.create(new PixelFormat(), attribs);
 			Display.setTitle("");
 		} catch (LWJGLException e) {

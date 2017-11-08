@@ -1,5 +1,7 @@
 package master;
 
+import java.io.IOException;
+
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
@@ -11,40 +13,51 @@ import data.TexturedModel;
 import entities.Camera;
 import entities.Entity;
 import entities.Player;
+import networking.Client;
 import renderEngine.DisplayManager;
 import renderEngine.Renderer;
 import shaders.StaticShader;
+import toolBox.Assets;
 import toolBox.Loader;
+import world.FaceMap;
 import world.World;
 
 public class GameLoop {
 
-	public static void main(String[] args){
+	public static void main(String[] args) throws IOException{
 		
 		DisplayManager.createDisplay(1200, 800);
 		
 		Loader loader = new Loader();
 		
+		Assets.loadAssets(loader);
+		
 		StaticShader shader = new StaticShader();
 		
 		Renderer renderer = new Renderer(shader);
 
-		World world = new World(loader);
+		//connect to a server
+		Client client = new Client();
 		
-		Entity ent = new Entity(world.model, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
+		System.out.println("Creating world");
 		
-		Player player = new Player(new Vector3f(World.XSIZE / 2, World.YSIZE - 4, World.ZSIZE / 2), new Vector3f(0, 0, 0));
+		//create the world
+		World world = new World(loader, client);
 		
+		//start connection
+		client.start(world);
+				
 		long startTime = Sys.getTime();
 		int frames = 0;
 		while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)){
 			long time = Sys.getTime();
 			
+			world.update();
 			renderer.prepare();
-			player.update(world);
 			shader.start();
-			shader.loadViewMatrix(player.camera);
-			renderer.render(ent, shader);
+			shader.loadViewMatrix(world.player.camera);
+			renderer.render(world.faceMap, shader);
+			renderer.render(world.dynEntities, shader);
 			shader.stop();
 			DisplayManager.updateDisplay();
 			
@@ -58,6 +71,7 @@ public class GameLoop {
 		float totTime = 1f/1000f * (Sys.getTime() - startTime);
 		System.out.println(totTime + " seconds for " + frames + " frames: " + frames / totTime + " fps");
 		
+		client.cleanUp();
 		shader.cleanUp();
 		loader.cleanUp();
 		DisplayManager.closeDisplay();
