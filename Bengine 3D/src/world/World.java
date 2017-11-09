@@ -16,7 +16,7 @@ import org.lwjgl.util.vector.Vector3f;
 import data.ModelTexture;
 import data.RawModel;
 import data.TexturedModel;
-import entities.Cubert;
+import entities.Bullet;
 import entities.DynEntity;
 import entities.Light;
 import entities.Player;
@@ -36,6 +36,7 @@ public class World {
 	public List<Light> lights = new ArrayList<Light>();
 	public Voxel[][][] voxels = new Voxel[XSIZE][YSIZE][ZSIZE];
 	
+	public List<DynEntity> newDynEntities = new ArrayList<DynEntity>();
 	public Map<String, DynEntity> dynEntities = new HashMap<String, DynEntity>();
 	public Map<String, DynEntity> localDynEntities = new HashMap<String, DynEntity>();
 	public FaceMap faceMap;
@@ -59,7 +60,7 @@ public class World {
 		}
 		
 		//add player
-		createDynEntity(player);
+		addDynEntity(player);
 		
 		//create face map
 		faceMap = new FaceMap(loader, new Random(Sys.getTime()), lights);
@@ -71,15 +72,26 @@ public class World {
 		boolean stillActive;
 		for(Iterator<Map.Entry<String, DynEntity>> it = localDynEntities.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<String, DynEntity> entry = it.next();
-			stillActive = entry.getValue().update(this, entry.getKey());
+			stillActive = entry.getValue().update(this);
 			if(!stillActive) {
-				dynEntities.remove(entry.getKey());
+				String key = entry.getKey();
+				dynEntities.remove(key);
+				client.deleteEntity(key);
 				it.remove();
 			}
 		}
+		//add all of the new entities that have been created
+		for(DynEntity entity: newDynEntities){
+			addDynEntity(entity);
+		}
+		newDynEntities.clear();
 	}
 	
 	public void createDynEntity(DynEntity entity){
+		newDynEntities.add(entity);
+	}
+	
+	private void addDynEntity(DynEntity entity){
 		String key;
 		
 		//assign a random key
@@ -93,7 +105,11 @@ public class World {
 		addDynEntity(key, entity);
 		
 		//broadcast addition
-		client.addPlayer(key, entity.position);
+		if(entity instanceof Player){
+			client.addPlayer(key, entity.position);
+		}else if(entity instanceof Bullet){
+			client.addBullet(key, entity.position);
+		}
 	}
 	
 	public void addDynEntity(String key, DynEntity entity){

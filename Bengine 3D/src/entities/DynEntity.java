@@ -8,6 +8,8 @@ import world.World;
 public abstract class DynEntity extends Entity{
 
 	public TexturedModel model;
+	public boolean visible = true;
+	public Vector3f velocity = new Vector3f(0, 0, 0);
 	public String key = "TEMP";
 	
 	public DynEntity(TexturedModel model, Vector3f position, Vector3f rotation, Vector3f scale) {
@@ -15,7 +17,7 @@ public abstract class DynEntity extends Entity{
 		this.model = model;
 	}
 	
-	public abstract boolean update(World world, String key);
+	public abstract boolean update(World world);
 	
 	public boolean checkCollision(World world, Vector3f change, Vector3f dimensions){
 		Vector3f checkPos = Vector3f.add(position, change, null);

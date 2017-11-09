@@ -16,6 +16,7 @@ import javax.swing.JTextField;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import entities.Bullet;
 import entities.Player;
 import toolBox.Assets;
 import world.World;
@@ -88,7 +89,15 @@ public class Client implements Runnable{
     }
     
     public void addPlayer(String key, Vector3f position){
-		sendData("c," + key + "," + position.x + "," + position.y + "," + position.z);
+		sendData("cp," + key + "," + position.x + "," + position.y + "," + position.z);
+    }
+    
+    public void addBullet(String key, Vector3f position){
+    	sendData("cb," + key + "," + position.x + "," + position.y + "," + position.z);
+    }
+    
+    public void deleteEntity(String key){
+    	sendData("d," + key);
     }
     
     public void sendData(String data){
@@ -102,18 +111,24 @@ public class Client implements Runnable{
 			//receive input
 			try {
 				String[] input = in.readLine().split(",");
-				if(input[0].equalsIgnoreCase("c")){
+				if(input[0].equalsIgnoreCase("cp")){
 					world.addDynEntity(input[1], new Player(new Vector3f(
 							Float.parseFloat(input[2]),
 							Float.parseFloat(input[3]),
 							Float.parseFloat(input[4]))));
-					System.out.println("added: " + input[1]);
+				}else if(input[0].equalsIgnoreCase("cb")){
+					world.addDynEntity(input[1], new Bullet(new Vector3f(
+							Float.parseFloat(input[2]),
+							Float.parseFloat(input[3]),
+							Float.parseFloat(input[4])), 0, 0));
 				}
 				else if(input[0].equalsIgnoreCase("p")){
 					String key = input[1];
 					world.dynEntities.get(key).position.x = Float.parseFloat(input[2]);
 					world.dynEntities.get(key).position.y = Float.parseFloat(input[3]);
 					world.dynEntities.get(key).position.z = Float.parseFloat(input[4]);
+				}else if(input[0].equalsIgnoreCase("d")){
+					world.dynEntities.remove(input[1]);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
