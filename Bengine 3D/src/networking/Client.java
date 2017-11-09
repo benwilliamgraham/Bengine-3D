@@ -28,12 +28,25 @@ public class Client implements Runnable{
     World world;
     
     boolean active = true;
+    boolean multiplayer = false;
     
     public String name;
     
-    public Client() throws IOException{
+    public Client(boolean multiplayer) throws IOException{
+    	this.multiplayer = multiplayer;
+    	if(multiplayer){
+    		setup();
+    	}else{
+    		in = null;
+    		out = null;
+    		name = "P0";
+    	}
+    }
+    	
+    public void setup() throws IOException{
     	// Make connection and initialize streams
-        String serverAddress = "localhost";
+        //String serverAddress = "10.0.1.10";
+    	String serverAddress = "Bens-Laptop";
         socket = new Socket(serverAddress, 9001);
         in = new BufferedReader(new InputStreamReader(
             socket.getInputStream()));
@@ -61,6 +74,8 @@ public class Client implements Runnable{
     }
     
     public void start(World world){
+    	if(!multiplayer) return;
+    	
     	//connect to the world
     	this.world = world;
     	
@@ -68,17 +83,17 @@ public class Client implements Runnable{
         new Thread(this).start();
     }
     
-    public void sendData(String data){
-    	out.println(data);
+    public void updatePosition(String key, Vector3f position){
+		sendData("p," + key + "," + position.x + "," + position.y + "," + position.z);
     }
     
-    public void cleanUp(){
-    	try {
-    		active = false;
-			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    public void addPlayer(String key, Vector3f position){
+		sendData("c," + key + "," + position.x + "," + position.y + "," + position.z);
+    }
+    
+    public void sendData(String data){
+    	if(!multiplayer) return;
+    	out.println(data);
     }
 
 	public void run() {

@@ -64,7 +64,7 @@ public class Server implements Runnable{
         });
         
     	//create the server
-        System.out.println("Started new server on port: " + PORT + "on server " + InetAddress.getLocalHost());
+        System.out.println("Started new server on port: " + PORT + " on server " + InetAddress.getLocalHost());
         listener = new ServerSocket(PORT);
         frame.setTitle("Server: " + InetAddress.getLocalHost());
         Thread addNewClients = new Thread(this);

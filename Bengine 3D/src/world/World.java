@@ -86,17 +86,19 @@ public class World {
 		do{
 			key = client.name + "K" + (int)(Math.random() * 999);
 		}while(dynEntities.containsKey(key));
+		entity.key = key;
 		
 		//add it to the lists of entities
 		localDynEntities.put(key, entity);
 		addDynEntity(key, entity);
 		
 		//broadcast addition
-		client.sendData("c," + key + "," + entity.position.x + "," + entity.position.y + "," + entity.position.z);
-		System.out.println(key);
+		client.addPlayer(key, entity.position);
 	}
 	
 	public void addDynEntity(String key, DynEntity entity){
+		//assign key
+		entity.key = key;
 		//add to list
 		dynEntities.put(key, entity);
 	}

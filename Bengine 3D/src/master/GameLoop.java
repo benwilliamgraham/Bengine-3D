@@ -26,7 +26,7 @@ public class GameLoop {
 
 	public static void main(String[] args) throws IOException{
 		
-		DisplayManager.createDisplay(1200, 800);
+		DisplayManager.createDisplay(1200, 800, true);
 		
 		Loader loader = new Loader();
 		
@@ -37,7 +37,7 @@ public class GameLoop {
 		Renderer renderer = new Renderer(shader);
 
 		//connect to a server
-		Client client = new Client();
+		Client client = new Client(false);
 		
 		System.out.println("Creating world");
 		
@@ -71,9 +71,9 @@ public class GameLoop {
 		float totTime = 1f/1000f * (Sys.getTime() - startTime);
 		System.out.println(totTime + " seconds for " + frames + " frames: " + frames / totTime + " fps");
 		
-		client.cleanUp();
 		shader.cleanUp();
 		loader.cleanUp();
 		DisplayManager.closeDisplay();
+		System.exit(0);
 	}
 }

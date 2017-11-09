@@ -11,14 +11,18 @@ public class DisplayManager {
 	
 	public static final float FPS = 64;
 	
-	public static void createDisplay(int width, int height){
+	public static void createDisplay(int width, int height, boolean fullscreen){
 		
 		ContextAttribs attribs = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
 		
 		try {
-			//Display.setFullscreen(true);
-			//Display.setDisplayMode(Display.getDesktopDisplayMode());
-			Display.setDisplayMode(new DisplayMode(width, height));
+			if(fullscreen){
+				Display.setDisplayMode(Display.getDesktopDisplayMode());
+				Display.setFullscreen(true);
+			}
+			else{
+				Display.setDisplayMode(new DisplayMode(width, height));
+			}
 			Display.create(new PixelFormat(), attribs);
 			Display.setTitle("");
 		} catch (LWJGLException e) {
