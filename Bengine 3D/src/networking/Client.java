@@ -33,7 +33,7 @@ public class Client implements Runnable{
     
     public Client() throws IOException{
     	// Make connection and initialize streams
-        String serverAddress = "localhost";
+        String serverAddress = "HS10-31323";
         socket = new Socket(serverAddress, 9001);
         in = new BufferedReader(new InputStreamReader(
             socket.getInputStream()));
