@@ -1,5 +1,6 @@
 package renderEngine;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +58,10 @@ public class Renderer {
 	}
 	
 	public void render(Map<String, DynEntity> entities, StaticShader shader){
-		for (Map.Entry<String, DynEntity> entity : entities.entrySet()) {
+		Map<String, DynEntity> ents = new HashMap<String, DynEntity>();
+		ents.putAll(entities);
+		for (Map.Entry<String, DynEntity> entity : ents.entrySet()) {
+			if(!entity.getValue().visible) continue;
 			GL30.glBindVertexArray(entity.getValue().model.model.vaoID);
 			GL20.glEnableVertexAttribArray(0);
 			GL20.glEnableVertexAttribArray(1);

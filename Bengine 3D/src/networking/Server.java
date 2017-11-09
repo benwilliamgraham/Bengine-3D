@@ -8,8 +8,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.HashSet;
 
 import javax.swing.JButton;
@@ -59,8 +64,9 @@ public class Server implements Runnable{
         });
         
     	//create the server
-        System.out.println("Started new server on port: " + PORT);
+        System.out.println("Started new server on port: " + PORT + " on server " + InetAddress.getLocalHost());
         listener = new ServerSocket(PORT);
+        frame.setTitle("Server: " + InetAddress.getLocalHost());
         Thread addNewClients = new Thread(this);
         addNewClients.start();
         while(waiting){
