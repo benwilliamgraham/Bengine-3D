@@ -15,10 +15,10 @@ public class Voxel {
 		solid = true;
 		switch(type){
 		case GRASS:
-			tileset = new Vector3f(4, 4, 4);
+			tileset = new Vector3f(2, 7, 7);
 			break;
 		case QUARTZ:
-			tileset = new Vector3f(0, 0, 0);
+			tileset = new Vector3f(5, 5, 5);
 			break;
 		case STONE:
 			tileset = new Vector3f(0, 0, 0);

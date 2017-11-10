@@ -26,6 +26,7 @@ public class Player extends DynEntity{
 	//movement variables
 	private boolean grounded;
 	private boolean supported;
+	private boolean usingItem;
 	private boolean mouseActive;
 	private float yaw, pitch;
 	
@@ -37,6 +38,7 @@ public class Player extends DynEntity{
 		this.velocity = new Vector3f(0, 0, 0);
 		this.grounded = false;
 		this.supported = false;
+		this.usingItem = false;
 		this.mouseActive = true;
 		camera = new Camera();
 		
@@ -84,7 +86,15 @@ public class Player extends DynEntity{
 		
 		//shooting
 		if(Mouse.isButtonDown(0)){
-			world.createDynEntity(new Bullet(new Vector3f(position.x, position.y, position.z), yaw, pitch));
+			if(usingItem == false){
+				usingItem = true;
+				for(int n = 0; n < 10; n++){
+					world.createDynEntity(new Bullet(new Vector3f(position.x, position.y + 0.6f, position.z), 
+							yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f)));
+				}
+			}
+		}else{
+			usingItem = false;
 		}
 		
 		//gravity

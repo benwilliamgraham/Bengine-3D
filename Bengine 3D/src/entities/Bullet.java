@@ -10,7 +10,7 @@ import world.World;
 
 public class Bullet extends DynEntity{
 	
-	public final float SPEED = 300;
+	public final float SPEED = 64;
 
 	public Bullet(Vector3f position, float yaw, float pitch) {
 		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f));

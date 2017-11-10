@@ -35,6 +35,6 @@ public abstract class DynEntity extends Entity{
 	}
 	
 	public float randBetween(float min, float max){
-		
+		return (float) Math.random() * (max - min) + min;
 	}
 }
