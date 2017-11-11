@@ -73,7 +73,7 @@ public class World {
 		for(Iterator<Map.Entry<String, DynEntity>> it = localDynEntities.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<String, DynEntity> entry = it.next();
 			stillActive = entry.getValue().update(this);
-			if(!stillActive) {
+			if(!stillActive){
 				String key = entry.getKey();
 				dynEntities.remove(key);
 				client.deleteEntity(key);
