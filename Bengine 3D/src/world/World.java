@@ -36,7 +36,7 @@ public class World {
 	public List<Light> lights = new ArrayList<Light>();
 	public Voxel[][][] voxels = new Voxel[XSIZE][YSIZE][ZSIZE];
 	
-	public List<DynEntity> newDynEntities = new ArrayList<DynEntity>();
+	public boolean lockMap = false;
 	public Map<String, DynEntity> dynEntities = new HashMap<String, DynEntity>();
 	public Map<String, DynEntity> localDynEntities = new HashMap<String, DynEntity>();
 	public FaceMap faceMap;
@@ -60,7 +60,7 @@ public class World {
 		}
 		
 		//add player
-		addDynEntity(player);
+		createDynEntity(player);
 		
 		//create face map
 		faceMap = new FaceMap(loader, new Random(Sys.getTime()), lights);
@@ -70,28 +70,23 @@ public class World {
 	public void update(){
 		//update 3d
 		boolean stillActive;
-		for(Iterator<Map.Entry<String, DynEntity>> it = localDynEntities.entrySet().iterator(); it.hasNext(); ) {
+		Map<String, DynEntity> updateEnts = new HashMap<String, DynEntity>();
+		lockMap = true;
+		updateEnts.putAll(localDynEntities);
+		lockMap = false;
+		for(Iterator<Map.Entry<String, DynEntity>> it = updateEnts.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<String, DynEntity> entry = it.next();
 			stillActive = entry.getValue().update(this);
 			if(!stillActive){
 				String key = entry.getKey();
-				dynEntities.remove(key);
+				localDynEntities.remove(key);
+				deleteDynEntity(key);
 				client.deleteEntity(key);
-				it.remove();
 			}
 		}
-		//add all of the new entities that have been created
-		for(DynEntity entity: newDynEntities){
-			addDynEntity(entity);
-		}
-		newDynEntities.clear();
 	}
 	
 	public void createDynEntity(DynEntity entity){
-		newDynEntities.add(entity);
-	}
-	
-	private void addDynEntity(DynEntity entity){
 		String key;
 		
 		//assign a random key
@@ -115,8 +110,22 @@ public class World {
 	public void addDynEntity(String key, DynEntity entity){
 		//assign key
 		entity.key = key;
+		
+		//wait for the map to be open
+		while(lockMap){
+			System.out.println("");
+		}
 		//add to list
 		dynEntities.put(key, entity);
+	}
+	
+	public void deleteDynEntity(String key){
+		//wait for the map to be open
+		while(lockMap){
+			System.out.println("");
+		}
+		//delete
+		dynEntities.remove(key);
 	}
 	
 	public boolean checkSolid(Vector3f position){

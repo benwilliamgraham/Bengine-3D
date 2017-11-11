@@ -87,7 +87,7 @@ public class Player extends DynEntity{
 		//shooting
 		if(Mouse.isButtonDown(0)){
 			if(usingItem == false){
-				usingItem = true;
+				//usingItem = true;
 				for(int n = 0; n < 10; n++){
 					world.createDynEntity(new Bullet(new Vector3f(position.x, position.y + 0.6f, position.z), 
 							yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f)));

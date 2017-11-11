@@ -128,7 +128,7 @@ public class Client implements Runnable{
 					world.dynEntities.get(key).position.y = Float.parseFloat(input[3]);
 					world.dynEntities.get(key).position.z = Float.parseFloat(input[4]);
 				}else if(input[0].equalsIgnoreCase("d")){
-					world.dynEntities.remove(input[1]);
+					world.deleteDynEntity(input[1]);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

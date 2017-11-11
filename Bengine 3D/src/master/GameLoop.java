@@ -26,7 +26,7 @@ public class GameLoop {
 
 	public static void main(String[] args) throws IOException{
 		
-		DisplayManager.createDisplay(1200, 800, true);
+		DisplayManager.createDisplay(1200, 800, false);
 		
 		Loader loader = new Loader();
 		
@@ -37,7 +37,7 @@ public class GameLoop {
 		Renderer renderer = new Renderer(shader);
 
 		//connect to a server
-		Client client = new Client(false);
+		Client client = new Client(true);
 		
 		System.out.println("Creating world");
 		
@@ -57,7 +57,9 @@ public class GameLoop {
 			shader.start();
 			shader.loadViewMatrix(world.player.camera);
 			renderer.render(world.faceMap, shader);
+			world.lockMap = true;
 			renderer.render(world.dynEntities, shader);
+			world.lockMap = false;
 			shader.stop();
 			DisplayManager.updateDisplay();
 			
