@@ -4,7 +4,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 public class Voxel {
 	public enum VoxelTypes {
-		GRASS, QUARTZ, STONE
+		DIRT, STONE, ROOFING, WOOD, RED_WOOD, TILES, BUSH, WATER
 	}
 	
 	//format top, side, bottom
@@ -14,14 +14,29 @@ public class Voxel {
 	public void setVoxel(VoxelTypes type){
 		solid = true;
 		switch(type){
-		case GRASS:
-			tileset = new Vector3f(2, 7, 7);
-			break;
-		case QUARTZ:
-			tileset = new Vector3f(5, 5, 5);
+		case DIRT:
+			tileset = new Vector3f(0, 0, 0);
 			break;
 		case STONE:
-			tileset = new Vector3f(0, 0, 0);
+			tileset = new Vector3f(1, 1, 1);
+			break;
+		case ROOFING:
+			tileset = new Vector3f(2, 2, 2);
+			break;
+		case WOOD:
+			tileset = new Vector3f(3, 3, 3);
+			break;
+		case RED_WOOD:
+			tileset = new Vector3f(4, 4, 4);
+			break;
+		case TILES:
+			tileset = new Vector3f(5, 5, 5);
+			break;
+		case BUSH:
+			tileset = new Vector3f(6, 6, 6);
+			break;
+		case WATER:
+			tileset = new Vector3f(7, 7, 7);
 			break;
 		}
 	}

@@ -4,6 +4,9 @@ import java.io.*;
 import java.awt.*;
 import javax.imageio.ImageIO;
 
+import org.lwjgl.util.vector.Vector3f;
+
+import entities.Light;
 import world.Voxel.VoxelTypes;
 
 import java.awt.image.BufferedImage;
@@ -23,15 +26,32 @@ public class LevelLoader{
 				
 				world.voxels[nx][ny][nz] = new Voxel();
 				switch (c.getRed()){
-				case 250:
-					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.QUARTZ);
+				case 89:
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.DIRT);
 					break;
-				case 125:
-					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.GRASS);
-					break;
-				case 110:
+				case 66:
 					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.STONE);
 					break;
+				case 27:
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.ROOFING);
+					break;
+				case 85:
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.WOOD);
+					break;
+				case 151:
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.RED_WOOD);
+					break;
+				case 64:
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.TILES);
+					break;
+				case 25:
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.BUSH);
+					break;
+				case 24:
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.WATER);
+					break;
+				case 255:
+					world.lights.add(new Light(new Vector3f(nx, ny, nz), 15, 1, 1.2f));
 				}
 			}
 		}

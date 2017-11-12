@@ -55,7 +55,7 @@ public class GameLoop {
 			world.update();
 			renderer.prepare();
 			shader.start();
-			shader.loadViewMatrix(world.player.camera);
+			shader.loadViewMatrix(world.camera);
 			renderer.render(world.faceMap, shader);
 			world.lockMap = true;
 			renderer.render(world.dynEntities, shader);

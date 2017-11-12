@@ -171,7 +171,7 @@ public class FaceMap extends Entity{
 		}
 		
 		RawModel rawModel = loader.loadToVAO(verticesArray, texturesArray, indicesArray);
-		ModelTexture texture = new ModelTexture(loader.loadTexture("T2"));
+		ModelTexture texture = new ModelTexture(loader.loadTexture("T3"));
 		
 		model = new TexturedModel(rawModel, texture);
 	}

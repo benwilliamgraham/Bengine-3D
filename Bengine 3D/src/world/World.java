@@ -17,8 +17,10 @@ import data.ModelTexture;
 import data.RawModel;
 import data.TexturedModel;
 import entities.Bullet;
+import entities.Camera;
 import entities.DynEntity;
 import entities.Light;
+import entities.NPC;
 import entities.Player;
 import networking.Client;
 import toolBox.Calc;
@@ -32,7 +34,9 @@ public class World {
 	public static final int ZSIZE = 125;
 	
 	public Client client;
-		
+	
+	public static final float GRAVITY = 80;
+	
 	public List<Light> lights = new ArrayList<Light>();
 	public Voxel[][][] voxels = new Voxel[XSIZE][YSIZE][ZSIZE];
 	
@@ -41,15 +45,17 @@ public class World {
 	public Map<String, DynEntity> localDynEntities = new HashMap<String, DynEntity>();
 	public FaceMap faceMap;
 	
-	public Player player = new Player(new Vector3f(World.XSIZE / 2, World.YSIZE - 4, World.ZSIZE / 2));
+	public Camera camera;
+	public Player player = new Player(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2)));
+	public Camera spectatorCamera = new Camera();
 	
 	public World(Loader loader, Client client){
 		this.client = client;
 		
 		//add lights
-		lights.add(new Light(new Vector3f(XSIZE / 2f, 1000, ZSIZE / 2f), 100000, 0.9f, 2));
+		lights.add(new Light(new Vector3f(XSIZE / 2f, 1000, ZSIZE / 2f), 100000, 0.1f, 2));
 		for(int n = 0; n < 100; n++){
-			//lights.add(new Light(new Vector3f(rand.nextInt(XSIZE), rand.nextInt(YSIZE), rand.nextInt(ZSIZE)), 10, 1, 2f));
+			//lights.add(new Light(new Vector3f(Math.random() * (float) XSIZE, Math.random() * (float) YSIZE, Math.random() * (float) ZSIZE), 10, 1, 2f));
 		}
 
 		//load level
@@ -61,6 +67,15 @@ public class World {
 		
 		//add player
 		createDynEntity(player);
+		for(int n = 0; n < 0; n++){
+			createDynEntity(new NPC(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2))));
+		}
+		
+		//add camera
+		camera = player.camera;
+		spectatorCamera.position = new Vector3f(XSIZE / 2f, 2f * YSIZE / 3f, ZSIZE / 2f);
+		spectatorCamera.pitch = (float) (Math.PI / 2f);
+		spectatorCamera.yaw = (float) (Math.PI / 2f);
 		
 		//create face map
 		faceMap = new FaceMap(loader, new Random(Sys.getTime()), lights);
@@ -137,7 +152,9 @@ public class World {
 	}
 	
 	public boolean checkSolid(int x, int y, int z){
-		if(x < 0 || x >= XSIZE || y < 0 || y >= YSIZE || z < 0 || z >= ZSIZE){
+		if(x < 0 || x >= XSIZE || y >= YSIZE || z < 0 || z >= ZSIZE){
+			return true;
+		}else if(y < 0){
 			return true;
 		}
 		return voxels[x][y][z].solid;

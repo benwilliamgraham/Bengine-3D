@@ -88,12 +88,24 @@ public class Client implements Runnable{
 		sendData("p," + key + "," + position.x + "," + position.y + "," + position.z);
     }
     
+    public void updateRotation(String key, Vector3f rotation){
+		sendData("r," + key + "," + rotation.x + "," + rotation.y + "," + rotation.z);
+    }
+    
+    public void updateVelocity(String key, Vector3f velocity){
+		sendData("v," + key + "," + velocity.x + "," + velocity.y + "," + velocity.z);
+    }
+    
     public void addPlayer(String key, Vector3f position){
 		sendData("cp," + key + "," + position.x + "," + position.y + "," + position.z);
     }
     
     public void addBullet(String key, Vector3f position){
     	sendData("cb," + key + "," + position.x + "," + position.y + "," + position.z);
+    }
+    
+    public void updateHealth(String key, float health){
+    	sendData("h," + key + "," + health);
     }
     
     public void deleteEntity(String key){
@@ -121,12 +133,23 @@ public class Client implements Runnable{
 							Float.parseFloat(input[2]),
 							Float.parseFloat(input[3]),
 							Float.parseFloat(input[4])), 0, 0));
-				}
-				else if(input[0].equalsIgnoreCase("p")){
+				}else if(input[0].equalsIgnoreCase("p")){
 					String key = input[1];
 					world.dynEntities.get(key).position.x = Float.parseFloat(input[2]);
 					world.dynEntities.get(key).position.y = Float.parseFloat(input[3]);
 					world.dynEntities.get(key).position.z = Float.parseFloat(input[4]);
+				}else if(input[0].equalsIgnoreCase("r")){
+					String key = input[1];
+					world.dynEntities.get(key).rotation.x = Float.parseFloat(input[2]);
+					world.dynEntities.get(key).rotation.y = Float.parseFloat(input[3]);
+					world.dynEntities.get(key).rotation.z = Float.parseFloat(input[4]);
+				}else if(input[0].equalsIgnoreCase("v")){
+					String key = input[1];
+					world.dynEntities.get(key).velocity.x = Float.parseFloat(input[2]);
+					world.dynEntities.get(key).velocity.y = Float.parseFloat(input[3]);
+					world.dynEntities.get(key).velocity.z = Float.parseFloat(input[4]);
+				}else if(input[0].equalsIgnoreCase("h")){
+					world.dynEntities.get(input[1]).health = Float.parseFloat(input[2]);
 				}else if(input[0].equalsIgnoreCase("d")){
 					world.deleteDynEntity(input[1]);
 				}
