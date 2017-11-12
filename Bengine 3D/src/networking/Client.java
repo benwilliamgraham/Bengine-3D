@@ -47,7 +47,7 @@ public class Client implements Runnable{
     public void setup() throws IOException{
     	// Make connection and initialize streams
         //String serverAddress = "10.0.1.10";
-    	String serverAddress = "Bens-Laptop";
+    	String serverAddress = "192.168.1.210";
         socket = new Socket(serverAddress, 9001);
         in = new BufferedReader(new InputStreamReader(
             socket.getInputStream()));

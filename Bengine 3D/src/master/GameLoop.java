@@ -26,7 +26,7 @@ public class GameLoop {
 
 	public static void main(String[] args) throws IOException{
 		
-		DisplayManager.createDisplay(1200, 800, false);
+		DisplayManager.createDisplay(1920, 1080, true);
 		
 		Loader loader = new Loader();
 		

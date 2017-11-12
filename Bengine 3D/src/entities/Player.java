@@ -19,7 +19,7 @@ public class Player extends DynEntity{
 	//define player constants
 	private static final float RUN_SPEED = 20;
 	private static final float STRAFE_SPEED = 17;
-	private static final float TURN_SPEED = 0.8f;
+	private static final float TURN_SPEED = 0.4f;
 	private static final float JUMP_POWER = 25;
 	
 	//movement variables
@@ -149,8 +149,8 @@ public class Player extends DynEntity{
 		camera.position.y = (this.position.y + 1.1f + camera.position.y * 2f) / 3f;
 		camera.position.z = (this.position.z + camera.position.z * 2f) / 3f;
 		
-		camera.yaw = ((float) (Math.PI - yaw) + camera.yaw * 3f) / 4f;
-		camera.pitch = (pitch + camera.pitch * 3f) / 4f;
+		camera.yaw = ((float) (Math.PI - yaw) + camera.yaw * 1f) / 2f;
+		camera.pitch = (pitch + camera.pitch * 1f) / 2f;
 		
 		
 		world.client.updatePosition(key, position);
