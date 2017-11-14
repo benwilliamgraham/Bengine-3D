@@ -26,7 +26,9 @@ public class GameLoop {
 
 	public static void main(String[] args) throws IOException{
 		
-		DisplayManager.createDisplay(1920, 1080, true);
+		DisplayManager.createDisplay(800, 600, false);
+		
+		//DisplayManager.createDisplay(1920, 1080, true);
 		
 		Loader loader = new Loader();
 		
@@ -62,7 +64,6 @@ public class GameLoop {
 			world.lockMap = false;
 			shader.stop();
 			DisplayManager.updateDisplay();
-			
 			
 			while(1000f / (Sys.getTime() + 1 - time) > DisplayManager.FPS){
 				
