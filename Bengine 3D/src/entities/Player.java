@@ -80,7 +80,7 @@ public class Player extends DynEntity{
 			sidewaysInput = -1;
 		}
 		
-		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && grounded){
+		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && grounded || Keyboard.isKeyDown(Keyboard.KEY_Q)){
 			velocity.y += JUMP_POWER;
 		}
 		

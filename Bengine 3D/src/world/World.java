@@ -26,6 +26,7 @@ import networking.Client;
 import toolBox.Calc;
 import toolBox.Loader;
 import toolBox.OpenSimplexNoise;
+import world.Voxel.VoxelTypes;
 
 public class World {
 	
@@ -43,7 +44,7 @@ public class World {
 	public boolean lockMap = false;
 	public Map<String, DynEntity> dynEntities = new HashMap<String, DynEntity>();
 	public Map<String, DynEntity> localDynEntities = new HashMap<String, DynEntity>();
-	public FaceMap faceMap;
+	public FaceNet faceNet;
 	
 	public Camera camera;
 	public Player player = new Player(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2)));
@@ -53,16 +54,34 @@ public class World {
 		this.client = client;
 		
 		//add lights
-		lights.add(new Light(new Vector3f(XSIZE / 2f, 1000, ZSIZE / 2f), 100000, 0.1f, 2));
+		lights.add(new Light(new Vector3f(XSIZE * 2f, 1000, ZSIZE * 2f), 100000, 1.1f, 2));
 		for(int n = 0; n < 100; n++){
 			//lights.add(new Light(new Vector3f(Math.random() * (float) XSIZE, Math.random() * (float) YSIZE, Math.random() * (float) ZSIZE), 10, 1, 2f));
 		}
 
 		//load level
+		/*
 		try {
 			LevelLoader.loadLevel(this);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		*/
+		
+		//generate level
+		OpenSimplexNoise noise = new OpenSimplexNoise(Sys.getTime());
+		
+		//fill
+		float gradient = 32;
+		for(int x = 0; x < XSIZE; x++){
+			for(int y = 0; y < YSIZE; y++){
+				for(int z = 0; z < ZSIZE; z++){
+					voxels[x][y][z] = new Voxel();
+					if(noise.eval(x / gradient, y / gradient, z / gradient) <= -0.5f){
+						voxels[x][y][z].setVoxel(VoxelTypes.STONE);
+					}
+				}
+			}
 		}
 		
 		//add player
@@ -78,8 +97,8 @@ public class World {
 		spectatorCamera.yaw = (float) (Math.PI / 2f);
 		
 		//create face map
-		faceMap = new FaceMap(loader, new Random(Sys.getTime()), lights);
-		faceMap.createFaceMap(this);
+		faceNet = new FaceNet(loader, this, new Random(Sys.getTime()), lights);
+		faceNet.createFaceMap();
 	}
 	
 	public void update(){

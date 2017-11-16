@@ -51,7 +51,8 @@ public class LevelLoader{
 					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.WATER);
 					break;
 				case 255:
-					world.lights.add(new Light(new Vector3f(nx, ny, nz), 15, 1, 1.2f));
+					//world.lights.add(new Light(new Vector3f(nx, ny, nz), 15, 1, 1.2f));
+					break;
 				}
 			}
 		}

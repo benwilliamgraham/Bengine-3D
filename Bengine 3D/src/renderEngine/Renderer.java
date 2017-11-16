@@ -18,6 +18,7 @@ import entities.Entity;
 import shaders.StaticShader;
 import toolBox.Calc;
 import world.FaceMap;
+import world.FaceNet;
 
 public class Renderer {
 	
@@ -41,7 +42,7 @@ public class Renderer {
 		GL11.glClearColor(0.8f / 4f, 0.85f / 4f, 0.75f / 4f, 1);
 	}
 	
-	public void render(FaceMap faceMap, StaticShader shader){
+	public void render(FaceNet faceMap, StaticShader shader){
 		GL30.glBindVertexArray(faceMap.model.model.vaoID);
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
