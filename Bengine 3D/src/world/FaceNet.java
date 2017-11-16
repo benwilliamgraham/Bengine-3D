@@ -54,29 +54,14 @@ public class FaceNet extends Entity{
 						//set tileset
 						Vector3f tileset = world.voxels[x][y][z].tileset;
 						
-						float mtplr = 0.1f;
-						
-						float xp = 0.5f;
-						if(!world.checkSolid(x + 1, y, z)) xp *= mtplr;
-						float xm = -0.5f;
-						if(!world.checkSolid(x - 1, y, z)) xm *= mtplr;
-						float yp = 0.5f;
-						if(!world.checkSolid(x, y + 1, z)) yp *= mtplr;
-						float ym = -0.5f;
-						if(!world.checkSolid(x, y - 1, z)) ym *= mtplr;
-						float zp = 0.5f;
-						if(!world.checkSolid(x, y, z + 1)) yp *= mtplr;
-						float zm = -0.5f;
-						if(!world.checkSolid(x, y, z - 1)) zm *= mtplr;
-						
-						Vector3f c1 = new Vector3f(x + xp, y + yp, z + zm);
-						Vector3f c2 = new Vector3f(x + xp, y + yp, z + zp);
-						Vector3f c3 = new Vector3f(x + xp, y + ym, z + zp);
-						Vector3f c4 = new Vector3f(x + xp, y + ym, z + zm);
-						Vector3f c5 = new Vector3f(x + xm, y + yp, z + zm);
-						Vector3f c6 = new Vector3f(x + xm, y + yp, z + zp);
-						Vector3f c7 = new Vector3f(x + xm, y + ym, z + zp);
-						Vector3f c8 = new Vector3f(x + xm, y + ym, z + zm);
+						Vector3f c1 = setIntersection(position, new Vector3f(1, 1, -1));
+						Vector3f c2 = setIntersection(position, new Vector3f(1, 1, 1));
+						Vector3f c3 = setIntersection(position, new Vector3f(1, -1, 1));
+						Vector3f c4 = setIntersection(position, new Vector3f(1, -1, -1));
+						Vector3f c5 = setIntersection(position, new Vector3f(-1, 1, -1));
+						Vector3f c6 = setIntersection(position, new Vector3f(-1, 1, 1));
+						Vector3f c7 = setIntersection(position, new Vector3f(-1, -1, 1));
+						Vector3f c8 = setIntersection(position, new Vector3f(-1, -1, -1));
 						
 						//x+
 						if(!world.checkSolid(x + 1, y, z)){
@@ -202,9 +187,56 @@ public class FaceNet extends Entity{
 		
 		System.out.println("Loading model with " + indicesArray.length / 3 + "tris");
 		RawModel rawModel = loader.loadToVAO(verticesArray, texturesArray, indicesArray);
-		ModelTexture texture = new ModelTexture(loader.loadTexture("T4"));
+		ModelTexture texture = new ModelTexture(loader.loadTexture("Flat"));
 		
 		model = new TexturedModel(rawModel, texture);
+	}
+	
+	
+	private Vector3f setIntersection(Vector3f position, Vector3f direction){
+		
+		Vector3f newDir = new Vector3f(direction.x, direction.y, direction.z);
+		
+		float fc = 0.5f;
+		float mc = 0f;
+		
+		//check x
+		if(world.checkSolid((int)(position.x + direction.x), (int) position.y, (int) position.z) ||
+				world.checkSolid((int)(position.x + direction.x), (int) (position.y + direction.y), (int) position.z) ||
+				world.checkSolid((int)(position.x + direction.x), (int) position.y, (int) (position.z + direction.z)) ||
+				world.checkSolid((int)(position.x + direction.x), (int) (position.y + direction.y), (int) (position.z + direction.z))){
+			newDir.x *= fc;
+		}else{
+			newDir.x *= mc;
+		}
+		
+		//check y
+		if(world.checkSolid((int)position.x, (int) (position.y + direction.y), (int) position.z) ||
+				world.checkSolid((int) (position.x + direction.x), (int) (position.y + direction.y), (int) position.z) ||
+				world.checkSolid((int) position.x, (int) (position.y + direction.y), (int) (position.z + direction.z)) ||
+				world.checkSolid((int) (position.x + direction.x), (int) (position.y + direction.y), (int) (position.z + direction.z))){
+			newDir.y *= fc;
+		}else{
+			newDir.y *= mc;
+		}
+		
+		//check z
+		if(world.checkSolid((int) position.x, (int) position.y, (int) (position.z + direction.z)) ||
+				world.checkSolid((int) (position.x + direction.x), (int) position.y, (int) (position.z + direction.z)) ||
+				world.checkSolid((int) position.x, (int) (position.y + direction.y), (int) (position.z + direction.z)) ||
+				world.checkSolid((int) (position.x + direction.x), (int) (position.y + direction.y), (int) (position.z + direction.z))){
+			newDir.z *= fc;
+		}else{
+			newDir.z *= mc;
+		}
+		
+		Vector3f intersection = Vector3f.add(newDir, position, null);
+		Vector3f offset = new Vector3f(
+				0.25f * (float) noise.eval(intersection.x, intersection.z, intersection.z), 
+				0.25f * (float) noise.eval(intersection.x, intersection.z, intersection.z),
+				0.25f * (float) noise.eval(intersection.x, intersection.z, intersection.z));
+		
+		return Vector3f.add(intersection, offset, null);
 	}
 	
 	
@@ -217,10 +249,11 @@ public class FaceNet extends Entity{
 		vertices.add(p3);
 		vertices.add(p4);
 		
-		shades.add(calcShade(position, p1));
-		shades.add(calcShade(position, p2));
-		shades.add(calcShade(position, p3));
-		shades.add(calcShade(position, p4));
+		Vector3f normal = Calc.calculateNormal(p1, p2, p3);
+		shades.add(calcShade(normal, p1));
+		shades.add(calcShade(normal, p2));
+		shades.add(calcShade(normal, p3));
+		shades.add(calcShade(normal, p4));
 		
 		setCoords(LRUD, tileset, textures);
 		
@@ -240,7 +273,7 @@ public class FaceNet extends Entity{
 		textures.add(new Vector2f(1, 1));
 	}
 	
-	private float calcShade(Vector3f position, Vector3f point){
+	private float calcShade(Vector3f normal, Vector3f point){
 		
 		float totalDiffuse = 0;
 		for(Light light: lights){
@@ -250,15 +283,13 @@ public class FaceNet extends Entity{
 				continue;
 			}
 			toLight = Calc.normaliseVector(toLight);
-			Vector3f normal = new Vector3f(position.x - point.x, position.y - point.y, position.z - point.z);
-			normal.normalise();
 			float diffuse = light.brightness * (Vector3f.dot(toLight, normal) + 1f) / 2f;
 			
 			diffuse *= 1 - Math.pow(mag / light.lightDist, light.dropOff);
 			
 			Vector3f checkPos = new Vector3f(point.x + 0.5f, point.y + 0.5f, point.z + 0.5f);
 			float distTest = Math.min(mag, 16);
-			for(int n = 0; n < distTest * 0; n++){
+			for(int n = 0; n < distTest; n++){
 				Vector3f.add(checkPos, toLight, checkPos);
 				if(world.checkSolid(checkPos)){
 					diffuse *= 0.4f;

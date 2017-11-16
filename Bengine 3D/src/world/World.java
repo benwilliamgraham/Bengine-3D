@@ -60,15 +60,16 @@ public class World {
 		}
 
 		//load level
-		/*
+		
 		try {
 			LevelLoader.loadLevel(this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		*/
+		
 		
 		//generate level
+		/*
 		OpenSimplexNoise noise = new OpenSimplexNoise(Sys.getTime());
 		
 		//fill
@@ -83,6 +84,7 @@ public class World {
 				}
 			}
 		}
+		*/
 		
 		//add player
 		createDynEntity(player);
