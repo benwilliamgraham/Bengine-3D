@@ -39,7 +39,7 @@ public class GameLoop {
 		Renderer renderer = new Renderer(shader);
 
 		//connect to a server
-		Client client = new Client(true);
+		Client client = new Client(false);
 		
 		System.out.println("Creating world");
 		

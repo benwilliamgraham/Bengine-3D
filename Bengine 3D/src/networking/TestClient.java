@@ -16,9 +16,7 @@ public class TestClient {
 		
 		byte[] outgoingData = new byte[256];
 		
-		outgoingData[0] = 0;
-		
-		System.out.println();
+		HandshakePacket handshake = new HandshakePacket("aTlas   ");
 		
 		DatagramPacket outgoingPacket = new DatagramPacket(outgoingData, outgoingData.length, serverAddress, SERVER_PORT);
 		
