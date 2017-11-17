@@ -14,9 +14,9 @@ public class TestClient {
 		
 		InetAddress serverAddress = InetAddress.getLocalHost();
 		
-		byte[] outgoingData = new byte[256];
-		
 		HandshakePacket handshake = new HandshakePacket("aTlas   ");
+		
+		byte[] outgoingData = handshake.getBytes();
 		
 		DatagramPacket outgoingPacket = new DatagramPacket(outgoingData, outgoingData.length, serverAddress, SERVER_PORT);
 		

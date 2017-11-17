@@ -18,35 +18,52 @@ public class UDPServer extends PacketSource {
 	
 	protected DatagramSocket serverSocket;
 	
+	private Thread packetListener;
+	
 	public UDPServer() throws IOException {
 		super();
 		
 		this.clients = new HashMap<String, NetworkedClient>();
 		this.serverSocket = new DatagramSocket(SERVER_PORT);
 		
-		while (true) {
-			byte[] incomingData = new byte[256];
-			DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-			
-			this.serverSocket.receive(incomingPacket);
-			
-			int packetType = (int)incomingData[0];
-			
-			try {
-				
-				Packet p = (Packet) packetTypes.get(packetType).newInstance();
-				p.loadPacket(incomingData);
-				System.out.println("Emitting packet event");
-				System.out.println(p);
-				this.EmitPacket(p);
-				
-			} catch (Exception e) {
-				System.out.println("Invalid packet type recieved.");
-				e.printStackTrace(System.err);
+		this.packetListener = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					
+					byte[] incomingData = new byte[256];
+					DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
+					
+					try {
+						serverSocket.receive(incomingPacket);
+					} catch (IOException e) {
+						e.printStackTrace();
+						continue;
+					}
+					
+					
+					int packetType = (int)incomingData[0];
+					
+					try {
+						
+						Packet p = (Packet) packetTypes.get(packetType).newInstance();
+						p.loadPacket(incomingData);
+						
+						EmitPacket(p);
+						
+					} catch (Exception e) {
+						System.out.println("Invalid packet type recieved.");
+						e.printStackTrace(System.err);
+					}
+					
+					
+				}
 			}
-			
-			
-		}
+		}); 
+	}
+	
+	public void open() {
+		this.packetListener.start();
 	}
 	
 	public static void registerPacket(int packetId, Class p) {
@@ -64,6 +81,8 @@ public class UDPServer extends PacketSource {
 				
 				System.out.println("Welcome " + h.name);
 			});
+			
+			server.open();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
