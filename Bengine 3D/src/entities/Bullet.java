@@ -47,4 +47,9 @@ public class Bullet extends DynEntity{
 		
 		return true;
 	}
+
+	@Override
+	public int getEntityId() {
+		return 2;
+	}
 }

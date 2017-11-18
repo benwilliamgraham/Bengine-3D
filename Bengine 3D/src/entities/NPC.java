@@ -88,4 +88,9 @@ public class NPC extends DynEntity{
 		world.client.updatePosition(key, position);
 		return true;
 	}
+
+	@Override
+	public int getEntityId() {
+		return 1;
+	}
 }

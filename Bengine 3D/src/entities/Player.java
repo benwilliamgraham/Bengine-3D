@@ -29,6 +29,8 @@ public class Player extends DynEntity{
 	private boolean mouseActive;
 	private float yaw, pitch;
 	
+	private boolean localPlayer = true;
+	
 	public Camera camera;
 	
 	public Player(Vector3f position) {
@@ -159,5 +161,10 @@ public class Player extends DynEntity{
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public int getEntityId() {
+		return 0;
 	}
 }

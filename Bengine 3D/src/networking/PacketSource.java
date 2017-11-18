@@ -1,6 +1,9 @@
 package networking;
 
 import java.util.Map;
+
+import networking.packets.Packet;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -21,6 +24,12 @@ public class PacketSource {
 				handlers.add(handler);
 				packetHandlers.put(type, handlers);
 			}
+		}
+	}
+	
+	public void OnPacket(PacketHandler h) {
+		for (ArrayList<PacketHandler> p : this.packetHandlers.values()) {
+			p.add(h);
 		}
 	}
 	

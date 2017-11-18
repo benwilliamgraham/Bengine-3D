@@ -13,4 +13,6 @@ public abstract class Entity {
 		this.rotation = rotation;
 		this.scale = scale;
 	}
+	
+	public abstract int getEntityId();
 }

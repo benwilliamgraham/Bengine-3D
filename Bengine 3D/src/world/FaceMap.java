@@ -313,4 +313,10 @@ public class FaceMap extends Entity{
 		return set[rand.nextInt(set.length)];
 	}
 
+
+	@Override
+	public int getEntityId() {
+		return 3;
+	}
+
 }
