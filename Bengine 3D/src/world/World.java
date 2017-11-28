@@ -22,7 +22,7 @@ import entities.DynEntity;
 import entities.Light;
 import entities.NPC;
 import entities.Player;
-import networking.Client;
+import networking.UDPClient;
 import toolBox.Calc;
 import toolBox.Loader;
 import toolBox.OpenSimplexNoise;
@@ -33,7 +33,7 @@ public class World {
 	public static final int YSIZE = 125;
 	public static final int ZSIZE = 125;
 	
-	public Client client;
+	public UDPClient networkClient;
 	
 	public static final float GRAVITY = 80;
 	
@@ -49,8 +49,8 @@ public class World {
 	public Player player = new Player(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2)));
 	public Camera spectatorCamera = new Camera();
 	
-	public World(Loader loader, Client client){
-		this.client = client;
+	public World(Loader loader, UDPClient client){
+		this.networkClient = client;
 		
 		//add lights
 		lights.add(new Light(new Vector3f(XSIZE / 2f, 1000, ZSIZE / 2f), 100000, 0.1f, 2));
@@ -128,7 +128,7 @@ public class World {
 		
 		//wait for the map to be open
 		while(lockMap){
-			System.out.println("");
+			continue;//System.out.println("");
 		}
 		//add to list
 		dynEntities.put(key, entity);

@@ -14,6 +14,7 @@ import entities.Camera;
 import entities.Entity;
 import entities.Player;
 import networking.Client;
+import networking.UDPClient;
 import renderEngine.DisplayManager;
 import renderEngine.Renderer;
 import shaders.StaticShader;
@@ -28,8 +29,6 @@ public class GameLoop {
 		
 		DisplayManager.createDisplay(800, 600, false);
 		
-		//DisplayManager.createDisplay(1920, 1080, true);
-		
 		Loader loader = new Loader();
 		
 		Assets.loadAssets(loader);
@@ -39,7 +38,7 @@ public class GameLoop {
 		Renderer renderer = new Renderer(shader);
 
 		//connect to a server
-		Client client = new Client(false);
+		UDPClient client = new UDPClient(true);
 		
 		System.out.println("Creating world");
 		
@@ -47,7 +46,7 @@ public class GameLoop {
 		World world = new World(loader, client);
 		
 		//start connection
-		client.start(world);
+		client.open();
 				
 		long startTime = Sys.getTime();
 		int frames = 0;

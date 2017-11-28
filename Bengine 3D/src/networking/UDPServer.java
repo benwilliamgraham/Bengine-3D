@@ -1,110 +1,89 @@
 package networking;
 
 import java.net.InetAddress;
+
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
 import java.util.HashMap;
 import java.util.Map;
 
+import entities.Entity;
+
 import networking.packets.HandshakePacket;
 import networking.packets.Packet;
+import networking.packets.RegisterEntityPacket;
 import networking.packets.RejectedPacket;
-import networking.packets.SpawnEntityPacket;
+import networking.packets.RegisterEntityPacket;
+
 
 import java.io.IOException;
 
-public class UDPServer extends PacketSource {
+public class UDPServer {
 	
 	public static final int SERVER_PORT = 9001;
 	public static final int CLIENT_PORT = 27016;
 	
-	private static Map<Integer, Class> packetTypes =  new HashMap<Integer, Class>();
-	
-	protected Map<Byte, NetworkedClient> clients; 
+	protected Map<String, NetworkedClient> clients;
+	protected Map<String, Entity> entities;
 	
 	protected DatagramSocket serverSocket;
 	
 	private Thread packetListener;
 	
-	private static byte currentId = 0;
+	private boolean isOpen = false;
 	
 	public UDPServer() throws IOException {
 		super();
 		
-		this.clients = new HashMap<Byte, NetworkedClient>();
+		this.clients = new HashMap<String, NetworkedClient>();
+		this.entities = new HashMap<String, Entity>();
 		this.serverSocket = new DatagramSocket(SERVER_PORT);
 		
-		this.OnPacket(new int[] {HandshakePacket.packetId}, (Packet p) -> {
-			HandshakePacket hp = (HandshakePacket) p; //Register that someone has joined the server.
-			
-			NetworkedClient client = new NetworkedClient(hp.name, currentId, p.getSender(), this);
-			currentId++;
-			
-			this.clients.put(client.id, client);
-			
-			System.out.printf("%s connected. Assigning ID: %d %n", client.name, (int) client.id);
-		
-			//Accept the connection.
-			client.send(new HandshakePacket(client.name, client.id));
-		});
-		
-		this.OnPacket(new int[] {SpawnEntityPacket.packetId}, (Packet p) -> {
-			SpawnEntityPacket s = (SpawnEntityPacket) p;
-			
-			
-		});
-		
-		this.packetListener = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
+		this.packetListener = new Thread(() -> {
+			while (isOpen) {
+				
+				byte[] incomingData = new byte[Packet.PACKET_SIZE];
+				DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
+				
+				try {
+					serverSocket.receive(incomingPacket);
+				} catch (IOException e) {
+					e.printStackTrace();
+					continue;
+				}
+				
+				NDBT packetData = new NDBT(incomingData);
+				
+				try {
+					Packet p = (Packet) Packet.TYPES.get((int) packetData.getByte(Packet.PACKET_TYPE)).newInstance();
+					p.setData(packetData);
+					p.onLoad();
 					
-					byte[] incomingData = new byte[Packet.PACKET_SIZE];
-					DatagramPacket incomingPacket = new DatagramPacket(incomingData, incomingData.length);
-					
-					try {
-						serverSocket.receive(incomingPacket);
-					} catch (IOException e) {
-						e.printStackTrace();
-						continue;
+					if (p.getId() == HandshakePacket.packetId) {
+						DatagramSocket clientSock = new DatagramSocket();
+						clientSock.connect(incomingPacket.getSocketAddress());
+						
+						NetworkedClient client = new NetworkedClient(((HandshakePacket) p).name, clientSock, this);
+						p.setSender(client);
+						clients.put(client.name, client);
+						client.EmitPacket(p);
 					}
 					
-					int packetType = (int)incomingData[0];
-					
-					try {
-						
-						Packet p = (Packet) packetTypes.get(packetType).newInstance();
-						p.loadPacket(incomingPacket);
-						
-						EmitPacket(p);
-						
-					} catch (Exception e) {
-						System.out.println("Invalid packet type recieved.");
-						e.printStackTrace(System.err);
-					}
+				} catch (Exception e) {
+					System.err.println("Invalid packet type recieved.");
+					e.printStackTrace();
 				}
 			}
 		}); 
 	}
 	
 	public void open() {
+		isOpen = true;
 		this.packetListener.start();
 	}
 	
-	public byte generateId() {
-		return 0;
-	}
-	
-	public void send(Packet p, InetAddress addr) {
-		byte[] data = p.getBytes();
-		
-		DatagramPacket pack = new DatagramPacket(data, Packet.PACKET_SIZE, addr, CLIENT_PORT);
-		
-		try {
-			this.serverSocket.send(pack);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void close() {
+		isOpen = false;
 	}
 	
 	public void broadcast(Packet p) {
@@ -114,14 +93,15 @@ public class UDPServer extends PacketSource {
 	}
 	
 	public static void registerPacket(int packetId, Class p) {
-		packetTypes.put(packetId, p);
+		Packet.TYPES.put(packetId, p);
 	}
 	
 	
 	public static void main(String[] args) {
-		UDPServer.registerPacket(HandshakePacket.packetId, HandshakePacket.class);
-		UDPServer.registerPacket(RejectedPacket.packetId, RejectedPacket.class);
-		UDPServer.registerPacket(SpawnEntityPacket.packetId, SpawnEntityPacket.class);
+		Packet.register(HandshakePacket.class);
+		Packet.register(RejectedPacket.class);
+		Packet.register(RegisterEntityPacket.class);
+		
 		
 		try {
 			UDPServer server = new UDPServer();
