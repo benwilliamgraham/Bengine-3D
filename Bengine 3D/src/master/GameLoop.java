@@ -26,27 +26,26 @@ public class GameLoop {
 
 	public static void main(String[] args) throws IOException{
 		
-		DisplayManager.createDisplay(1920, 1080, false);
-		
 		Loader loader = new Loader();
+		
+		//connect to a server
+		Client client = new Client(false);
+				
+		//create the world
+		World world = new World(loader, client);
+		
+		DisplayManager.createDisplay(1920, 1080, false);
 		
 		Assets.loadAssets(loader);
 		
 		StaticShader shader = new StaticShader();
 		
 		Renderer renderer = new Renderer(shader);
-
-		//connect to a server
-		Client client = new Client(false);
-		
-		System.out.println("Creating world");
-		
-		//create the world
-		World world = new World(loader, client);
 		
 		//start connection
 		client.start(world);
-				
+		
+		System.out.println("Starting Timer");
 		long startTime = Sys.getTime();
 		int frames = 0;
 		while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)){
@@ -54,13 +53,7 @@ public class GameLoop {
 			
 			world.update();
 			renderer.prepare();
-			shader.start();
-			shader.loadViewMatrix(world.camera);
-			renderer.render(world.faceNet, shader);
-			world.lockMap = true;
-			renderer.render(world.dynEntities, shader);
-			world.lockMap = false;
-			shader.stop();
+			world.render(renderer, shader);
 			DisplayManager.updateDisplay();
 			
 			
@@ -69,9 +62,13 @@ public class GameLoop {
 			}
 			
 			frames++;
+			if(frames == 120){
+				float totTime = 1f/1000f * (Sys.getTime() - startTime);
+				System.out.println(totTime + " seconds for " + frames + " frames: " + frames / totTime + " fps");
+				frames = 0;
+				startTime = Sys.getTime();
+			}
 		}
-		float totTime = 1f/1000f * (Sys.getTime() - startTime);
-		System.out.println(totTime + " seconds for " + frames + " frames: " + frames / totTime + " fps");
 		
 		shader.cleanUp();
 		loader.cleanUp();

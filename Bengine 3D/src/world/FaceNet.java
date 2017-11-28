@@ -70,13 +70,8 @@ public class FaceNet extends Entity{
 							Vector3f p3 = new Vector3f(c3);
 							Vector3f p4 = new Vector3f(c4);
 							
-							int LRUD = 0;
-							if(!world.checkSolid(x, y, z + 1)) LRUD += 1000;
-							if(!world.checkSolid(x, y, z - 1)) LRUD += 100;
-							if(!world.checkSolid(x, y + 1, z)) LRUD += 10;
-							if(!world.checkSolid(x, y - 1, z)) LRUD += 1;
-							createFace(position, p1, p2, p3, p4, LRUD, (int) tileset.y,
-									vertices, textures, shades, indices);
+							createFace(p1, p2, p3, vertices, textures, shades, indices);
+							createFace(p1, p3, p4, vertices, textures, shades, indices);
 						}
 						
 						//x-
@@ -86,13 +81,8 @@ public class FaceNet extends Entity{
 							Vector3f p3 = new Vector3f(c8);
 							Vector3f p4 = new Vector3f(c7);
 							
-							int LRUD = 0;
-							if(!world.checkSolid(x, y, z - 1)) LRUD += 1000;
-							if(!world.checkSolid(x, y, z + 1)) LRUD += 100;
-							if(!world.checkSolid(x, y + 1, z)) LRUD += 10;
-							if(!world.checkSolid(x, y - 1, z)) LRUD += 1;
-							createFace(position, p1, p2, p3, p4, LRUD, (int) tileset.y,
-									vertices, textures, shades, indices);
+							createFace(p1, p2, p3, vertices, textures, shades, indices);
+							createFace(p1, p3, p4, vertices, textures, shades, indices);
 						}
 						
 						//y+
@@ -102,13 +92,8 @@ public class FaceNet extends Entity{
 							Vector3f p3 = new Vector3f(c6);
 							Vector3f p4 = new Vector3f(c2);
 							
-							int LRUD = 0;
-							if(!world.checkSolid(x, y, z + 1)) LRUD += 1000;
-							if(!world.checkSolid(x, y, z - 1)) LRUD += 100;
-							if(!world.checkSolid(x - 1, y, z)) LRUD += 10;
-							if(!world.checkSolid(x + 1, y, z)) LRUD += 1;
-							createFace(position, p1, p2, p3, p4, LRUD, (int) tileset.x,
-									vertices, textures, shades, indices);
+							createFace(p1, p2, p3, vertices, textures, shades, indices);
+							createFace(p1, p3, p4, vertices, textures, shades, indices);
 						}
 						
 						//y-
@@ -118,13 +103,8 @@ public class FaceNet extends Entity{
 							Vector3f p3 = new Vector3f(c7);
 							Vector3f p4 = new Vector3f(c8);
 							
-							int LRUD = 0;
-							if(!world.checkSolid(x, y, z + 1)) LRUD += 1000;
-							if(!world.checkSolid(x, y, z - 1)) LRUD += 100;
-							if(!world.checkSolid(x + 1, y, z)) LRUD += 10;
-							if(!world.checkSolid(x - 1, y, z)) LRUD += 1;
-							createFace(position, p1, p2, p3, p4, LRUD, (int) tileset.z,
-									vertices, textures, shades, indices);
+							createFace(p1, p2, p3, vertices, textures, shades, indices);
+							createFace(p1, p3, p4, vertices, textures, shades, indices);
 						}
 						
 						//z+
@@ -134,13 +114,8 @@ public class FaceNet extends Entity{
 							Vector3f p3 = new Vector3f(c7);
 							Vector3f p4 = new Vector3f(c3);
 							
-							int LRUD = 0;
-							if(!world.checkSolid(x - 1, y, z)) LRUD += 1000;
-							if(!world.checkSolid(x + 1, y, z)) LRUD += 100;
-							if(!world.checkSolid(x, y + 1, z)) LRUD += 10;
-							if(!world.checkSolid(x, y - 1, z)) LRUD += 1;
-							createFace(position, p1, p2, p3, p4, LRUD, (int) tileset.y,
-									vertices, textures, shades, indices);
+							createFace(p1, p2, p3, vertices, textures, shades, indices);
+							createFace(p1, p3, p4, vertices, textures, shades, indices);
 						}
 						
 						//z-
@@ -150,13 +125,8 @@ public class FaceNet extends Entity{
 							Vector3f p3 = new Vector3f(c4);
 							Vector3f p4 = new Vector3f(c8);
 							
-							int LRUD = 0;
-							if(!world.checkSolid(x + 1, y, z)) LRUD += 1000;
-							if(!world.checkSolid(x - 1, y, z)) LRUD += 100;
-							if(!world.checkSolid(x, y + 1, z)) LRUD += 10;
-							if(!world.checkSolid(x, y - 1, z)) LRUD += 1;
-							createFace(position, p1, p2, p3, p4, LRUD, (int) tileset.y,
-									vertices, textures, shades, indices);
+							createFace(p1, p2, p3, vertices, textures, shades, indices);
+							createFace(p1, p3, p4, vertices, textures, shades, indices);
 						}
 						
 						
@@ -185,9 +155,9 @@ public class FaceNet extends Entity{
 			indicesArray[pointer * 1 + 0] = indices.get(pointer);
 		}
 		
-		System.out.println("Loading model with " + indicesArray.length / 3 + "tris");
+		System.out.println("Loading model with " + indicesArray.length / 3 + "tris and " + vertices.size() + " vertices");
 		RawModel rawModel = loader.loadToVAO(verticesArray, texturesArray, indicesArray);
-		ModelTexture texture = new ModelTexture(loader.loadTexture("Flat"));
+		ModelTexture texture = new ModelTexture(loader.loadTexture("flat"));
 		
 		model = new TexturedModel(rawModel, texture);
 	}
@@ -198,7 +168,7 @@ public class FaceNet extends Entity{
 		Vector3f newDir = new Vector3f(direction.x, direction.y, direction.z);
 		
 		float fc = 0.5f;
-		float mc = 0f;
+		float mc = 0.0f;
 		
 		//check x
 		if(world.checkSolid((int)(position.x + direction.x), (int) position.y, (int) position.z) ||
@@ -230,47 +200,32 @@ public class FaceNet extends Entity{
 			newDir.z *= mc;
 		}
 		
-		Vector3f intersection = Vector3f.add(newDir, position, null);
-		Vector3f offset = new Vector3f(
-				0.25f * (float) noise.eval(intersection.x, intersection.z, intersection.z), 
-				0.25f * (float) noise.eval(intersection.x, intersection.z, intersection.z),
-				0.25f * (float) noise.eval(intersection.x, intersection.z, intersection.z));
-		
-		return Vector3f.add(intersection, offset, null);
+		return Vector3f.add(newDir, position, null);
 	}
 	
 	
-	private void createFace(Vector3f position, Vector3f p1, Vector3f p2, Vector3f p3, Vector3f p4, int LRUD, int tileset,
+	private void createFace(Vector3f p1, Vector3f p2, Vector3f p3,
 			List<Vector3f> vertices, List<Vector2f> textures, List<Float> shades, List<Integer> indices){
 		int index = vertices.size();
 		
-		vertices.add(p1);
-		vertices.add(p2);
-		vertices.add(p3);
-		vertices.add(p4);
+		//make sure that it is a valid face
+		if((p1.x == p2.x && p1.y == p2.y && p1.z == p2.z) ||
+				(p1.x == p3.x && p1.y == p3.y && p1.z == p3.z) ||
+				(p2.x == p3.x && p2.y == p3.y && p2.z == p3.z)){
+			return;
+		}
 		
 		Vector3f normal = Calc.calculateNormal(p1, p2, p3);
-		shades.add(calcShade(normal, p1));
-		shades.add(calcShade(normal, p2));
-		shades.add(calcShade(normal, p3));
-		shades.add(calcShade(normal, p4));
-		
-		setCoords(LRUD, tileset, textures);
-		
-		indices.add(index + 0);
-		indices.add(index + 1);
-		indices.add(index + 2);
-		indices.add(index + 0);
-		indices.add(index + 2);
-		indices.add(index + 3);
+		addVertex(p1, normal, vertices, textures, shades, indices);
+		addVertex(p2, normal, vertices, textures, shades, indices);
+		addVertex(p3, normal, vertices, textures, shades, indices);
 	}
 	
-	
-	private void setCoords(int LRUD, int tileset, List<Vector2f> textures){		
-		textures.add(new Vector2f(1, 0));
-		textures.add(new Vector2f(0, 0));
-		textures.add(new Vector2f(0, 1));
+	private void addVertex(Vector3f point, Vector3f normal, List<Vector3f> vertices, List<Vector2f> textures, List<Float> shades, List<Integer> indices){
+		vertices.add(point);
+		shades.add(calcShade(normal, point));
 		textures.add(new Vector2f(1, 1));
+		indices.add(vertices.size() - 1);
 	}
 	
 	private float calcShade(Vector3f normal, Vector3f point){
@@ -283,10 +238,9 @@ public class FaceNet extends Entity{
 				continue;
 			}
 			toLight = Calc.normaliseVector(toLight);
-			float diffuse = light.brightness * (Vector3f.dot(toLight, normal) + 1f) / 2f;
+			float diffuse = light.brightness * (Vector3f.dot(toLight, normal) + 2f) / 3f;
 			
 			diffuse *= 1 - Math.pow(mag / light.lightDist, light.dropOff);
-			
 			Vector3f checkPos = new Vector3f(point.x + 0.5f, point.y + 0.5f, point.z + 0.5f);
 			float distTest = Math.min(mag, 16);
 			for(int n = 0; n < distTest; n++){

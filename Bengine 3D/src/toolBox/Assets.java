@@ -7,6 +7,7 @@ import data.TexturedModel;
 public class Assets {
 
 	public static ModelTexture tex;
+	public static ModelTexture tiles;
 	public static RawModel cube;
 	public static TexturedModel cubert;
 	
@@ -95,6 +96,7 @@ public class Assets {
 	};
 	
 	public static void loadAssets(Loader loader){
+		tiles = new ModelTexture(loader.loadTexture("T"));
 		tex = new ModelTexture(loader.loadTexture("Cubert"));
 		cube = loader.loadToVAO(vertices, textureCoords, indices);
 		cubert = new TexturedModel(cube, tex);

@@ -10,10 +10,10 @@ import world.World;
 
 public class Bullet extends DynEntity{
 	
-	public final float SPEED = 64;
+	public final float SPEED = 128;
 
 	public Bullet(Vector3f position, float yaw, float pitch) {
-		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f), new Vector3f(0, 0, 0), false);
+		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(0.5f, 0.5f, 0.5f), new Vector3f(0, 0, 0), false);
 		float xVel = (float) (SPEED * Math.sin(yaw) * Math.cos(pitch)); 
 		float yVel = (float) (SPEED * Math.sin(-pitch)); 
 		float zVel = (float) (SPEED * Math.cos(yaw) * Math.cos(pitch)); 
@@ -36,14 +36,30 @@ public class Bullet extends DynEntity{
 			world.client.updateVelocity(intersection.key, intersection.velocity);
 			world.client.updateHealth(intersection.key, intersection.health);
 			return false;
-		}else if(!checkCollision(world, new Vector3f(velocity.x / DisplayManager.FPS, velocity.y / DisplayManager.FPS, velocity.z / DisplayManager.FPS))){
-			position.x += velocity.x / DisplayManager.FPS;
-			position.y += velocity.y / DisplayManager.FPS;
-			position.z += velocity.z / DisplayManager.FPS;
-			world.client.updatePosition(key, position);
 		}else{
-			return false;
+			float magnitude = Calc.calculateMagnitude(velocity) / DisplayManager.FPS;
+			
+			float step = 0.9f;
+			
+			for(float dist = 0; dist <= magnitude; dist += step){
+				
+				float distRatio = dist / magnitude;
+				
+				
+				Vector3f checkPos = Vector3f.add(position, Vector3f.add(new Vector3f(0.5f, 0.5f, 0.5f), new Vector3f(
+						velocity.x * distRatio / DisplayManager.FPS,
+						velocity.y * distRatio / DisplayManager.FPS,
+						velocity.z * distRatio / DisplayManager.FPS), null), null);
+				if(world.checkSolid(checkPos)){
+					world.destroyVoxel((int) checkPos.x, (int) checkPos.y, (int) checkPos.z);
+					return false;
+				}
+			}
 		}
+		
+		position.x += velocity.x / DisplayManager.FPS;
+		position.y += velocity.y / DisplayManager.FPS;
+		position.z += velocity.z / DisplayManager.FPS;
 		
 		return true;
 	}

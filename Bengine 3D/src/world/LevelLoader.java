@@ -30,22 +30,22 @@ public class LevelLoader{
 					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.DIRT);
 					break;
 				case 66:
-					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.STONE);
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.DIRT);
 					break;
 				case 27:
-					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.ROOFING);
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.DIRT);
 					break;
 				case 85:
-					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.WOOD);
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.DIRT);
 					break;
 				case 151:
-					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.RED_WOOD);
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.DIRT);
 					break;
 				case 64:
-					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.TILES);
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.DIRT);
 					break;
 				case 25:
-					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.BUSH);
+					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.DIRT);
 					break;
 				case 24:
 					world.voxels[nx][ny][nz].setVoxel(VoxelTypes.WATER);

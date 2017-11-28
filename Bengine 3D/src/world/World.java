@@ -23,6 +23,8 @@ import entities.Light;
 import entities.NPC;
 import entities.Player;
 import networking.Client;
+import renderEngine.Renderer;
+import shaders.StaticShader;
 import toolBox.Calc;
 import toolBox.Loader;
 import toolBox.OpenSimplexNoise;
@@ -30,9 +32,14 @@ import world.Voxel.VoxelTypes;
 
 public class World {
 	
-	public static final int XSIZE = 125;
-	public static final int YSIZE = 125;
-	public static final int ZSIZE = 125;
+	public static final int XSIZE = 256;
+	public static final int YSIZE = 64;
+	public static final int ZSIZE = 256;
+	
+	public static final int CHUNK_SIZE = 16;
+	public static final int X_CHUNKS = (int) Math.ceil(XSIZE / CHUNK_SIZE);
+	public static final int Y_CHUNKS = (int) Math.ceil(YSIZE / CHUNK_SIZE);
+	public static final int Z_CHUNKS = (int) Math.ceil(ZSIZE / CHUNK_SIZE);
 	
 	public Client client;
 	
@@ -44,10 +51,12 @@ public class World {
 	public boolean lockMap = false;
 	public Map<String, DynEntity> dynEntities = new HashMap<String, DynEntity>();
 	public Map<String, DynEntity> localDynEntities = new HashMap<String, DynEntity>();
-	public FaceNet faceNet;
+	public FaceMapRepeating[][][] faceMaps = new FaceMapRepeating[X_CHUNKS][Y_CHUNKS][Z_CHUNKS];
+	public List<FaceMapRepeating> faceMapsToUpdate = new ArrayList<FaceMapRepeating>();
+	public List<FaceMapRepeating> faceMapsToUpload = new ArrayList<FaceMapRepeating>();
 	
 	public Camera camera;
-	public Player player = new Player(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2)));
+	public Player player = new Player(new Vector3f((float) (Math.random() * World.XSIZE), YSIZE - 10, (float) (Math.random() * World.ZSIZE / 2)));
 	public Camera spectatorCamera = new Camera();
 	
 	public World(Loader loader, Client client){
@@ -58,34 +67,62 @@ public class World {
 		for(int n = 0; n < 100; n++){
 			//lights.add(new Light(new Vector3f(Math.random() * (float) XSIZE, Math.random() * (float) YSIZE, Math.random() * (float) ZSIZE), 10, 1, 2f));
 		}
-
-		//load level
 		
-		try {
-			LevelLoader.loadLevel(this);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		boolean level = false;
 		
-		
-		//generate level
-		/*
-		OpenSimplexNoise noise = new OpenSimplexNoise(Sys.getTime());
-		
-		//fill
-		float gradient = 32;
-		for(int x = 0; x < XSIZE; x++){
-			for(int y = 0; y < YSIZE; y++){
-				for(int z = 0; z < ZSIZE; z++){
-					voxels[x][y][z] = new Voxel();
-					if(noise.eval(x / gradient, y / gradient, z / gradient) <= -0.5f){
-						voxels[x][y][z].setVoxel(VoxelTypes.STONE);
+		System.out.println("Loading Level");
+		if(level){
+			try {
+				LevelLoader.loadLevel(this);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else{
+			OpenSimplexNoise noise = new OpenSimplexNoise(Sys.getTime());
+			
+			//fill
+			float gradient = 42;
+			float maxHeight = YSIZE / 4f;
+			for(int x = 0; x < XSIZE; x++){
+				for(int y = 0; y < YSIZE; y++){
+					for(int z = 0; z < ZSIZE; z++){
+						voxels[x][y][z] = new Voxel();
+						
+						float hVal = (float) ((noise.eval(x / gradient, z / gradient) + 2.5f) / 2f * maxHeight - y) / YSIZE * 1f;
+						float tVal = (float) noise.eval(x / gradient, y / gradient, z / gradient);
+						
+						//check if a block should exist
+						if(hVal + tVal > 0 || y == 0){
+							if(y == 0){
+								voxels[x][y][z].setVoxel(VoxelTypes.WATER);
+							}else if(y < 6){
+								voxels[x][y][z].setVoxel(VoxelTypes.SAND);
+							}else{
+								voxels[x][y][z].setVoxel(VoxelTypes.DIRT);
+							}
+						}
 					}
 				}
 			}
+			
+			//add vegetation
+			for(int x = 0; x < XSIZE; x++){
+				for(int z = 0; z < ZSIZE; z++){
+					for(int y = YSIZE - 1; y >= 0; y--){
+						if(voxels[x][y][z].solid){
+							if(voxels[x][y][z].type == VoxelTypes.DIRT){
+								voxels[x][y][z].setVoxel(VoxelTypes.GRASS);
+							}
+							break;
+						}
+					}
+				}
+			}
+			
 		}
-		*/
 		
+		
+		System.out.println("Adding Player and Camera");
 		//add player
 		createDynEntity(player);
 		for(int n = 0; n < 0; n++){
@@ -98,12 +135,33 @@ public class World {
 		spectatorCamera.pitch = (float) (Math.PI / 2f);
 		spectatorCamera.yaw = (float) (Math.PI / 2f);
 		
-		//create face map
-		faceNet = new FaceNet(loader, this, new Random(Sys.getTime()), lights);
-		faceNet.createFaceMap();
+		System.out.println("Creating Face Maps");
+		//create face maps
+		for(int x = 0; x < X_CHUNKS; x++){
+			for(int y = 0; y < Y_CHUNKS; y++){
+				for(int z = 0; z < Z_CHUNKS; z++){
+					faceMaps[x][y][z] = new FaceMapRepeating(loader, this, lights, new Vector3f(x, y, z));
+				}
+			}
+		}
+		
+		System.out.println("World Creation Done");
 	}
 	
 	public void update(){
+		//update any new face maps
+		while(!faceMapsToUpdate.isEmpty()){
+			faceMapsToUpdate.get(0).createFaceMap();
+			faceMapsToUpdate.remove(0);
+		}
+		
+		
+		//upload any new face maps
+		while(!faceMapsToUpload.isEmpty()){
+			faceMapsToUpload.get(0).uploadFaceMap();
+		}
+		
+		
 		//update 3d
 		boolean stillActive;
 		Map<String, DynEntity> updateEnts = new HashMap<String, DynEntity>();
@@ -120,6 +178,29 @@ public class World {
 				client.deleteEntity(key);
 			}
 		}
+	}
+	
+	public void render(Renderer renderer, StaticShader shader){
+		shader.start();
+		shader.loadViewMatrix(camera);
+		float renderDist = 6;
+		for(int x = (int) (camera.position.x / CHUNK_SIZE - renderDist); x <= (int) (camera.position.x / CHUNK_SIZE + renderDist); x++){
+			if(x < 0 || x >= X_CHUNKS) continue;
+			for(int y = (int) (camera.position.y / CHUNK_SIZE - renderDist); y <= (int) (camera.position.y / CHUNK_SIZE + renderDist); y++){
+				if(y < 0 || y >= Y_CHUNKS) continue;
+				for(int z = (int) (camera.position.z / CHUNK_SIZE - renderDist); z <= (int) (camera.position.z / CHUNK_SIZE + renderDist); z++){
+					if(z < 0 || z >= Z_CHUNKS) continue;
+					if(faceMaps[x][y][z].model == null) continue;
+					renderer.render(faceMaps[x][y][z]);
+				}
+			}
+		}
+		
+		//render dynamic entities
+		lockMap = true;
+		renderer.render(dynEntities, shader);
+		lockMap = false;
+		shader.stop();
 	}
 	
 	public void createDynEntity(DynEntity entity){
@@ -164,6 +245,54 @@ public class World {
 		dynEntities.remove(key);
 	}
 	
+	public void destroyVoxel(int x, int y, int z){
+		if(checkBounds(x, y, z) || !voxels[x][y][z].solid) return;
+		voxels[x][y][z] = new Voxel();
+		updateFaceMap(x / CHUNK_SIZE, y / CHUNK_SIZE, z / CHUNK_SIZE);
+		if(x / CHUNK_SIZE != (x + 1) / CHUNK_SIZE){
+			if(!checkBounds(x + 1, y, z)) updateFaceMap((x + 1) / CHUNK_SIZE, y / CHUNK_SIZE, z / CHUNK_SIZE);
+		}
+		if(x / CHUNK_SIZE != (x - 1) / CHUNK_SIZE){
+			if(!checkBounds(x - 1, y, z)) updateFaceMap((x - 1) / CHUNK_SIZE, y / CHUNK_SIZE, z / CHUNK_SIZE);
+		}
+		if(y / CHUNK_SIZE != (y + 1) / CHUNK_SIZE){
+			if(!checkBounds(x, y + 1, z)) updateFaceMap(x / CHUNK_SIZE, (y + 1) / CHUNK_SIZE, z / CHUNK_SIZE);
+		}
+		if(y / CHUNK_SIZE != (y - 1) / CHUNK_SIZE){
+			if(!checkBounds(x, y - 1, z)) updateFaceMap(x / CHUNK_SIZE, (y - 1) / CHUNK_SIZE, z / CHUNK_SIZE);
+		}
+		if(z / CHUNK_SIZE != (z + 1) / CHUNK_SIZE){
+			if(!checkBounds(x, y, z + 1)) updateFaceMap(x / CHUNK_SIZE, y / CHUNK_SIZE, (z + 1) / CHUNK_SIZE);
+		}
+		if(z / CHUNK_SIZE != (z - 1) / CHUNK_SIZE){
+			if(!checkBounds(x, y, z - 1)) updateFaceMap(x / CHUNK_SIZE, y / CHUNK_SIZE, (z - 1) / CHUNK_SIZE);
+		}
+	}
+	
+	public void updateFaceMap(int x, int y, int z){
+		FaceMapRepeating faceMap = faceMaps[x][y][z];
+		if(!faceMapsToUpdate.contains(faceMap)){
+			faceMapsToUpdate.add(faceMap);
+		}
+	}
+	
+	public boolean checkBounds(Vector3f position){
+		int x = (int) (position.x);
+		int y = (int) (position.y);
+		int z = (int) (position.z);
+
+		return checkBounds(x, y, z);
+	}
+	
+	public boolean checkBounds(int x, int y, int z){
+		if(x < 0 || x >= XSIZE || y >= YSIZE || z < 0 || z >= ZSIZE){
+			return true;
+		}else if(y < 0){
+			return true;
+		}
+		return false;
+	}
+	
 	public boolean checkSolid(Vector3f position){
 		int x = (int) (position.x);
 		int y = (int) (position.y);
@@ -173,11 +302,7 @@ public class World {
 	}
 	
 	public boolean checkSolid(int x, int y, int z){
-		if(x < 0 || x >= XSIZE || y >= YSIZE || z < 0 || z >= ZSIZE){
-			return true;
-		}else if(y < 0){
-			return true;
-		}
+		if(checkBounds(x, y, z)) return true;
 		return voxels[x][y][z].solid;
 	}
 }

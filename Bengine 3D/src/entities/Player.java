@@ -32,16 +32,13 @@ public class Player extends DynEntity{
 	public Camera camera;
 	
 	public Player(Vector3f position) {
-		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(1, 2.5f, 1), new Vector3f(1, 2.5f, 1), true);
+		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(1, 3, 1), new Vector3f(1, 3, 1), true);
 		this.grounded = false;
 		this.supported = false;
 		this.usingItem = false;
 		this.mouseActive = true;
 		this.health = 15;
 		camera = new Camera();
-		
-		Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
-		Mouse.setGrabbed(true);
 	}
 
 	public boolean update(World world){
@@ -88,13 +85,28 @@ public class Player extends DynEntity{
 		if(Mouse.isButtonDown(0)){
 			if(usingItem == false){
 				usingItem = true;
+				
 				for(int n = 0; n < 10; n++){
 					world.createDynEntity(new Bullet(new Vector3f(position.x, position.y + 1.1f, position.z), 
 							yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f)));
 				}
+				
+				//world.createDynEntity(new GrapplingHook(this, yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f)));
 			}
 		}else{
 			usingItem = false;
+		}
+		
+		//destroy
+		if(Keyboard.isKeyDown(Keyboard.KEY_R)){
+			int rad = 5;
+			for(int x = (int) (position.x - rad); x < position.x + rad; x++){
+				for(int y = (int) (position.y - rad); y < position.y + rad; y++){
+					for(int z = (int) (position.z - rad); z < position.z + rad; z++){
+						world.destroyVoxel(x, y, z);
+					}
+				}
+			}
 		}
 		
 		//gravity

@@ -18,13 +18,16 @@ import entities.Entity;
 import shaders.StaticShader;
 import toolBox.Calc;
 import world.FaceMap;
+import world.FaceMapRepeating;
 import world.FaceNet;
 
 public class Renderer {
 	
 	private static final float FOV = 120;
 	private static final float NEAR_PLANE = 0.1f;
-	private static final float FAR_PLANE = 128f;
+	private static final float FAR_PLANE = 196f;
+	
+	private StaticShader shader = new StaticShader();
 	
 	private Matrix4f projectionMatrix;
 	
@@ -37,12 +40,14 @@ public class Renderer {
 	public void prepare(){
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		//GL11.glEnable(GL11.GL_BLEND);
+		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-		GL11.glClearColor(0.8f / 4f, 0.85f / 4f, 0.75f / 4f, 1);
+		GL11.glClearColor(0.8f / 1f, 0.85f / 1f, 0.75f / 1f, 1);
 	}
 	
-	public void render(FaceNet faceMap, StaticShader shader){
+	public void render(FaceMapRepeating faceMap){
 		GL30.glBindVertexArray(faceMap.model.model.vaoID);
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
