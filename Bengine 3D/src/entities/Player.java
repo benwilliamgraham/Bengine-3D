@@ -58,7 +58,6 @@ public class Player extends DynEntity{
 		if(mouseActive){
 			yaw += mouseXChange * TURN_SPEED / DisplayManager.FPS;
 			rotation.y = yaw;
-			world.client.updateRotation(this.key, rotation);
 			pitch += mouseYChange * TURN_SPEED / DisplayManager.FPS;
 			pitch = (float) Math.min(Math.max(pitch, -Math.PI / 2.5), Math.PI / 2.5);
 			
@@ -155,7 +154,8 @@ public class Player extends DynEntity{
 		camera.pitch = (pitch + camera.pitch * 1f) / 2f;
 		
 		
-		world.client.updatePosition(key, position);
+		world.networkClient.updateEntity(this);
+		
 		if(health <= 0){
 			world.camera = world.spectatorCamera;
 			return false;
@@ -164,7 +164,7 @@ public class Player extends DynEntity{
 	}
 
 	@Override
-	public int getEntityId() {
+	public int getEntityType() {
 		return 0;
 	}
 }

@@ -24,7 +24,7 @@ public class UDPServer {
 	public static final int CLIENT_PORT = 27016;
 	
 	protected Map<String, NetworkedClient> clients;
-	protected Map<String, Entity> entities;
+	protected Map<String, NetworkedEntity> entities;
 	
 	protected DatagramSocket serverSocket;
 	
@@ -36,7 +36,7 @@ public class UDPServer {
 		super();
 		
 		this.clients = new HashMap<String, NetworkedClient>();
-		this.entities = new HashMap<String, Entity>();
+		this.entities = new HashMap<String, NetworkedEntity>();
 		this.serverSocket = new DatagramSocket(SERVER_PORT);
 		
 		this.packetListener = new Thread(() -> {

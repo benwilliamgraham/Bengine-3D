@@ -7,12 +7,17 @@ import data.TexturedModel;
 public abstract class Entity {
 	
 	public Vector3f position, rotation, scale;
-		
+	
+	public String id;
+	
+	public boolean isNetworked;
+	
+	
 	public Entity(Vector3f position, Vector3f rotation, Vector3f scale) {
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
 	}
 	
-	public abstract int getEntityId();
+	public abstract int getEntityType();
 }

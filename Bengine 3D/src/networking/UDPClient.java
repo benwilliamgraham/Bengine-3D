@@ -20,6 +20,8 @@ public class UDPClient extends PacketSource {
 	public static final int CLIENT_PORT = 27016;
 	
 	public DatagramSocket socket;
+	public String clientId;
+	
 	
 	private Thread localServerThread;
 	private Thread packetListenerThread;
@@ -98,7 +100,11 @@ public class UDPClient extends PacketSource {
 		});
 	}
 	
-	public void registerEntity(Entity e) {
+	public void requestEntity(int type, Vector3f pos, Vector3f rot) {
+		
+	}
+	
+	public void updateEntity(Entity e) {
 		
 	}
 	
@@ -143,6 +149,10 @@ public class UDPClient extends PacketSource {
 			}
 			
 			System.out.println("Connected as " + hp.name);
+			
+			if (hp.id != null) {
+				c.clientId = hp.id;
+			}
 			
 			c.send(new RegisterEntityPacket(new Vector3f(1.0f, 2.0f, 3.0f), new Vector3f(), new Vector3f(), 0, "TEST"));
 		}); 

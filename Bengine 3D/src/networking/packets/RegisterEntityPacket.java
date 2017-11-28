@@ -2,6 +2,8 @@ package networking.packets;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import networking.NetworkedEntity;
+
 public class RegisterEntityPacket extends Packet {
 
 	public static int packetId = 2;
@@ -38,6 +40,10 @@ public class RegisterEntityPacket extends Packet {
 		
 	}
 	
+	public RegisterEntityPacket(NetworkedEntity e) {
+		this(e.position, e.rotation, e.scale, e.entityType, e.id);
+	}
+
 	@Override
 	public void onLoad() {
 		pos = data.getVec3(POS_ID);

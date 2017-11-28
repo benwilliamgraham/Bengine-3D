@@ -15,7 +15,6 @@ public abstract class DynEntity extends Entity{
 	public boolean visible = true;
 	public Vector3f velocity = new Vector3f(0, 0, 0);
 	public Vector3f dimensions;
-	public String key = "TEMP";
 	public boolean collidable;
 	public float health = 0;
 	

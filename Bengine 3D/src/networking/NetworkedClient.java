@@ -9,6 +9,7 @@ import java.util.UUID;
 import networking.packets.HandshakePacket;
 import networking.packets.Packet;
 import networking.packets.RegisterEntityPacket;
+import networking.packets.UpdateEntityPacket;
 
 public class NetworkedClient extends PacketSource {
 	
@@ -62,7 +63,26 @@ public class NetworkedClient extends PacketSource {
 			
 			RegisterEntityPacket r = (RegisterEntityPacket) p;
 			
+			NetworkedEntity e = new NetworkedEntity(r);
+			e.owner = this;
 			
+			this.server.entities.put(e.id, e);
+			
+			this.server.broadcast(new RegisterEntityPacket(e));
+		});
+		
+		this.OnPacket(new int[] {UpdateEntityPacket.packetId}, (Packet p) -> {
+			UpdateEntityPacket u = (UpdateEntityPacket) p;
+			
+			if (this.server.entities.containsKey(u.entity)) {
+				NetworkedEntity e = this.server.entities.get(u.entity);
+				
+				if (this.equals(e.owner)) {
+					e.position = u.pos;
+					e.rotation = u.rot;
+					e.velocity = u.vel;
+				}
+			}
 		});
 		
 		this.listenerThread.start();

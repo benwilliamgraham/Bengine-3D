@@ -7,7 +7,7 @@ import org.lwjgl.util.vector.Vector3f;
 import networking.packets.RegisterEntityPacket;
 
 public class NetworkedEntity {
-	public Vector3f position, rotation, scale;
+	public Vector3f position, rotation, scale, velocity;
 	public String id;
 	public int entityType;
 	public NetworkedClient owner;
@@ -20,5 +20,6 @@ public class NetworkedEntity {
 		this.scale = p.scale;
 		this.entityType = p.entityType;
 		this.id = UUID.randomUUID().toString();
+		this.velocity = new Vector3f();
 	}
 }

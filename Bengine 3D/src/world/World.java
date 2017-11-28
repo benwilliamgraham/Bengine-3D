@@ -46,7 +46,7 @@ public class World {
 	public FaceMap faceMap;
 	
 	public Camera camera;
-	public Player player = new Player(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2)));
+	public Player player;// = new Player(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2)));
 	public Camera spectatorCamera = new Camera();
 	
 	public World(Loader loader, UDPClient client){
@@ -72,7 +72,7 @@ public class World {
 		}
 		
 		//add camera
-		camera = player.camera;
+		//camera = player.camera;
 		spectatorCamera.position = new Vector3f(XSIZE / 2f, 2f * YSIZE / 3f, ZSIZE / 2f);
 		spectatorCamera.pitch = (float) (Math.PI / 2f);
 		spectatorCamera.yaw = (float) (Math.PI / 2f);
