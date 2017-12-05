@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.PortUnreachableException;
 import java.util.UUID;
 
 import networking.packets.HandshakePacket;
@@ -25,13 +26,25 @@ public class NetworkedClient extends PacketSource {
 		this.server = server;
 		this.listenerThread = new Thread(() -> {
 			while (true) {
+				//Check for disconnect
+				if (!this.sock.isConnected() || this.sock.isClosed()) {
+					System.out.println("Client disconnected"); //TODO: Handle disconnection on server, (remove entites, etc)
+					break;
+				}
+				
+				
+				//Recieve packet and handle
 				byte[] incomingData = new byte[Packet.PACKET_SIZE];
 				DatagramPacket p = new DatagramPacket(incomingData, Packet.PACKET_SIZE);
 				
 				try {
 					sock.receive(p);
+				} catch (PortUnreachableException e) {
+					System.out.println("Client lost connection to server.");
+					break;
 				} catch (IOException e) {
 					e.printStackTrace();
+					continue; //Packet couldn't be recieved, so we skip trying to unencode it.
 				}
 				
 				NDBT packetData = new NDBT(incomingData);
@@ -52,10 +65,13 @@ public class NetworkedClient extends PacketSource {
 		
 		this.OnPacket(new int[] {HandshakePacket.packetId}, (Packet p) -> {
 			HandshakePacket hp = (HandshakePacket) p;
-			
 			System.out.println(hp.name + " has connected.");
 			
-			send(hp);
+			System.out.println("Assigning " + hp.name + " an id of " + this.id);
+			HandshakePacket h = new HandshakePacket(hp.name, this.id);
+		
+			
+			send(h);
 		});
 		
 		this.OnPacket(new int[] {RegisterEntityPacket.packetId}, (Packet p) -> {

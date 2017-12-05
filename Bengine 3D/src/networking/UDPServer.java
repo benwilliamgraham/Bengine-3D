@@ -7,12 +7,15 @@ import java.net.DatagramPacket;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.lwjgl.Sys;
+
 import entities.Entity;
 
 import networking.packets.HandshakePacket;
 import networking.packets.Packet;
 import networking.packets.RegisterEntityPacket;
 import networking.packets.RejectedPacket;
+import networking.packets.UpdateEntityPacket;
 import networking.packets.RegisterEntityPacket;
 
 
@@ -22,6 +25,7 @@ public class UDPServer {
 	
 	public static final int SERVER_PORT = 9001;
 	public static final int CLIENT_PORT = 27016;
+	public static final int TICKRATE = 20;
 	
 	protected Map<String, NetworkedClient> clients;
 	protected Map<String, NetworkedEntity> entities;
@@ -80,6 +84,17 @@ public class UDPServer {
 	public void open() {
 		isOpen = true;
 		this.packetListener.start();
+		
+		while (isOpen) {
+			long time = Sys.getTime();
+			
+			updateEntitiesRemote();
+			
+			//Slow down there buddy. We only need TICKRATE ticks per second.
+			while ((Sys.getTime() - time) < (1000 / TICKRATE)) {
+				continue;
+			}
+		}
 	}
 	
 	public void close() {
@@ -92,15 +107,24 @@ public class UDPServer {
 		}
 	}
 	
-	public static void registerPacket(int packetId, Class p) {
-		Packet.TYPES.put(packetId, p);
+	private void updateEntitiesRemote() {
+		for (NetworkedEntity e : this.entities.values()) {
+			UpdateEntityPacket p = new UpdateEntityPacket(e);
+			
+			for (NetworkedClient c : this.clients.values()) {
+				if (!e.owner.equals(c)) { //Don't force-update an entity that is controlled by that client.
+					c.send(p);
+				}
+			}
+			
+		}
 	}
-	
 	
 	public static void main(String[] args) {
 		Packet.register(HandshakePacket.class);
 		Packet.register(RejectedPacket.class);
 		Packet.register(RegisterEntityPacket.class);
+		Packet.register(UpdateEntityPacket.class);
 		
 		
 		try {

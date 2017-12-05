@@ -315,8 +315,14 @@ public class FaceMap extends Entity{
 
 
 	@Override
-	public int getEntityId() {
+	public int getEntityType() {
 		return 3;
 	}
 
+
+	@Override
+	public boolean onUpdate(float delta) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

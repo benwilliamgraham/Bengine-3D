@@ -2,6 +2,10 @@ package networking.packets;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import entities.DynEntity;
+import entities.Entity;
+import networking.NetworkedEntity;
+
 public class UpdateEntityPacket extends Packet {
 	public static int packetId = 3;
 	
@@ -18,6 +22,7 @@ public class UpdateEntityPacket extends Packet {
 	}
 	
 	public UpdateEntityPacket(Vector3f pos, Vector3f rot, Vector3f vel, String entityId) {
+		super();
 		this.pos = pos;
 		this.rot = rot;
 		this.vel = vel;
@@ -30,6 +35,14 @@ public class UpdateEntityPacket extends Packet {
 		data.pack();
 	}
 	
+	public UpdateEntityPacket(NetworkedEntity e) {
+		this(e.position, e.rotation, e.velocity, e.id);
+	}
+	
+	public UpdateEntityPacket(Entity e) {
+		this(e.position, e.rotation, e.velocity, e.id);
+	}
+
 	@Override
 	public void onLoad() {
 		this.pos = data.getVec3(POS_ID);

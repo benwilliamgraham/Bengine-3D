@@ -1,47 +1,53 @@
 package networking;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.lwjgl.Sys;
 import org.lwjgl.util.vector.Vector3f;
 
 import entities.Entity;
+import entities.DynEntity;
 import networking.packets.HandshakePacket;
 import networking.packets.Packet;
 import networking.packets.RejectedPacket;
+import networking.packets.UpdateEntityPacket;
+import world.World;
 import networking.packets.RegisterEntityPacket;
 
 public class UDPClient extends PacketSource {
 
 	public static final int SERVER_PORT = 9001;
 	public static final int CLIENT_PORT = 27016;
+	public static final int TICKRATE = 20;
+	
 	
 	public DatagramSocket socket;
 	public String clientId;
 	
+	protected World world;
 	
-	private Thread localServerThread;
+	private Process localServer;
 	private Thread packetListenerThread;
+	private Thread serverTickThread;
 	private InetAddress serverAddress;
 	private boolean isConnected = false;
 	
 	public UDPClient(boolean localMode) {
 		
 		if (localMode) {
-			localServerThread = new Thread(() -> {
-				try {
-					UDPServer server = new UDPServer();
-					
-					server.open();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
 			
-			localServerThread.start();
+			try {
+				localServer = spawnServerProcess();
+				
+			} catch (IOException e) {
+				System.err.println("Failed to start local server.");
+				System.exit(1);
+			}
 			
 			try {
 				serverAddress = InetAddress.getLocalHost();
@@ -98,19 +104,57 @@ public class UDPClient extends PacketSource {
 				}
 			}
 		});
+		
+		serverTickThread = new Thread(() -> {
+			while (isConnected) {
+				long time = Sys.getTime(); 
+				
+				updateEntitiesRemote();
+				
+				//Slow down there buddy. We only need TICKRATE ticks per second.
+				while ((Sys.getTime() - time) < (1000 / TICKRATE)) {
+					continue;
+				}
+			}
+		});
+		
+		
+		
+		OnPacket(new int[] {HandshakePacket.packetId}, (Packet p) -> {
+			HandshakePacket hp = (HandshakePacket) p;
+			
+			try {
+				this.socket.connect(hp.getAddress());
+			} catch (SocketException e) {
+				e.printStackTrace();
+			}
+			
+			System.out.println("Connected as " + hp.name + " with id: " + hp.id);
+			
+			if (hp.id != null) {
+				this.clientId = hp.id;
+			}
+			
+			this.world.onConnected();
+		});
 	}
 	
-	public void requestEntity(int type, Vector3f pos, Vector3f rot) {
-		
+	public void registerEntity(Entity e) {
+		this.send(new RegisterEntityPacket(e));
+	}
+	
+	public void setWorld(World world) {
+		this.world = world;
 	}
 	
 	public void updateEntity(Entity e) {
-		
+		this.send(new UpdateEntityPacket(e)); 
 	}
 	
 	public void open() {
 		isConnected = true;
 		packetListenerThread.start();
+		serverTickThread.start();
 		this.send(new HandshakePacket("aTlas"));
 	}
 	
@@ -131,32 +175,32 @@ public class UDPClient extends PacketSource {
 		}
 	}
 	
+	public void close() {
+		if (localServer != null) {
+			localServer.destroyForcibly();
+		}
+	}
 	
-	public static void main(String args[]) {
-		Packet.register(HandshakePacket.class);
-		Packet.register(RejectedPacket.class);
-		Packet.register(RegisterEntityPacket.class);
-		
-		UDPClient c = new UDPClient(false);
-		
-		c.OnPacket(new int[] {HandshakePacket.packetId}, (Packet p) -> {
-			HandshakePacket hp = (HandshakePacket) p;
-			
-			try {
-				c.socket.connect(hp.getAddress());
-			} catch (SocketException e) {
-				e.printStackTrace();
+	private void updateEntitiesRemote() {
+		for (DynEntity e : world.entities.values()) {
+			if (e.owner.equals(this.clientId)) {
+				send(new UpdateEntityPacket(e));
 			}
-			
-			System.out.println("Connected as " + hp.name);
-			
-			if (hp.id != null) {
-				c.clientId = hp.id;
-			}
-			
-			c.send(new RegisterEntityPacket(new Vector3f(1.0f, 2.0f, 3.0f), new Vector3f(), new Vector3f(), 0, "TEST"));
-		}); 
+		}
+	}
+	
+	private Process spawnServerProcess() throws IOException { //Little bit of an ugly hack, but hey, at least it's not for something important, like the whole backend of the game or anything, right guys?
+		String javaHome = System.getProperty("java.home");
+		String javaBin = javaHome +
+                File.separator + "bin" +
+                File.separator + "java";
+		String classpath = System.getProperty("java.class.path");
+		String libraryPath = System.getProperty("java.library.path");
+		String className = UDPServer.class.getCanonicalName();
 		
-		c.open();
+		ProcessBuilder pb = new ProcessBuilder(javaBin, "-Djava.library.path="+libraryPath, "-cp", classpath, className);
+		System.out.println(pb.command().toString());
+		pb.inheritIO();
+		return pb.start();
 	}
 }

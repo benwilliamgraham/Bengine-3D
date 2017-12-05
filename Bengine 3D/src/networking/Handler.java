@@ -2,6 +2,6 @@ package networking;
 
 import networking.packets.Packet;
 
-public interface PacketHandler extends Handler<Packet> {
-
+interface Handler<T> {
+	public void handle(T p);
 }

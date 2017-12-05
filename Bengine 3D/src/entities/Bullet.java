@@ -10,6 +10,8 @@ import world.World;
 
 public class Bullet extends DynEntity{
 	
+	public static final int type = 2;
+	
 	public final float SPEED = 64;
 
 	public Bullet(Vector3f position, float yaw, float pitch) {
@@ -33,14 +35,14 @@ public class Bullet extends DynEntity{
 		if(intersection != null){
 			intersection.health -= 1;
 			intersection.velocity = velocity;
-			world.client.updateVelocity(intersection.key, intersection.velocity);
-			world.client.updateHealth(intersection.key, intersection.health);
+			//world.client.updateVelocity(intersection.key, intersection.velocity);
+			//world.client.updateHealth(intersection.key, intersection.health);
 			return false;
-		}else if(!checkCollision(world, new Vector3f(velocity.x / DisplayManager.FPS, velocity.y / DisplayManager.FPS, velocity.z / DisplayManager.FPS))){
+		}else if(!checkCollisionParticle(world, new Vector3f(velocity.x / DisplayManager.FPS, velocity.y / DisplayManager.FPS, velocity.z / DisplayManager.FPS))){
 			position.x += velocity.x / DisplayManager.FPS;
 			position.y += velocity.y / DisplayManager.FPS;
 			position.z += velocity.z / DisplayManager.FPS;
-			world.client.updatePosition(key, position);
+			//world.client.updatePosition(key, position);
 		}else{
 			return false;
 		}
@@ -49,7 +51,14 @@ public class Bullet extends DynEntity{
 	}
 
 	@Override
-	public int getEntityId() {
-		return 2;
+	public int getEntityType() {
+		// TODO Auto-generated method stub
+		return type;
+	}
+
+	@Override
+	public boolean onUpdate(float delta) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

@@ -55,13 +55,15 @@ public class NDBT {
 			bb.flip();	
 			d.put(bb);
 			
-			/*System.out.println(item.getKey());
+			/*
+			System.out.println(item.getKey());
 			System.out.println((byte) item.getValue().length);
 			
 			for (byte b : item.getValue()) {
 				System.out.print(b + " ");
 			}
-			System.out.println();*/
+			System.out.println();
+			*/
 		}
 		
 		d.put(TERMINATOR);
@@ -121,21 +123,20 @@ public class NDBT {
 	}
 	
 	public int getInt(byte id) {
-		IntBuffer b = ByteBuffer.allocate(Integer.BYTES)
-				.put(unpackedData.get(id))
-				.asIntBuffer();
+		ByteBuffer b = ByteBuffer.allocate(Integer.BYTES)
+				.put(unpackedData.get(id));
 		b.flip();
 		
-		return b.get();
+		return b.getInt();
 	}
 	
 	public float getFloat(byte id) {
-		FloatBuffer b = ByteBuffer.allocate(Float.BYTES)
+		ByteBuffer b = ByteBuffer.allocate(Float.BYTES)
 				.put(unpackedData.get(id))
-				.asFloatBuffer();
+				;
 		b.flip();
 		
-		return b.get();
+		return b.getFloat();
 	}
 	
 	public String getString(byte id) {

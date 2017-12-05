@@ -16,6 +16,8 @@ import world.World;
 
 public class NPC extends DynEntity{
 	
+	public static final int type = 1;
+	
 	//define player constants
 	private static final float RUN_SPEED = 4;
 	private static final float STRAFE_SPEED = 17;
@@ -30,7 +32,7 @@ public class NPC extends DynEntity{
 		this.grounded = false;
 	}
 
-	public boolean update(World world){
+	public boolean onUpdate(float delta){
 		
 		float forwardInput = 1;
 		
@@ -40,7 +42,7 @@ public class NPC extends DynEntity{
 		}
 		
 		//gravity
-		velocity.y -= World.GRAVITY / DisplayManager.FPS;
+		velocity.y -= World.GRAVITY;
 		
 		float forwardSpeed = forwardInput * RUN_SPEED;
 		float sidewaysSpeed = sidewaysInput * STRAFE_SPEED;
@@ -48,7 +50,7 @@ public class NPC extends DynEntity{
 		float xChange = (float) (forwardSpeed * Math.sin(rotation.y) + sidewaysSpeed * Math.sin(rotation.y + Math.PI / 2f)) + velocity.x;
 		float zChange = (float) (forwardSpeed * Math.cos(rotation.y) + sidewaysSpeed * Math.cos(rotation.y + Math.PI / 2f)) + velocity.z;
 		
-		if(!checkCollision(world, new Vector3f(0, velocity.y / DisplayManager.FPS, 0), dimensions)){
+		if(!checkCollision(world, new Vector3f(0, velocity.y , 0))){
 			position.y += velocity.y / DisplayManager.FPS;
 			grounded = false;
 		}else{
@@ -62,19 +64,21 @@ public class NPC extends DynEntity{
 		//shooting
 		if((int)(Math.random() * 60) == 0){
 			for(int n = 0; n < 10; n++){
-				world.createDynEntity(new Bullet(new Vector3f(position.x, position.y + 0.6f, position.z), 
-						rotation.y + randBetween(-0.05f, 0.05f), 0 + randBetween(-0.05f, 0.05f)));
+				Bullet b = new Bullet(new Vector3f(position.x, position.y + 0.6f, position.z), 
+						rotation.y + randBetween(-0.05f, 0.05f), 0 + randBetween(-0.05f, 0.05f));
+				
+				world.addDynEntity(b);
 			}
 		}
 		
 		boolean collide = false;
-		if(!checkCollision(world, new Vector3f(xChange / DisplayManager.FPS, 0, 0), dimensions)){
+		if(!checkCollision(world, new Vector3f(xChange / DisplayManager.FPS, 0, 0))){
 			position.x += xChange / DisplayManager.FPS;
 		}else{
 			collide = true;
 			velocity.x *= -0.1f;
 		}
-		if(!checkCollision(world, new Vector3f(0, 0, zChange / DisplayManager.FPS), dimensions)){
+		if(!checkCollision(world, new Vector3f(0, 0, zChange / DisplayManager.FPS))){
 			position.z += zChange / DisplayManager.FPS;
 		}else{
 			collide = true;
@@ -85,12 +89,11 @@ public class NPC extends DynEntity{
 			velocity.y = randBetween(JUMP_POWER / 2f, JUMP_POWER);
 		}
 		
-		world.client.updatePosition(key, position);
 		return true;
 	}
 
 	@Override
-	public int getEntityId() {
-		return 1;
+	public int getEntityType() {
+		return type;
 	}
 }

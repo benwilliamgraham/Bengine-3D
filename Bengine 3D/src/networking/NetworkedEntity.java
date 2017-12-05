@@ -19,7 +19,13 @@ public class NetworkedEntity {
 		this.rotation = p.rot;
 		this.scale = p.scale;
 		this.entityType = p.entityType;
-		this.id = UUID.randomUUID().toString();
+		
+		if (p.entityId != null) {
+			this.id = p.entityId;
+		} else {
+			this.id = UUID.randomUUID().toString();
+		}
+		
 		this.velocity = new Vector3f();
 	}
 }

@@ -5,27 +5,23 @@ import java.io.IOException;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.util.vector.Vector3f;
 
-import data.ModelTexture;
-import data.RawModel;
-import data.TexturedModel;
-import entities.Camera;
-import entities.Entity;
-import entities.Player;
-import networking.Client;
 import networking.UDPClient;
+import networking.packets.*;
 import renderEngine.DisplayManager;
 import renderEngine.Renderer;
 import shaders.StaticShader;
 import toolBox.Assets;
 import toolBox.Loader;
-import world.FaceMap;
 import world.World;
 
 public class GameLoop {
 
 	public static void main(String[] args) throws IOException{
+		Packet.register(HandshakePacket.class);
+		Packet.register(RejectedPacket.class);
+		Packet.register(RegisterEntityPacket.class);
+		Packet.register(UpdateEntityPacket.class);
 		
 		DisplayManager.createDisplay(800, 600, false);
 		
@@ -58,14 +54,12 @@ public class GameLoop {
 			shader.start();
 			shader.loadViewMatrix(world.camera);
 			renderer.render(world.faceMap, shader);
-			world.lockMap = true;
-			renderer.render(world.dynEntities, shader);
-			world.lockMap = false;
+			renderer.render(world.entities, shader);
 			shader.stop();
 			DisplayManager.updateDisplay();
 			
 			while(1000f / (Sys.getTime() + 1 - time) > DisplayManager.FPS){
-				
+				continue;
 			}
 			
 			frames++;
@@ -75,6 +69,7 @@ public class GameLoop {
 		
 		shader.cleanUp();
 		loader.cleanUp();
+		client.close();
 		DisplayManager.closeDisplay();
 		System.exit(0);
 	}

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import networking.packets.Packet;
 
+
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -13,6 +14,10 @@ public class PacketSource {
 	
 	public PacketSource() {
 		this.packetHandlers = new HashMap<Integer, ArrayList<PacketHandler>>();
+	}
+	
+	public <T extends Packet> void OnPacket (Handler<T> handler) {
+		//Packet.TYPES.containsValue(T.class);
 	}
 	
 	public void OnPacket(int[] types, PacketHandler handler) {

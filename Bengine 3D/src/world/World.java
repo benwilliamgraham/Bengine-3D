@@ -3,29 +3,24 @@ package world;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 
 import org.lwjgl.Sys;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import data.ModelTexture;
-import data.RawModel;
-import data.TexturedModel;
-import entities.Bullet;
 import entities.Camera;
 import entities.DynEntity;
+import entities.Entity;
 import entities.Light;
-import entities.NPC;
 import entities.Player;
 import networking.UDPClient;
-import toolBox.Calc;
+import networking.packets.Packet;
+import networking.packets.RegisterEntityPacket;
+import networking.packets.UpdateEntityPacket;
 import toolBox.Loader;
-import toolBox.OpenSimplexNoise;
 
 public class World {
 	
@@ -35,22 +30,71 @@ public class World {
 	
 	public UDPClient networkClient;
 	
-	public static final float GRAVITY = 80;
+	public static final float GRAVITY = 160;
 	
 	public List<Light> lights = new ArrayList<Light>();
 	public Voxel[][][] voxels = new Voxel[XSIZE][YSIZE][ZSIZE];
 	
 	public boolean lockMap = false;
-	public Map<String, DynEntity> dynEntities = new HashMap<String, DynEntity>();
-	public Map<String, DynEntity> localDynEntities = new HashMap<String, DynEntity>();
+	//public Map<String, DynEntity> dynEntities = new HashMap<String, DynEntity>();
+	//public Map<String, DynEntity> localDynEntities = new HashMap<String, DynEntity>();
+	public Map<String, DynEntity> entities = new HashMap<String, DynEntity>();
 	public FaceMap faceMap;
 	
 	public Camera camera;
 	public Player player;// = new Player(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2)));
 	public Camera spectatorCamera = new Camera();
 	
+	//List of entities that we've created locally, but haven't been initialized on the server yet.
+	private Map<String, DynEntity> cachedEntities = new HashMap<String, DynEntity>();
+	
+	private long lastTime = Sys.getTime();
+	
 	public World(Loader loader, UDPClient client){
 		this.networkClient = client;
+		
+		//Update the position, rotation and velocity of an entity, whenever we recieve an entity update packet.
+		this.networkClient.OnPacket(new int[] {UpdateEntityPacket.packetId}, (Packet p) -> {
+			UpdateEntityPacket u = (UpdateEntityPacket) p;
+			
+			DynEntity e = this.entities.get(u.entity);
+			e.position = u.pos;
+			e.rotation = u.rot;
+			e.velocity = u.vel;
+		});
+		
+		this.networkClient.OnPacket(new int[] {RegisterEntityPacket.packetId}, (Packet p) -> {
+			RegisterEntityPacket r = (RegisterEntityPacket) p;
+			
+			if (cachedEntities.containsKey(r.entityId)) {
+				DynEntity e = cachedEntities.remove(r.entityId);
+				e.world = this;
+				e.owner = r.owner;
+				entities.put(e.id, e);
+				e.onCreate();
+			} else {
+				try {
+					DynEntity e = (DynEntity) Entity.entities.get(r.entityType).newInstance();
+					e.id = r.entityId;
+					e.position = r.pos;
+					e.rotation = r.rot;
+					e.scale = r.scale;
+					e.owner = r.owner;
+					e.world = this;
+					entities.put(e.id, e);
+					e.onCreate();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+		});
+		
+		this.networkClient.setWorld(this);
+		
+		this.camera = spectatorCamera;
+		
+		this.player = new Player(new Vector3f(36.0f, 10f, 42.7f));
 		
 		//add lights
 		lights.add(new Light(new Vector3f(XSIZE / 2f, 1000, ZSIZE / 2f), 100000, 0.1f, 2));
@@ -66,9 +110,9 @@ public class World {
 		}
 		
 		//add player
-		createDynEntity(player);
+		//createDynEntity(player);
 		for(int n = 0; n < 0; n++){
-			createDynEntity(new NPC(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2))));
+			//createDynEntity(new NPC(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2))));
 		}
 		
 		//add camera
@@ -82,65 +126,31 @@ public class World {
 		faceMap.createFaceMap(this);
 	}
 	
+	public void onConnected() {
+		addDynEntity(player);
+	}
+	
 	public void update(){
-		//update 3d
-		boolean stillActive;
-		Map<String, DynEntity> updateEnts = new HashMap<String, DynEntity>();
-		lockMap = true;
-		updateEnts.putAll(localDynEntities);
-		lockMap = false;
-		for(Iterator<Map.Entry<String, DynEntity>> it = updateEnts.entrySet().iterator(); it.hasNext(); ) {
-			Map.Entry<String, DynEntity> entry = it.next();
-			stillActive = entry.getValue().update(this);
-			if(!stillActive){
-				String key = entry.getKey();
-				localDynEntities.remove(key);
-				deleteDynEntity(key);
-				client.deleteEntity(key);
+		long time = Sys.getTime();
+		long delta = time - lastTime;
+		lastTime = time;
+		
+		for (Entry<String, DynEntity> it : this.entities.entrySet()) {
+			DynEntity e = it.getValue();
+			if (!e.onUpdate(delta / 1000.0f) && !e.isNetworked) {
+				//Entity needs destroyed. Locally at least.
+				this.entities.remove(it.getKey());
 			}
 		}
 	}
 	
-	public void createDynEntity(DynEntity entity){
-		String key;
-		
-		//assign a random key
-		do{
-			key = client.name + "K" + (int)(Math.random() * 999);
-		}while(dynEntities.containsKey(key));
-		entity.key = key;
-		
-		//add it to the lists of entities
-		localDynEntities.put(key, entity);
-		addDynEntity(key, entity);
-		
-		//broadcast addition
-		if(entity instanceof Player){
-			client.addPlayer(key, entity.position);
-		}else if(entity instanceof Bullet){
-			client.addBullet(key, entity.position);
+	public void addDynEntity(DynEntity entity){
+		if (entity.isNetworked) {
+			cachedEntities.put(entity.id, entity);
+			this.networkClient.registerEntity(entity);
+		} else { 
+			entities.put(entity.id, entity);
 		}
-	}
-	
-	public void addDynEntity(String key, DynEntity entity){
-		//assign key
-		entity.key = key;
-		
-		//wait for the map to be open
-		while(lockMap){
-			continue;//System.out.println("");
-		}
-		//add to list
-		dynEntities.put(key, entity);
-	}
-	
-	public void deleteDynEntity(String key){
-		//wait for the map to be open
-		while(lockMap){
-			System.out.println("");
-		}
-		//delete
-		dynEntities.remove(key);
 	}
 	
 	public boolean checkSolid(Vector3f position){
@@ -149,6 +159,10 @@ public class World {
 		int z = (int) (position.z);
 
 		return checkSolid(x, y, z);
+	}
+	
+	public boolean checkSolid(float x, float y, float z) {
+		return checkSolid((int) (x + 0.5f), (int) (y + 0.5f), (int) (z + 0.5f));
 	}
 	
 	public boolean checkSolid(int x, int y, int z){
