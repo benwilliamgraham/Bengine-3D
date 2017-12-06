@@ -57,10 +57,11 @@ public class World {
 		this.networkClient.OnPacket(new int[] {UpdateEntityPacket.packetId}, (Packet p) -> {
 			UpdateEntityPacket u = (UpdateEntityPacket) p;
 			
-			DynEntity e = this.entities.get(u.entity);
-			e.position = u.pos;
-			e.rotation = u.rot;
-			e.velocity = u.vel;
+			if (this.entities.containsKey(u.entity)) {
+				DynEntity e = this.entities.get(u.entity);
+				
+				e.onNetworkUpdate(u);
+			}
 		});
 		
 		this.networkClient.OnPacket(new int[] {RegisterEntityPacket.packetId}, (Packet p) -> {
@@ -70,6 +71,7 @@ public class World {
 				DynEntity e = cachedEntities.remove(r.entityId);
 				e.world = this;
 				e.owner = r.owner;
+				e.isRemote = !(r.owner.equals(this.networkClient.clientId));
 				entities.put(e.id, e);
 				e.onCreate();
 			} else {
@@ -80,6 +82,7 @@ public class World {
 					e.rotation = r.rot;
 					e.scale = r.scale;
 					e.owner = r.owner;
+					e.isRemote = !(r.owner.equals(this.networkClient.clientId));
 					e.world = this;
 					entities.put(e.id, e);
 					e.onCreate();
@@ -137,10 +140,11 @@ public class World {
 		
 		for (Entry<String, DynEntity> it : this.entities.entrySet()) {
 			DynEntity e = it.getValue();
+			
 			if (!e.onUpdate(delta / 1000.0f) && !e.isNetworked) {
 				//Entity needs destroyed. Locally at least.
 				this.entities.remove(it.getKey());
-			}
+			}		
 		}
 	}
 	

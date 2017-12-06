@@ -6,6 +6,8 @@ import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
+import entities.Entity;
+import entities.Player;
 import networking.UDPClient;
 import networking.packets.*;
 import renderEngine.DisplayManager;
@@ -17,11 +19,17 @@ import world.World;
 
 public class GameLoop {
 
-	public static void main(String[] args) throws IOException{
+	public static void main(String[] args) throws IOException {
+		//Register packets
 		Packet.register(HandshakePacket.class);
 		Packet.register(RejectedPacket.class);
 		Packet.register(RegisterEntityPacket.class);
 		Packet.register(UpdateEntityPacket.class);
+		
+		//Register entities so that the server can see them.
+		Entity.register(Player.class);
+		
+		
 		
 		DisplayManager.createDisplay(800, 600, false);
 		

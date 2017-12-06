@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import networking.packets.UpdateEntityPacket;
 import world.World;
 
 
@@ -21,7 +22,7 @@ public abstract class Entity {
 	
 	public String owner;
 	
-	public boolean isNetworked;
+	public boolean isNetworked, isRemote;
 	
 	public Entity(Vector3f position, Vector3f rotation, Vector3f scale) {
 		this.position = position;
@@ -33,6 +34,10 @@ public abstract class Entity {
 	}
 	
 	public void onCreate() {
+		
+	}
+	
+	public void onNetworkUpdate(UpdateEntityPacket p) {
 		
 	}
 	

@@ -48,4 +48,12 @@ public class Calc {
 		
 		return normal;
 	}
+	
+	public static Vector3f lerp(Vector3f start, Vector3f end, float step) {
+		Vector3f delta = new Vector3f();
+		Vector3f.sub(start, end, delta);
+		delta.scale(step);
+		
+		return Vector3f.add(start, delta, null);
+	}
 }

@@ -70,8 +70,13 @@ public class NetworkedClient extends PacketSource {
 			System.out.println("Assigning " + hp.name + " an id of " + this.id);
 			HandshakePacket h = new HandshakePacket(hp.name, this.id);
 		
-			
 			send(h);
+			
+			System.out.println("Registering entities with " + hp.name);
+			
+			for (NetworkedEntity e : this.server.entities.values()) {
+				send(new RegisterEntityPacket(e));
+			}
 		});
 		
 		this.OnPacket(new int[] {RegisterEntityPacket.packetId}, (Packet p) -> {

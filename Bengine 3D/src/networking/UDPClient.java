@@ -155,7 +155,7 @@ public class UDPClient extends PacketSource {
 		isConnected = true;
 		packetListenerThread.start();
 		serverTickThread.start();
-		this.send(new HandshakePacket("aTlas"));
+		this.send(new HandshakePacket("aTlas" + Math.random()));
 	}
 	
 	public void send(Packet p) {
