@@ -14,11 +14,12 @@ import java.awt.image.BufferedImage;
 public class LevelLoader{
 	
 	public static void loadLevel(World world) throws IOException{
-		File file= new File("assets/city.png");
+		File file= new File("assets/testMap.png");
 		BufferedImage image = ImageIO.read(file);
 		
 		for(int x = 0; x < World.XSIZE; x++){
 			for(int y = 0; y < World.YSIZE * World.ZSIZE; y++){
+				System.out.println(x);
 				Color c = new Color(image.getRGB(x, y), true);
 				int nx = x;
 				int ny = World.YSIZE - 1 - y / World.YSIZE;

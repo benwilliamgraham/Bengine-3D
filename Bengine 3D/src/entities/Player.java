@@ -119,8 +119,9 @@ public class Player extends DynEntity{
 			}
 			
 			if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-				movementVelocity.x += (float) (STRAFE_SPEED * Math.cos(yaw));
-				movementVelocity.z += (float) -(STRAFE_SPEED * Math.sin(yaw));
+				//movementVelocity.x += (float) (STRAFE_SPEED * Math.cos(yaw));
+				//movementVelocity.z += (float) -(STRAFE_SPEED * Math.sin(yaw));
+				movementVelocity.x += STRAFE_SPEED;
 			} 
 			
 			if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
@@ -160,7 +161,7 @@ public class Player extends DynEntity{
 			return true;
 		} else { 
 			if (this.targetPos != null && !this.targetPos.equals(this.position)) {
-				this.position = Calc.lerp(this.position, this.targetPos, delta * UDPClient.TICKRATE);
+				updateMovement(delta);
 			}
 		}
 		
@@ -169,13 +170,10 @@ public class Player extends DynEntity{
 	
 	@Override
 	public void onNetworkUpdate(UpdateEntityPacket u) {
-		//System.out.println("Tick");
 		if (u.pos != null) {
 			this.position = u.pos;
+			this.velocity = u.vel;
 		}
-		
-		
-		//this.targetPos = u.pos;
 	}
 
 	@Override

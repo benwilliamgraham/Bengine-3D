@@ -24,9 +24,9 @@ import toolBox.Loader;
 
 public class World {
 	
-	public static final int XSIZE = 125;
-	public static final int YSIZE = 125;
-	public static final int ZSIZE = 125;
+	public static final int XSIZE = 39;
+	public static final int YSIZE = 39;
+	public static final int ZSIZE = 39;
 	
 	public UDPClient networkClient;
 	
@@ -166,7 +166,7 @@ public class World {
 	}
 	
 	public boolean checkSolid(float x, float y, float z) {
-		return checkSolid((int) (x + 0.5f), (int) (y + 0.5f), (int) (z + 0.5f));
+		return checkSolid(Math.round(x - 0.5f), (int) (y + 1), (int) (z + 1));
 	}
 	
 	public boolean checkSolid(int x, int y, int z){
@@ -176,5 +176,9 @@ public class World {
 			return true;
 		}
 		return voxels[x][y][z].solid;
+	}
+	
+	public Vector3f getClosestVoxelPos(float x, float y, float z) {
+		return new Vector3f(Math.round(x - 0.5f), (int) (y + 1), (int) (z + 1));
 	}
 }

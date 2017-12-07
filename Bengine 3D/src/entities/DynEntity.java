@@ -11,6 +11,8 @@ import world.World;
 
 public abstract class DynEntity extends Entity{
 
+	private static final float collisionSkin = 0.05f; 
+	
 	public TexturedModel model;
 	public boolean visible = true;
 	public Vector3f dimensions;
@@ -35,39 +37,46 @@ public abstract class DynEntity extends Entity{
 				for (float oz = -(dimensions.z / 2.0f); oz <= (dimensions.z / 2.0f); oz += (dimensions.z / collisionSteps)) {
 					if (deltaPos.x > 0) {
 						if (world.checkSolid(position.x + deltaPos.x + dimensions.x / 2.0f, position.y + oy, position.z + oz)) {
-							deltaPos.x = 0;
-							velocity.x = Math.min(0, velocity.x);
+							System.out.println(deltaPos.x);
+							deltaPos.x = world.getClosestVoxelPos(position.x + deltaPos.x + dimensions.x / 2.0f, position.y + oy, position.z + oz).x 
+									   - (position.x + (dimensions.x / 2.0f - collisionSkin));
+							System.out.println(deltaPos.x);
+							System.out.println(world.getClosestVoxelPos(position.x + deltaPos.x + dimensions.x / 2.0f, position.y + oy, position.z + oz).x + " : " + (position.x + dimensions.x / 2.0f));
+							velocity.x = 0;
 							break outer_loop;
 						}
 					} else if (deltaPos.x < 0) {
 						if (world.checkSolid(position.x + deltaPos.x - dimensions.x / 2.0f, position.y + oy, position.z + oz)) {
-							deltaPos.x = 0;
+							deltaPos.x = world.getClosestVoxelPos(position.x + deltaPos.x - dimensions.x / 2.0f, position.y + oy, position.z + oz).x 
+									   - (position.x - (dimensions.x / 2.0f + collisionSkin));
 							velocity.x = Math.max(0, velocity.x);
 							break outer_loop;
 						}
 					}
 				}
 			}
-		
+		/*
 		outer_loop:
 			for (float oy = -(dimensions.y / 2.0f); oy <= (dimensions.y / 2.0f); oy += (dimensions.y / collisionSteps)) {
 				for (float ox = -(dimensions.x / 2.0f); ox <= (dimensions.x / 2.0f); ox += (dimensions.x / collisionSteps)) {
 					if (deltaPos.z > 0) {
 						if (world.checkSolid(position.x + ox, position.y + oy, position.z + deltaPos.z + dimensions.z / 2.0f)) {
-							deltaPos.z = 0;
+							deltaPos.z = world.getClosestVoxelPos(position.x + ox, position.y + oy, position.z + deltaPos.z + dimensions.z / 2.0f).z
+									   - (position.z + (dimensions.z / 2.0f + collisionSkin));
 							velocity.z = Math.min(0, velocity.z);
 							break outer_loop;
 						}
 					} else if (deltaPos.z < 0) {
 						if (world.checkSolid(position.x + ox, position.y + oy, position.z + deltaPos.z - dimensions.z / 2.0f)) {
-							deltaPos.z = 0;
+							deltaPos.z = world.getClosestVoxelPos(position.x + ox, position.y + oy, position.z + deltaPos.z - dimensions.z / 2.0f).z
+									   - (position.z - (dimensions.z / 2.0f + collisionSkin));
 							velocity.z = Math.max(0, velocity.z);
 							break outer_loop;
 						}
 					}
 				}
 			}
-			
+			*/
 		outer_loop:
 			for (float ox = -(dimensions.x / 2.0f); ox <= (dimensions.x / 2.0f); ox += (dimensions.x / collisionSteps)) {
 				for (float oz = -(dimensions.z / 2.0f); oz <= (dimensions.z / 2.0f); oz += (dimensions.z / collisionSteps)) {
