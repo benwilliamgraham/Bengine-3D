@@ -74,6 +74,8 @@ public class UDPClient extends PacketSource {
 		packetListenerThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
+				System.out.println("Listening for packets from : " + serverAddress.toString());
+				
 				while (isConnected) {
 					byte[] incomingData = new byte[Packet.PACKET_SIZE];
 					DatagramPacket incomingPacket = new DatagramPacket(incomingData, Packet.PACKET_SIZE);

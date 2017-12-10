@@ -39,6 +39,9 @@ public class UDPServer {
 	public UDPServer() throws IOException {
 		super();
 		
+		System.out.println(InetAddress.getLocalHost().toString());
+
+		
 		this.clients = new HashMap<String, NetworkedClient>();
 		this.entities = new HashMap<String, NetworkedEntity>();
 		this.serverSocket = new DatagramSocket(SERVER_PORT);

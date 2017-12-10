@@ -40,8 +40,6 @@ public abstract class DynEntity extends Entity{
 							System.out.println(deltaPos.x);
 							deltaPos.x = world.getClosestVoxelPos(position.x + deltaPos.x + dimensions.x / 2.0f, position.y + oy, position.z + oz).x 
 									   - (position.x + (dimensions.x / 2.0f - collisionSkin));
-							System.out.println(deltaPos.x);
-							System.out.println(world.getClosestVoxelPos(position.x + deltaPos.x + dimensions.x / 2.0f, position.y + oy, position.z + oz).x + " : " + (position.x + dimensions.x / 2.0f));
 							velocity.x = 0;
 							break outer_loop;
 						}
@@ -55,7 +53,7 @@ public abstract class DynEntity extends Entity{
 					}
 				}
 			}
-		/*
+		
 		outer_loop:
 			for (float oy = -(dimensions.y / 2.0f); oy <= (dimensions.y / 2.0f); oy += (dimensions.y / collisionSteps)) {
 				for (float ox = -(dimensions.x / 2.0f); ox <= (dimensions.x / 2.0f); ox += (dimensions.x / collisionSteps)) {
@@ -76,7 +74,7 @@ public abstract class DynEntity extends Entity{
 					}
 				}
 			}
-			*/
+			
 		outer_loop:
 			for (float ox = -(dimensions.x / 2.0f); ox <= (dimensions.x / 2.0f); ox += (dimensions.x / collisionSteps)) {
 				for (float oz = -(dimensions.z / 2.0f); oz <= (dimensions.z / 2.0f); oz += (dimensions.z / collisionSteps)) {

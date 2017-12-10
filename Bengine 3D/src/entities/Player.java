@@ -119,9 +119,9 @@ public class Player extends DynEntity{
 			}
 			
 			if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-				//movementVelocity.x += (float) (STRAFE_SPEED * Math.cos(yaw));
-				//movementVelocity.z += (float) -(STRAFE_SPEED * Math.sin(yaw));
-				movementVelocity.x += STRAFE_SPEED;
+				movementVelocity.x += (float) (STRAFE_SPEED * Math.cos(yaw));
+				movementVelocity.z += (float) -(STRAFE_SPEED * Math.sin(yaw));
+				//movementVelocity.x += STRAFE_SPEED;
 			} 
 			
 			if (Keyboard.isKeyDown(Keyboard.KEY_D)) {

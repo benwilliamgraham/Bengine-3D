@@ -16,7 +16,8 @@ public abstract class Entity {
 	
 	public World world;
 	
-	public Vector3f position, rotation, scale, velocity;
+	public Vector3f position = new Vector3f();
+	public  Vector3f rotation, scale, velocity;
 	
 	public String id;
 	
