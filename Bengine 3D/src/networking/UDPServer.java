@@ -1,7 +1,10 @@
 package networking;
 
 import java.net.InetAddress;
-
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
 import java.util.HashMap;
@@ -23,7 +26,7 @@ import java.io.IOException;
 
 public class UDPServer {
 	
-	public static final int SERVER_PORT = 9001;
+	public static final int SERVER_PORT = 27014;
 	public static final int CLIENT_PORT = 27016;
 	public static final int TICKRATE = 20;
 	
@@ -44,8 +47,7 @@ public class UDPServer {
 		
 		this.clients = new HashMap<String, NetworkedClient>();
 		this.entities = new HashMap<String, NetworkedEntity>();
-		this.serverSocket = new DatagramSocket(SERVER_PORT);
-		
+		this.serverSocket = new DatagramSocket(null);
 		this.packetListener = new Thread(() -> {
 			while (isOpen) {
 				
@@ -54,6 +56,7 @@ public class UDPServer {
 				
 				try {
 					serverSocket.receive(incomingPacket);
+					System.out.println("Recieved packet");
 				} catch (IOException e) {
 					e.printStackTrace();
 					continue;
@@ -86,6 +89,14 @@ public class UDPServer {
 	
 	public void open() {
 		isOpen = true;
+		
+		try {
+			SocketAddress addr = new InetSocketAddress("192.168.1.204", SERVER_PORT);
+			this.serverSocket.bind(addr);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		
 		this.packetListener.start();
 		
 		while (isOpen) {

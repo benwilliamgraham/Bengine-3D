@@ -21,7 +21,7 @@ import networking.packets.RegisterEntityPacket;
 
 public class UDPClient extends PacketSource {
 
-	public static final int SERVER_PORT = 9001;
+	public static final int SERVER_PORT = 27014;
 	public static final int CLIENT_PORT = 27016;
 	public static final int TICKRATE = 20;
 	
@@ -66,10 +66,13 @@ public class UDPClient extends PacketSource {
 			
 			try {
 				this.socket = new DatagramSocket();
+				this.socket.connect(new InetSocketAddress(this.serverAddress, SERVER_PORT));
 			} catch (SocketException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		
 		
 		packetListenerThread = new Thread(new Runnable() {
 			@Override
