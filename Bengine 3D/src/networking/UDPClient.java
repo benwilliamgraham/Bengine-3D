@@ -37,7 +37,7 @@ public class UDPClient extends PacketSource {
 	private InetAddress serverAddress;
 	private boolean isConnected = false;
 	
-	public UDPClient(boolean localMode) {
+	public UDPClient(boolean localMode, InetAddress serverAddress) {
 		
 		if (localMode) {
 			
@@ -50,7 +50,7 @@ public class UDPClient extends PacketSource {
 			}
 			
 			try {
-				serverAddress = InetAddress.getLocalHost();
+				this.serverAddress = InetAddress.getLocalHost();
 			} catch (UnknownHostException e1) {
 				e1.printStackTrace();
 			}
@@ -62,11 +62,7 @@ public class UDPClient extends PacketSource {
 			}
 			
 		} else {
-			try {
-				serverAddress = InetAddress.getLocalHost();
-			} catch (UnknownHostException e1) {
-				e1.printStackTrace();
-			}
+			this.serverAddress = serverAddress;
 			
 			try {
 				this.socket = new DatagramSocket();

@@ -1,6 +1,9 @@
 package master;
 
 import java.io.IOException;
+import java.net.InetAddress;
+
+import javax.swing.JOptionPane;
 
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
@@ -29,6 +32,7 @@ public class GameLoop {
 		//Register entities so that the server can see them.
 		Entity.register(Player.class);
 		
+		String serverAddress = JOptionPane.showInputDialog("Enter the Server IP: ");
 		
 		
 		DisplayManager.createDisplay(800, 600, false);
@@ -42,7 +46,7 @@ public class GameLoop {
 		Renderer renderer = new Renderer(shader);
 
 		//connect to a server
-		UDPClient client = new UDPClient(true);
+		UDPClient client = new UDPClient(false, InetAddress.getByName(serverAddress));
 		
 		System.out.println("Creating world");
 		

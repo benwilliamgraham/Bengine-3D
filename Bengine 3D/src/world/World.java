@@ -24,9 +24,9 @@ import toolBox.Loader;
 
 public class World {
 	
-	public static final int XSIZE = 39;
-	public static final int YSIZE = 39;
-	public static final int ZSIZE = 39;
+	public static final int XSIZE = 125;
+	public static final int YSIZE = 125;
+	public static final int ZSIZE = 125;
 	
 	public UDPClient networkClient;
 	
