@@ -20,7 +20,7 @@ public class GrapplingHook extends DynEntity{
 		this.boss = boss;
 		
 		float xVel = (float) (SPEED * Math.sin(yaw) * Math.cos(pitch));
-		float yVel = (float) (SPEED * Math.sin(-pitch)); 
+		float yVel = (float) (SPEED * Math.sin(-pitch));
 		float zVel = (float) (SPEED * Math.cos(yaw) * Math.cos(pitch)); 
 		
 		//set velocity
