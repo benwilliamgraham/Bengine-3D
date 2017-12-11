@@ -328,4 +328,16 @@ public class FaceMap extends Entity{
 		return set[rand.nextInt(set.length)];
 	}
 
+
+	@Override
+	public int getEntityType() {
+		return 3;
+	}
+
+
+	@Override
+	public boolean onUpdate(float delta) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

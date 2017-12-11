@@ -1,6 +1,9 @@
 package master;
 
 import java.io.IOException;
+import java.net.InetAddress;
+
+import javax.swing.JOptionPane;
 
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
@@ -13,7 +16,8 @@ import data.TexturedModel;
 import entities.Camera;
 import entities.Entity;
 import entities.Player;
-import networking.Client;
+import networking.UDPClient;
+import networking.packets.*;
 import renderEngine.DisplayManager;
 import renderEngine.Renderer;
 import shaders.StaticShader;
@@ -24,17 +28,29 @@ import world.World;
 
 public class GameLoop {
 
-	public static void main(String[] args) throws IOException{
+	public static void main(String[] args) throws IOException {
+		//Register packets
+		Packet.register(HandshakePacket.class);
+		Packet.register(RejectedPacket.class);
+		Packet.register(RegisterEntityPacket.class);
+		Packet.register(UpdateEntityPacket.class);
+		
+		//Register entities so that the server can see them.
+		Entity.register(Player.class);
+		
+		String serverAddress = JOptionPane.showInputDialog("Enter the Server IP: ");
+		
 		
 		Loader loader = new Loader();
 		
 		//connect to a server
-		Client client = new Client(false);
+		UDPClient client = new UDPClient(false, InetAddress.getByName(serverAddress));
 				
 		//create the world
+		System.out.println("Creating world");
 		World world = new World(loader, client);
 		
-		DisplayManager.createDisplay(1920, 1080, false);
+		DisplayManager.createDisplay(800, 600, false);
 		
 		Assets.loadAssets(loader);
 		
@@ -43,7 +59,7 @@ public class GameLoop {
 		Renderer renderer = new Renderer(shader);
 		
 		//start connection
-		client.start(world);
+		client.open();
 		
 		System.out.println("Starting Timer");
 		long startTime = Sys.getTime();
@@ -62,16 +78,13 @@ public class GameLoop {
 			}
 			
 			frames++;
-			if(frames == 120){
-				float totTime = 1f/1000f * (Sys.getTime() - startTime);
-				System.out.println(totTime + " seconds for " + frames + " frames: " + frames / totTime + " fps");
-				frames = 0;
-				startTime = Sys.getTime();
-			}
 		}
+		float totTime = 1f/1000f * (Sys.getTime() - startTime);
+		System.out.println(totTime + " seconds for " + frames + " frames: " + frames / totTime + " fps");
 		
 		shader.cleanUp();
 		loader.cleanUp();
+		client.close();
 		DisplayManager.closeDisplay();
 		System.exit(0);
 	}

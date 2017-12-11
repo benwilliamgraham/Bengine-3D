@@ -262,4 +262,18 @@ public class FaceNet extends Entity{
 		return set[rand.nextInt(set.length)];
 	}
 
+
+	@Override
+	public boolean onUpdate(float delta) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public int getEntityType() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

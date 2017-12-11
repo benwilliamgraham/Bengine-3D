@@ -6,9 +6,9 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Bengine 3D/lib/natives"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jars/lwjgl_util.jar"/>
-	<classpathentry kind="lib" path="lib/jars/lwjgl.jar"/>
-	<classpathentry kind="lib" path="lib/jars/PNGDecoder.jar"/>
-	<classpathentry kind="lib" path="lib/jars/slick-util.jar"/>
+	<classpathentry kind="lib" path="C:/Users/jbass/git/Bengine-3D/Bengine 3D/lib/lwjgl_util.jar"/>
+	<classpathentry kind="lib" path="C:/Users/jbass/git/Bengine-3D/Bengine 3D/lib/lwjgl.jar"/>
+	<classpathentry kind="lib" path="C:/Users/jbass/git/Bengine-3D/Bengine 3D/lib/PNGDecoder.jar"/>
+	<classpathentry kind="lib" path="C:/Users/jbass/git/Bengine-3D/Bengine 3D/lib/slick-util.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

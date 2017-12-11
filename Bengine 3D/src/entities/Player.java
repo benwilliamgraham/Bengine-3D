@@ -10,11 +10,16 @@ import org.lwjgl.util.input.ControllerAdapter;
 import org.lwjgl.util.vector.Vector3f;
 
 import data.TexturedModel;
+import networking.UDPClient;
+import networking.packets.UpdateEntityPacket;
 import renderEngine.DisplayManager;
 import toolBox.Assets;
+import toolBox.Calc;
 import world.World;
 
 public class Player extends DynEntity{
+	
+	public static final int type = 0;
 	
 	//define player constants
 	private static final float RUN_SPEED = 20;
@@ -31,6 +36,17 @@ public class Player extends DynEntity{
 	
 	public Camera camera;
 	
+	public Player() {
+		super(Assets.cubert, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 2.5f, 1), new Vector3f(1, 2.5f, 1), true);
+	
+		this.grounded = false;
+		this.supported = false;
+		this.usingItem = false;
+		this.mouseActive = true;
+		this.health = 15;
+		this.isNetworked = true;
+	}
+	
 	public Player(Vector3f position) {
 		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(1, 3, 1), new Vector3f(1, 3, 1), true);
 		this.grounded = false;
@@ -38,10 +54,11 @@ public class Player extends DynEntity{
 		this.usingItem = false;
 		this.mouseActive = true;
 		this.health = 15;
+		this.isNetworked = true;
 		camera = new Camera();
 	}
 
-	public boolean update(World world){
+	public boolean onUpdate(float delta){
 		int mouseXChange = Display.getWidth() / 2 - Mouse.getX();
 		int mouseYChange = Display.getHeight() / 2 - Mouse.getY();
 		
@@ -53,7 +70,6 @@ public class Player extends DynEntity{
 		if(mouseActive){
 			yaw += mouseXChange * TURN_SPEED / DisplayManager.FPS;
 			rotation.y = yaw;
-			world.client.updateRotation(this.key, rotation);
 			pitch += mouseYChange * TURN_SPEED / DisplayManager.FPS;
 			pitch = (float) Math.min(Math.max(pitch, -Math.PI / 2.5), Math.PI / 2.5);
 			
@@ -87,8 +103,10 @@ public class Player extends DynEntity{
 				usingItem = true;
 				
 				for(int n = 0; n < 0; n++){
-					world.createDynEntity(new Bullet(new Vector3f(position.x, position.y + 1.1f, position.z), 
-							yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f)));
+					Bullet b = new Bullet(new Vector3f(position.x, position.y + 1.1f, position.z), 
+							yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f));
+					
+					world.addDynEntity(b);
 				}
 				
 				//world.createDynEntity(new GrapplingHook(this, yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f)));
@@ -118,7 +136,7 @@ public class Player extends DynEntity{
 		float xChange = (float) (forwardSpeed * Math.sin(yaw) + sidewaysSpeed * Math.sin(yaw + Math.PI / 2f)) + velocity.x;
 		float zChange = (float) (forwardSpeed * Math.cos(yaw) + sidewaysSpeed * Math.cos(yaw + Math.PI / 2f)) + velocity.z;
 		
-		if(!checkCollision(world, new Vector3f(0, velocity.y / DisplayManager.FPS, 0), dimensions)){
+		if(!checkCollision(world, new Vector3f(0, velocity.y / DisplayManager.FPS, 0))){
 			position.y += velocity.y / DisplayManager.FPS;
 			grounded = false;
 		}else{
@@ -129,17 +147,17 @@ public class Player extends DynEntity{
 		}
 		
 		supported = false;
-		if(!checkCollision(world, new Vector3f(xChange / DisplayManager.FPS, 0, 0), dimensions)){
+		if(!checkCollision(world, new Vector3f(xChange / DisplayManager.FPS, 0, 0))){
 			position.x += xChange / DisplayManager.FPS;
-		}else if(!checkCollision(world, new Vector3f(xChange / DisplayManager.FPS, 1, 0), dimensions)){
+		}else if(!checkCollision(world, new Vector3f(xChange / DisplayManager.FPS, 1, 0))){
 			position.y += 1;
 		}else{
 			velocity.x *= -0.1f;
 			supported = true;
 		}
-		if(!checkCollision(world, new Vector3f(0, 0, zChange / DisplayManager.FPS), dimensions)){
+		if(!checkCollision(world, new Vector3f(0, 0, zChange / DisplayManager.FPS))){
 			position.z += zChange / DisplayManager.FPS;
-		}else if(!checkCollision(world, new Vector3f(0, 1, zChange / DisplayManager.FPS), dimensions)){
+		}else if(!checkCollision(world, new Vector3f(0, 1, zChange / DisplayManager.FPS))){
 			position.y += 1;
 		}else{
 			velocity.z *= -0.1f;
@@ -165,11 +183,34 @@ public class Player extends DynEntity{
 		camera.pitch = (pitch + camera.pitch * 1f) / 2f;
 		
 		
-		world.client.updatePosition(key, position);
+		
 		if(health <= 0){
 			world.camera = world.spectatorCamera;
 			return false;
 		}
 		return true;
+	}
+	@Override
+	public void onNetworkUpdate(UpdateEntityPacket u) {
+		if (u.pos != null) {
+			this.position = u.pos;
+			this.velocity = u.vel;
+		}
+	}
+
+	@Override
+	public void onCreate() {
+		if (!isRemote) {
+			System.out.println("LocalPlayer created");
+			this.world.camera = this.camera;
+		} else {
+			System.out.println("RemotePlayer created");
+		}
+		
+	}
+	
+	@Override
+	public int getEntityType() {
+		return type;
 	}
 }

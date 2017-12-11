@@ -14,7 +14,10 @@ void main(void){
 		discard;
 	}
 	
-	float shade = pass_textureCoords.z;
-	out_Color = vec4(textureColor * shade);
+	vec4 shade = textureColor * pass_textureCoords.z;
+	
+	
+	
+	out_Color = shade + textureColor * 0.2;
 	
 }

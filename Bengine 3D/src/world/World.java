@@ -3,29 +3,22 @@ package world;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
 
 import org.lwjgl.Sys;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import data.ModelTexture;
-import data.RawModel;
-import data.TexturedModel;
-import entities.Bullet;
 import entities.Camera;
 import entities.DynEntity;
+import entities.Entity;
 import entities.Light;
-import entities.NPC;
 import entities.Player;
-import networking.Client;
+import networking.UDPClient;
+import networking.packets.*;
 import renderEngine.Renderer;
 import shaders.StaticShader;
-import toolBox.Calc;
 import toolBox.Loader;
 import toolBox.OpenSimplexNoise;
 import world.Voxel.VoxelTypes;
@@ -41,7 +34,7 @@ public class World {
 	public static final int Y_CHUNKS = (int) Math.ceil(YSIZE / CHUNK_SIZE);
 	public static final int Z_CHUNKS = (int) Math.ceil(ZSIZE / CHUNK_SIZE);
 	
-	public Client client;
+	public UDPClient networkClient;
 	
 	public static final float GRAVITY = 80;
 	
@@ -49,8 +42,8 @@ public class World {
 	public Voxel[][][] voxels = new Voxel[XSIZE][YSIZE][ZSIZE];
 	
 	public boolean lockMap = false;
-	public Map<String, DynEntity> dynEntities = new HashMap<String, DynEntity>();
-	public Map<String, DynEntity> localDynEntities = new HashMap<String, DynEntity>();
+	public Map<String, DynEntity> entities = new HashMap<String, DynEntity>();
+	public Map<String, DynEntity> cachedEntities = new HashMap<String, DynEntity>();
 	public FaceMapRepeating[][][] faceMaps = new FaceMapRepeating[X_CHUNKS][Y_CHUNKS][Z_CHUNKS];
 	public List<FaceMapRepeating> faceMapsToUpdate = new ArrayList<FaceMapRepeating>();
 	public List<FaceMapRepeating> faceMapsToUpload = new ArrayList<FaceMapRepeating>();
@@ -59,8 +52,52 @@ public class World {
 	public Player player = new Player(new Vector3f((float) (Math.random() * World.XSIZE), YSIZE - 10, (float) (Math.random() * World.ZSIZE / 2)));
 	public Camera spectatorCamera = new Camera();
 	
-	public World(Loader loader, Client client){
-		this.client = client;
+	private long lastTime = 0;
+	
+	public World(Loader loader, UDPClient client){
+		this.networkClient = client;
+		
+		//Update the position, rotation and velocity of an entity, whenever we recieve an entity update packet.
+		this.networkClient.OnPacket(new int[] {UpdateEntityPacket.packetId}, (Packet p) -> {
+			UpdateEntityPacket u = (UpdateEntityPacket) p;
+					
+			if (this.entities.containsKey(u.entity)) {
+				DynEntity e = this.entities.get(u.entity);						
+				e.onNetworkUpdate(u);
+			}
+		});
+		
+		this.networkClient.OnPacket(new int[] {RegisterEntityPacket.packetId}, (Packet p) -> {
+			RegisterEntityPacket r = (RegisterEntityPacket) p;
+			
+			if (cachedEntities.containsKey(r.entityId)) {
+				DynEntity e = cachedEntities.remove(r.entityId);
+				e.world = this;
+				e.owner = r.owner;
+				e.isRemote = !(r.owner.equals(this.networkClient.clientId));
+				entities.put(e.id, e);
+				e.onCreate();
+			} else {
+				try {
+					DynEntity e = (DynEntity) Entity.entities.get(r.entityType).newInstance();
+					e.id = r.entityId;
+					e.position = r.pos;
+					e.rotation = r.rot;
+					e.scale = r.scale;
+					e.owner = r.owner;
+					e.isRemote = !(r.owner.equals(this.networkClient.clientId));
+					e.world = this;
+					entities.put(e.id, e);
+					e.onCreate();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+		});
+		
+		this.networkClient.setWorld(this);
+		
 		
 		//add lights
 		lights.add(new Light(new Vector3f(XSIZE * 2f, 1000, ZSIZE * 2f), 100000, 1.1f, 2));
@@ -124,16 +161,16 @@ public class World {
 		
 		System.out.println("Adding Player and Camera");
 		//add player
-		createDynEntity(player);
-		for(int n = 0; n < 0; n++){
+		//createDynEntity(player);
+		/*for(int n = 0; n < 0; n++){
 			createDynEntity(new NPC(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2))));
-		}
+		}*/
 		
 		//add camera
-		camera = player.camera;
 		spectatorCamera.position = new Vector3f(XSIZE / 2f, 2f * YSIZE / 3f, ZSIZE / 2f);
 		spectatorCamera.pitch = (float) (Math.PI / 2f);
 		spectatorCamera.yaw = (float) (Math.PI / 2f);
+		this.camera = spectatorCamera;
 		
 		System.out.println("Creating Face Maps");
 		//create face maps
@@ -146,6 +183,10 @@ public class World {
 		}
 		
 		System.out.println("World Creation Done");
+	}
+	
+	public void onConnected() {
+		addDynEntity(player);
 	}
 	
 	public void update(){
@@ -162,21 +203,17 @@ public class World {
 		}
 		
 		
-		//update 3d
-		boolean stillActive;
-		Map<String, DynEntity> updateEnts = new HashMap<String, DynEntity>();
-		lockMap = true;
-		updateEnts.putAll(localDynEntities);
-		lockMap = false;
-		for(Iterator<Map.Entry<String, DynEntity>> it = updateEnts.entrySet().iterator(); it.hasNext(); ) {
-			Map.Entry<String, DynEntity> entry = it.next();
-			stillActive = entry.getValue().update(this);
-			if(!stillActive){
-				String key = entry.getKey();
-				localDynEntities.remove(key);
-				deleteDynEntity(key);
-				client.deleteEntity(key);
-			}
+		long time = Sys.getTime();
+		long delta = time - lastTime;
+		lastTime = time;
+		
+		for (Entry<String, DynEntity> it : this.entities.entrySet()) {
+			DynEntity e = it.getValue();
+			
+			if (!e.onUpdate(delta / 1000.0f) && !e.isNetworked) {
+				//Entity needs destroyed. Locally at least.
+				this.entities.remove(it.getKey());
+			}		
 		}
 	}
 	
@@ -198,51 +235,18 @@ public class World {
 		
 		//render dynamic entities
 		lockMap = true;
-		renderer.render(dynEntities, shader);
+		renderer.render(this.entities, shader);
 		lockMap = false;
 		shader.stop();
 	}
 	
-	public void createDynEntity(DynEntity entity){
-		String key;
-		
-		//assign a random key
-		do{
-			key = client.name + "K" + (int)(Math.random() * 999);
-		}while(dynEntities.containsKey(key));
-		entity.key = key;
-		
-		//add it to the lists of entities
-		localDynEntities.put(key, entity);
-		addDynEntity(key, entity);
-		
-		//broadcast addition
-		if(entity instanceof Player){
-			client.addPlayer(key, entity.position);
-		}else if(entity instanceof Bullet){
-			client.addBullet(key, entity.position);
+	public void addDynEntity(DynEntity entity){
+		if (entity.isNetworked) {
+			cachedEntities.put(entity.id, entity);
+			this.networkClient.registerEntity(entity);
+		} else { 
+			entities.put(entity.id, entity);
 		}
-	}
-	
-	public void addDynEntity(String key, DynEntity entity){
-		//assign key
-		entity.key = key;
-		
-		//wait for the map to be open
-		while(lockMap){
-			System.out.println("");
-		}
-		//add to list
-		dynEntities.put(key, entity);
-	}
-	
-	public void deleteDynEntity(String key){
-		//wait for the map to be open
-		while(lockMap){
-			System.out.println("");
-		}
-		//delete
-		dynEntities.remove(key);
 	}
 	
 	public void destroyVoxel(int x, int y, int z){
