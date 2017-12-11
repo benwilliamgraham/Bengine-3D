@@ -79,7 +79,7 @@ public class GameLoop {
 			
 			
 			while(1000f / (Sys.getTime() + 1 - time) > DisplayManager.FPS){
-				
+				continue;
 			}
 			
 			frames++;
