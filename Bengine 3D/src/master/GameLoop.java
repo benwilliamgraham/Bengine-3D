@@ -58,9 +58,6 @@ public class GameLoop {
 		
 		Renderer renderer = new Renderer(shader);
 		
-		//start connection
-		client.open();
-		
 		System.out.println("Starting Timer");
 		long startTime = Sys.getTime();
 		int frames = 0;

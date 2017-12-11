@@ -66,7 +66,6 @@ public class UDPClient extends PacketSource {
 			
 			try {
 				this.socket = new DatagramSocket();
-				this.socket.connect(new InetSocketAddress(this.serverAddress, SERVER_PORT));
 			} catch (SocketException e) {
 				e.printStackTrace();
 			}
@@ -74,34 +73,31 @@ public class UDPClient extends PacketSource {
 		
 		
 		
-		packetListenerThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				System.out.println("Listening for packets from : " + serverAddress.toString());
+		packetListenerThread = new Thread(() -> {
+			System.out.println("Listening for packets from : " + serverAddress.toString());
 				
-				while (isConnected) {
-					byte[] incomingData = new byte[Packet.PACKET_SIZE];
-					DatagramPacket incomingPacket = new DatagramPacket(incomingData, Packet.PACKET_SIZE);
-					try {
-						socket.receive(incomingPacket);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+			while (isConnected) {
+				byte[] incomingData = new byte[Packet.PACKET_SIZE];
+				DatagramPacket incomingPacket = new DatagramPacket(incomingData, Packet.PACKET_SIZE);
+				try {
+					socket.receive(incomingPacket);
+					System.out.println("Recieved packet.");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 					
-					NDBT packetData = new NDBT(incomingData);
+				NDBT packetData = new NDBT(incomingData);
 					
-					try {
-						Packet p = (Packet) Packet.TYPES.get((int) packetData.getByte(Packet.PACKET_TYPE)).newInstance();
-						p.setData(packetData);
-						p.setAddress(incomingPacket.getSocketAddress());
-						p.onLoad();
+				try {
+					Packet p = (Packet) Packet.TYPES.get((int) packetData.getByte(Packet.PACKET_TYPE)).newInstance();
+					p.setData(packetData);
+					p.setAddress(incomingPacket.getSocketAddress());
+					p.onLoad();					
 						
-						
-						EmitPacket(p);
-					} catch (Exception e) {
-						System.err.println("Invalid packet type.");
-						e.printStackTrace();
-					}
+					EmitPacket(p);
+				} catch (Exception e) {
+					System.err.println("Invalid packet type.");
+					e.printStackTrace();
 				}
 			}
 		});

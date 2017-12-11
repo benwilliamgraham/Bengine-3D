@@ -56,9 +56,9 @@ public class UDPServer {
 				
 				try {
 					serverSocket.receive(incomingPacket);
-					System.out.println("Recieved packet");
+					
 				} catch (IOException e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 					continue;
 				}
 				
@@ -91,7 +91,7 @@ public class UDPServer {
 		isOpen = true;
 		
 		try {
-			SocketAddress addr = new InetSocketAddress("192.168.1.204", SERVER_PORT);
+			SocketAddress addr = new InetSocketAddress(SERVER_PORT);
 			this.serverSocket.bind(addr);
 		} catch (SocketException e) {
 			e.printStackTrace();

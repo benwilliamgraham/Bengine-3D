@@ -159,12 +159,8 @@ public class World {
 		}
 		
 		
-		System.out.println("Adding Player and Camera");
-		//add player
-		//createDynEntity(player);
-		/*for(int n = 0; n < 0; n++){
-			createDynEntity(new NPC(new Vector3f((float) (Math.random() * World.XSIZE), 40, (float) (Math.random() * World.ZSIZE / 2))));
-		}*/
+		System.out.println("Adding Camera");
+		
 		
 		//add camera
 		spectatorCamera.position = new Vector3f(XSIZE / 2f, 2f * YSIZE / 3f, ZSIZE / 2f);
@@ -182,10 +178,13 @@ public class World {
 			}
 		}
 		
-		System.out.println("World Creation Done");
+		System.out.println("World Creation Done; Connecting to server");
+		
+		this.networkClient.open();
 	}
 	
 	public void onConnected() {
+		System.out.println("Connected to server; Registering player.");
 		addDynEntity(player);
 	}
 	

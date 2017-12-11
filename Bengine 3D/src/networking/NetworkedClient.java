@@ -80,7 +80,7 @@ public class NetworkedClient extends PacketSource {
 		});
 		
 		this.OnPacket(new int[] {RegisterEntityPacket.packetId}, (Packet p) -> {
-			System.out.println("Client attempted to register entity.");
+			System.out.println(this.name + " registered an entity.");
 			
 			RegisterEntityPacket r = (RegisterEntityPacket) p;
 			
