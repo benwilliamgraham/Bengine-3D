@@ -3,22 +3,30 @@ package entities;
 import org.lwjgl.util.vector.Vector3f;
 
 import data.TexturedModel;
+import networking.packets.UpdateEntityPacket;
 import renderEngine.DisplayManager;
 import toolBox.Assets;
 import toolBox.Calc;
 import world.World;
 
-public class Bullet extends DynEntity{
+public class Bullet extends DynEntity {
 	
 	public static final int type = 2;
 	
 	public final float SPEED = 128;
 
+	public Bullet() {
+		super(Assets.cubert, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f), new Vector3f(0, 0, 0), false);
+	}
+	
 	public Bullet(Vector3f position, float yaw, float pitch) {
 		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f), new Vector3f(0, 0, 0), false);
 		float xVel = (float) (SPEED * Math.sin(yaw) * Math.cos(pitch)); 
 		float yVel = (float) (SPEED * Math.sin(-pitch)); 
 		float zVel = (float) (SPEED * Math.cos(yaw) * Math.cos(pitch)); 
+		
+		rotation.x = pitch;
+		rotation.y = yaw;
 		
 		//set velocity
 		velocity = new Vector3f(xVel, yVel, zVel);
@@ -29,7 +37,8 @@ public class Bullet extends DynEntity{
 		position.z += 1.5f * velocity.z / DisplayManager.FPS;
 	}
 
-	public boolean update(World world) {
+	@Override
+	public boolean onUpdate(float delta) {
 		//movement and detection
 		DynEntity intersection = getIntersection(world, new Vector3f(velocity.x / DisplayManager.FPS, velocity.y / DisplayManager.FPS, velocity.z / DisplayManager.FPS));
 		if(intersection != null){
@@ -54,6 +63,7 @@ public class Bullet extends DynEntity{
 						velocity.z * distRatio / DisplayManager.FPS), null), null);
 				if(world.checkSolid(checkPos)){
 					world.destroyVoxel((int) checkPos.x, (int) checkPos.y, (int) checkPos.z);
+					this.kill();
 					return false;
 				}
 			}
@@ -65,16 +75,17 @@ public class Bullet extends DynEntity{
 		
 		return true;
 	}
+	
+	@Override
+	public void onNetworkUpdate(UpdateEntityPacket u) {
+		if (u.pos != null) {
+			this.position = u.pos;
+		}
+	}
 
 	@Override
 	public int getEntityType() {
 		// TODO Auto-generated method stub
 		return type;
-	}
-
-	@Override
-	public boolean onUpdate(float delta) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 }

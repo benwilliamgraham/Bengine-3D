@@ -13,7 +13,7 @@ import java.util.Map;
 import org.lwjgl.Sys;
 
 import entities.Entity;
-
+import networking.packets.DestroyEntityPacket;
 import networking.packets.HandshakePacket;
 import networking.packets.Packet;
 import networking.packets.RegisterEntityPacket;
@@ -139,6 +139,7 @@ public class UDPServer {
 		Packet.register(RejectedPacket.class);
 		Packet.register(RegisterEntityPacket.class);
 		Packet.register(UpdateEntityPacket.class);
+		Packet.register(DestroyEntityPacket.class);
 		
 		
 		try {

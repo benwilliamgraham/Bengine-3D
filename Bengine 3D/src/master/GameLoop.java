@@ -16,6 +16,7 @@ import data.TexturedModel;
 import entities.Camera;
 import entities.Entity;
 import entities.Player;
+import entities.Bullet;
 import networking.UDPClient;
 import networking.packets.*;
 import renderEngine.DisplayManager;
@@ -34,29 +35,36 @@ public class GameLoop {
 		Packet.register(RejectedPacket.class);
 		Packet.register(RegisterEntityPacket.class);
 		Packet.register(UpdateEntityPacket.class);
+		Packet.register(DestroyEntityPacket.class);
 		
 		//Register entities so that the server can see them.
 		Entity.register(Player.class);
-		
-		String serverAddress = JOptionPane.showInputDialog("Enter the Server IP: ");
-		
+		Entity.register(Bullet.class);
 		
 		Loader loader = new Loader();
 		
+		String serverAddress = JOptionPane.showInputDialog("Enter the Server IP: ");
+
+		//Create Display
+		DisplayManager.createDisplay(800, 600, false);
+		
 		//connect to a server
 		UDPClient client = new UDPClient(false, InetAddress.getByName(serverAddress));
-				
+		
+		//Load  assets
+		Assets.loadAssets(loader);
+		System.out.println("Finished loading assets");
+		
 		//create the world
 		System.out.println("Creating world");
 		World world = new World(loader, client);
 		
-		DisplayManager.createDisplay(800, 600, false);
-		
-		Assets.loadAssets(loader);
-		
 		StaticShader shader = new StaticShader();
 		
 		Renderer renderer = new Renderer(shader);
+		
+		System.out.println("Connecting to Server");
+		client.open();
 		
 		System.out.println("Starting Timer");
 		long startTime = Sys.getTime();

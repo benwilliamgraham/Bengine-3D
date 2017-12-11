@@ -182,6 +182,11 @@ public abstract class DynEntity extends Entity{
 		return null;
 	}
 	
+	public void kill() {
+		this.world.networkClient.destroyEntity(this);
+		this.world.entities.remove(this.id);
+	}
+	
 	float randBetween(float min, float max){
 		return (float) Math.random() * (max - min) + min;
 	}

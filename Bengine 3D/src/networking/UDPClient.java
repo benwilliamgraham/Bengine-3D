@@ -12,6 +12,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import entities.Entity;
 import entities.DynEntity;
+import networking.packets.DestroyEntityPacket;
 import networking.packets.HandshakePacket;
 import networking.packets.Packet;
 import networking.packets.RejectedPacket;
@@ -81,7 +82,6 @@ public class UDPClient extends PacketSource {
 				DatagramPacket incomingPacket = new DatagramPacket(incomingData, Packet.PACKET_SIZE);
 				try {
 					socket.receive(incomingPacket);
-					System.out.println("Recieved packet.");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -138,6 +138,10 @@ public class UDPClient extends PacketSource {
 	
 	public void registerEntity(Entity e) {
 		this.send(new RegisterEntityPacket(e));
+	}
+	
+	public void destroyEntity(Entity e) {
+		this.send(new DestroyEntityPacket(e.id));
 	}
 	
 	public void setWorld(World world) {

@@ -96,6 +96,14 @@ public class World {
 			}
 		});
 		
+		this.networkClient.OnPacket(new int[] {DestroyEntityPacket.packetId}, (Packet p) -> {
+			DestroyEntityPacket dp = (DestroyEntityPacket) p;
+			
+			if (this.entities.containsKey(dp.entityId)) {
+				this.entities.remove(dp.entityId);
+			}
+		});
+		
 		this.networkClient.setWorld(this);
 		
 		
@@ -115,7 +123,7 @@ public class World {
 				e.printStackTrace();
 			}
 		}else{
-			OpenSimplexNoise noise = new OpenSimplexNoise(Sys.getTime());
+			OpenSimplexNoise noise = new OpenSimplexNoise(12345L); //Changed to a static seed, so that we can keep it consistent across clients.
 			
 			//fill
 			float gradient = 42;
@@ -178,9 +186,7 @@ public class World {
 			}
 		}
 		
-		System.out.println("World Creation Done; Connecting to server");
-		
-		this.networkClient.open();
+		System.out.println("World Creation Done");
 	}
 	
 	public void onConnected() {
@@ -233,9 +239,7 @@ public class World {
 		}
 		
 		//render dynamic entities
-		lockMap = true;
 		renderer.render(this.entities, shader);
-		lockMap = false;
 		shader.stop();
 	}
 	

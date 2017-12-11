@@ -8,6 +8,10 @@ public class DestroyEntityPacket extends Packet {
 	
 	public String entityId;
 	
+	public DestroyEntityPacket() {
+		super();
+	}
+	
 	public DestroyEntityPacket(String entityId) {
 		super();
 		this.entityId = entityId;

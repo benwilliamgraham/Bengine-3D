@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.PortUnreachableException;
 import java.util.UUID;
 
+import networking.packets.DestroyEntityPacket;
 import networking.packets.HandshakePacket;
 import networking.packets.Packet;
 import networking.packets.RegisterEntityPacket;
@@ -29,6 +30,7 @@ public class NetworkedClient extends PacketSource {
 				//Check for disconnect
 				if (!this.sock.isConnected() || this.sock.isClosed()) {
 					System.out.println("Client disconnected"); //TODO: Handle disconnection on server, (remove entites, etc)
+					handleDisconnect();
 					break;
 				}
 				
@@ -41,6 +43,7 @@ public class NetworkedClient extends PacketSource {
 					sock.receive(p);
 				} catch (PortUnreachableException e) {
 					System.out.println("Client lost connection to server.");
+					handleDisconnect();
 					break;
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -106,6 +109,15 @@ public class NetworkedClient extends PacketSource {
 			}
 		});
 		
+		this.OnPacket(new int[] {DestroyEntityPacket.packetId}, (Packet p) -> {
+			DestroyEntityPacket d = (DestroyEntityPacket) p;
+			
+			if (this.server.entities.get(d.entityId).owner.equals(this)) {
+				this.server.entities.remove(d.entityId);
+				this.server.broadcast(new DestroyEntityPacket(d.entityId));
+			}
+		});
+		
 		this.listenerThread.start();
 	}
 	
@@ -119,5 +131,15 @@ public class NetworkedClient extends PacketSource {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void handleDisconnect() {
+		for (NetworkedEntity e : this.server.entities.values()) {
+			if (e.owner.equals(this)) {
+				this.server.entities.remove(e.id);
+				this.server.broadcast(new DestroyEntityPacket(e.id));
+			}
+		}
+		this.server.clients.remove(this.id);
 	}
 }
