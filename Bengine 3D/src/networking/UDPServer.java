@@ -9,6 +9,7 @@ import java.net.DatagramSocket;
 import java.net.DatagramPacket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.lwjgl.Sys;
 
@@ -45,8 +46,8 @@ public class UDPServer {
 		System.out.println(InetAddress.getLocalHost().toString());
 
 		
-		this.clients = new HashMap<String, NetworkedClient>();
-		this.entities = new HashMap<String, NetworkedEntity>();
+		this.clients = new ConcurrentHashMap<String, NetworkedClient>();
+		this.entities = new ConcurrentHashMap<String, NetworkedEntity>();
 		this.serverSocket = new DatagramSocket(null);
 		this.packetListener = new Thread(() -> {
 			while (isOpen) {
@@ -58,7 +59,7 @@ public class UDPServer {
 					serverSocket.receive(incomingPacket);
 					
 				} catch (IOException e) {
-					//e.printStackTrace();
+					e.printStackTrace();
 					continue;
 				}
 				

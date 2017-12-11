@@ -8,6 +8,7 @@ import java.net.PortUnreachableException;
 import java.util.UUID;
 
 import networking.packets.DestroyEntityPacket;
+import networking.packets.DisconnectPacket;
 import networking.packets.HandshakePacket;
 import networking.packets.Packet;
 import networking.packets.RegisterEntityPacket;
@@ -116,6 +117,10 @@ public class NetworkedClient extends PacketSource {
 				this.server.entities.remove(d.entityId);
 				this.server.broadcast(new DestroyEntityPacket(d.entityId));
 			}
+		});
+		
+		this.OnPacket(new int[] {DisconnectPacket.packetId}, (Packet p) -> {
+			handleDisconnect();
 		});
 		
 		this.listenerThread.start();

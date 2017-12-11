@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.lwjgl.Sys;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
 
 import entities.Camera;
@@ -42,7 +44,7 @@ public class World {
 	public Voxel[][][] voxels = new Voxel[XSIZE][YSIZE][ZSIZE];
 	
 	public boolean lockMap = false;
-	public Map<String, DynEntity> entities = new HashMap<String, DynEntity>();
+	public Map<String, DynEntity> entities = new ConcurrentHashMap<String, DynEntity>();
 	public Map<String, DynEntity> cachedEntities = new HashMap<String, DynEntity>();
 	public FaceMapRepeating[][][] faceMaps = new FaceMapRepeating[X_CHUNKS][Y_CHUNKS][Z_CHUNKS];
 	public List<FaceMapRepeating> faceMapsToUpdate = new ArrayList<FaceMapRepeating>();
@@ -195,6 +197,11 @@ public class World {
 	}
 	
 	public void update(){
+		if (Keyboard.isKeyDown(Keyboard.KEY_O) && player.health <= 0) {
+			player = new Player(new Vector3f((float) (Math.random() * World.XSIZE), YSIZE - 10, (float) (Math.random() * World.ZSIZE / 2)));
+			addDynEntity(player);
+		}
+		
 		//update any new face maps
 		while(!faceMapsToUpdate.isEmpty()){
 			faceMapsToUpdate.get(0).createFaceMap();
@@ -220,6 +227,8 @@ public class World {
 				this.entities.remove(it.getKey());
 			}		
 		}
+		
+		
 	}
 	
 	public void render(Renderer renderer, StaticShader shader){

@@ -39,39 +39,43 @@ public class Bullet extends DynEntity {
 
 	@Override
 	public boolean onUpdate(float delta) {
-		//movement and detection
-		DynEntity intersection = getIntersection(world, new Vector3f(velocity.x / DisplayManager.FPS, velocity.y / DisplayManager.FPS, velocity.z / DisplayManager.FPS));
-		if(intersection != null){
-			intersection.health -= 1;
-			intersection.velocity = velocity;
-			//world.client.updateVelocity(intersection.key, intersection.velocity);
-			//world.client.updateHealth(intersection.key, intersection.health);
-			return false;
-		}else{
-			float magnitude = Calc.calculateMagnitude(velocity) / DisplayManager.FPS;
-			
-			float step = 0.9f;
-			
-			for(float dist = 0; dist <= magnitude; dist += step){
+		if (!isRemote) {
+			//movement and detection
+			DynEntity intersection = getIntersection(world, new Vector3f(velocity.x / DisplayManager.FPS, velocity.y / DisplayManager.FPS, velocity.z / DisplayManager.FPS));
+			if(intersection != null){
+				intersection.health -= 1;
+				//world.networkClient.updateEntity(intersection);
+				//intersection.velocity = velocity;
+				//world.client.updateVelocity(intersection.key, intersection.velocity);
+				//world.client.updateHealth(intersection.key, intersection.health);
+				this.kill();
+				return false;
+			}else{
+				float magnitude = Calc.calculateMagnitude(velocity) / DisplayManager.FPS;
 				
-				float distRatio = dist / magnitude;
+				float step = 0.9f;
 				
-				
-				Vector3f checkPos = Vector3f.add(position, Vector3f.add(new Vector3f(0.5f, 0.5f, 0.5f), new Vector3f(
-						velocity.x * distRatio / DisplayManager.FPS,
-						velocity.y * distRatio / DisplayManager.FPS,
-						velocity.z * distRatio / DisplayManager.FPS), null), null);
-				if(world.checkSolid(checkPos)){
-					world.destroyVoxel((int) checkPos.x, (int) checkPos.y, (int) checkPos.z);
-					this.kill();
-					return false;
+				for(float dist = 0; dist <= magnitude; dist += step){
+					
+					float distRatio = dist / magnitude;
+					
+					
+					Vector3f checkPos = Vector3f.add(position, Vector3f.add(new Vector3f(0.5f, 0.5f, 0.5f), new Vector3f(
+							velocity.x * distRatio / DisplayManager.FPS,
+							velocity.y * distRatio / DisplayManager.FPS,
+							velocity.z * distRatio / DisplayManager.FPS), null), null);
+					if(world.checkSolid(checkPos)){
+						world.destroyVoxel((int) checkPos.x, (int) checkPos.y, (int) checkPos.z);
+						this.kill();
+						return false;
+					}
 				}
 			}
+			
+			position.x += velocity.x / DisplayManager.FPS;
+			position.y += velocity.y / DisplayManager.FPS;
+			position.z += velocity.z / DisplayManager.FPS;
 		}
-		
-		position.x += velocity.x / DisplayManager.FPS;
-		position.y += velocity.y / DisplayManager.FPS;
-		position.z += velocity.z / DisplayManager.FPS;
 		
 		return true;
 	}

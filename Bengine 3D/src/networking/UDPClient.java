@@ -13,6 +13,7 @@ import org.lwjgl.util.vector.Vector3f;
 import entities.Entity;
 import entities.DynEntity;
 import networking.packets.DestroyEntityPacket;
+import networking.packets.DisconnectPacket;
 import networking.packets.HandshakePacket;
 import networking.packets.Packet;
 import networking.packets.RejectedPacket;
@@ -177,6 +178,7 @@ public class UDPClient extends PacketSource {
 	}
 	
 	public void close() {
+		this.send(new DisconnectPacket());
 		if (localServer != null) {
 			localServer.destroyForcibly();
 		}

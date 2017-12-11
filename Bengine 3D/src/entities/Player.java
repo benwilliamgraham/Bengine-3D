@@ -179,6 +179,7 @@ public class Player extends DynEntity{
 			*/
 			
 			visible = false;
+			
 			camera.position.x = (this.position.x + camera.position.x * 2f) / 3f;
 			camera.position.y = (this.position.y + 1.1f + camera.position.y * 2f) / 3f;
 			camera.position.z = (this.position.z + camera.position.z * 2f) / 3f;
