@@ -10,18 +10,19 @@ import org.lwjgl.util.input.ControllerAdapter;
 import org.lwjgl.util.vector.Vector3f;
 
 import data.TexturedModel;
-import networking.UDPClient;
-import networking.packets.UpdateEntityPacket;
 import renderEngine.DisplayManager;
 import toolBox.Assets;
 import toolBox.Calc;
 import world.World;
 
-public class Player extends DynEntity{
+public class Player extends Entity {
 	
-	public static final int type = 0;
+	public static final int OBJECT_TYPE = generateTypeId();
 	
 	public Camera camera;
+	
+	@SyncedField("position")
+	public Vector3f networkedPosition;
 	
 	//define player constants
 	private static final float RUN_SPEED = 20;
@@ -36,33 +37,28 @@ public class Player extends DynEntity{
 	private boolean mouseActive;
 	private float yaw, pitch;
 	
-	private Vector3f targetPos;
-	
-	
-	
 	public Player() {
-		super(Assets.cubert, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 3, 1), new Vector3f(1, 3, 1), true);
+		super(Assets.cubert, new Vector3f(1, 3, 1), new Vector3f(0, 0, 0));
+		this.scale = new Vector3f(1, 3, 1);
 		this.grounded = false;
 		this.supported = false;
 		this.usingItem = false;
 		this.mouseActive = true;
 		this.health = 15;
-		this.isNetworked = true;
 	}
 	
 	public Player(Vector3f position) {
-		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(1, 3, 1), new Vector3f(1, 3, 1), true);
+		super(Assets.cubert, new Vector3f(1, 3, 1), position);
 		this.grounded = false;
 		this.supported = false;
 		this.usingItem = false;
 		this.mouseActive = true;
 		this.health = 15;
-		this.isNetworked = true;
 		camera = new Camera();
 	}
 
-	public boolean onUpdate(float delta){
-		if (!isRemote) {
+	public void onUpdate(float delta){
+		if (isLocalAuthority()) {
 			int mouseXChange = Display.getWidth() / 2 - Mouse.getX();
 			int mouseYChange = Display.getHeight() / 2 - Mouse.getY();
 			
@@ -109,8 +105,7 @@ public class Player extends DynEntity{
 					for(int n = 0; n < 5; n++){
 						Bullet b = new Bullet(new Vector3f(position.x, position.y + 1.1f, position.z), 
 								yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f));
-						b.isNetworked = true;
-						world.addDynEntity(b);
+						world.spawnEntity(b);
 					}
 					
 					//world.createDynEntity(new GrapplingHook(this, yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f)));
@@ -191,37 +186,46 @@ public class Player extends DynEntity{
 			
 			if(health <= 0){
 				world.camera = world.spectatorCamera;
-				return false;
+				this.kill();
 			}
-		} else {
-			if (this.targetPos != null) {
-				//this.position = Calc.lerp(this.position, this.targetPos, 1.0f / UDPClient.TICKRATE);
-			}
-		}
-		
-		return true;
-	}
-	@Override
-	public void onNetworkUpdate(UpdateEntityPacket u) {
-		if (u.pos != null) {
-			this.position = u.pos;
-			this.rotation = u.rot;
+			
+			networkedPosition = new Vector3f(this.position);
 		}
 	}
 
 	@Override
-	public void onCreate() {
-		if (!isRemote) {
+	public void onRegistered() {
+	}
+	
+	@Override
+	public void onCreated() {
+		if (isLocalAuthority()) {
 			System.out.println("LocalPlayer created");
 			this.world.camera = this.camera;
 		} else {
 			System.out.println("RemotePlayer created");
-		}
+		}	
+	}
+
+	@Override
+	public void onDestroyed() {
+		// TODO Auto-generated method stub
 		
 	}
-	
+
 	@Override
-	public int getEntityType() {
-		return type;
+	public void onObjectUpdate() {
+		if (!isLocalAuthority()) {
+			if (this.networkedPosition != null) {
+				this.position = new Vector3f(this.networkedPosition);
+			}
+		}
+		
+		
+	}
+
+	@Override
+	public int getType() {
+		return OBJECT_TYPE;
 	}
 }

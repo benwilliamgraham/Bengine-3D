@@ -16,7 +16,9 @@ import toolBox.Calc;
 import toolBox.Loader;
 import toolBox.OpenSimplexNoise;
 
-public class FaceNet extends Entity{
+public class FaceNet extends Entity {
+	
+	public static final int OBJECT_TYPE = generateTypeId();
 	
 	public TexturedModel model;
 	
@@ -27,7 +29,7 @@ public class FaceNet extends Entity{
 	private OpenSimplexNoise noise;
 	
 	public FaceNet(Loader loader, World world, Random rand, List<Light> lights) {
-		super(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
+		super(null, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0));
 		this.loader = loader;
 		this.world = world;
 		this.rand = rand;
@@ -262,18 +264,39 @@ public class FaceNet extends Entity{
 		return set[rand.nextInt(set.length)];
 	}
 
-
 	@Override
-	public boolean onUpdate(float delta) {
+	public void onCreated() {
 		// TODO Auto-generated method stub
-		return false;
+		
+	}
+
+	public void onUpdate(float delta) {
+		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void onDestroyed() {
+		// TODO Auto-generated method stub
+		
 	}
 
 
 	@Override
-	public int getEntityType() {
+	public void onRegistered() {
 		// TODO Auto-generated method stub
-		return 0;
+		
+	}
+
+	@Override
+	public void onObjectUpdate() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public int getType() {
+		return OBJECT_TYPE;
 	}
 
 }

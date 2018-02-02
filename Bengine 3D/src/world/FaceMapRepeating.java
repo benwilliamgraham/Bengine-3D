@@ -18,7 +18,7 @@ import toolBox.Loader;
 
 public class FaceMapRepeating extends Entity implements Runnable{
 	
-	public TexturedModel model;
+	public static final int OBJECT_TYPE = generateTypeId();
 	
 	private Loader loader;
 	private World world;
@@ -30,7 +30,7 @@ public class FaceMapRepeating extends Entity implements Runnable{
 	private int[] indicesArray;
 	
 	public FaceMapRepeating(Loader loader, World world, List<Light> lights, Vector3f cornerPosition) {
-		super(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
+		super(null, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0));
 		this.loader = loader;
 		this.world = world;
 		this.lights = lights;
@@ -248,14 +248,35 @@ public class FaceMapRepeating extends Entity implements Runnable{
 	}
 
 	@Override
-	public boolean onUpdate(float delta) {
-		// TODO Auto-generated method stub
-		return false;
+	public void onUpdate(float delta) {
 	}
 
 	@Override
-	public int getEntityType() {
+	public void onCreated() {
 		// TODO Auto-generated method stub
-		return 0;
+		
+	}
+
+	@Override
+	public void onDestroyed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onRegistered() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onObjectUpdate() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getType() {
+		return OBJECT_TYPE;
 	}
 }

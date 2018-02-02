@@ -17,6 +17,8 @@ import toolBox.Loader;
 
 public class FaceMap extends Entity{
 	
+	public static final int OBJECT_TYPE = generateTypeId();
+	
 	public TexturedModel model;
 	
 	private Random rand;
@@ -25,7 +27,7 @@ public class FaceMap extends Entity{
 	private List<Light> lights;
 	
 	public FaceMap(Loader loader, World world, Random rand, List<Light> lights) {
-		super(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(1, 1, 1));
+		super(null, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0));
 		this.loader = loader;
 		this.world = world;
 		this.rand = rand;
@@ -328,16 +330,38 @@ public class FaceMap extends Entity{
 		return set[rand.nextInt(set.length)];
 	}
 
-
 	@Override
-	public int getEntityType() {
-		return 3;
+	public void onUpdate(float delta) {
+		
 	}
 
 
 	@Override
-	public boolean onUpdate(float delta) {
+	public void onCreated() {
+		
+	}
+
+
+	@Override
+	public void onDestroyed() {
+		
+	}
+
+
+	@Override
+	public void onRegistered() {
+	}
+
+
+	@Override
+	public void onObjectUpdate() {
 		// TODO Auto-generated method stub
-		return false;
+		
+	}
+
+
+	@Override
+	public int getType() {
+		return OBJECT_TYPE;
 	}
 }

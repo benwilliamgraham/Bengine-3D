@@ -1,7 +1,5 @@
 package entities;
 
-import javax.sound.midi.ControllerEventListener;
-
 import org.lwjgl.input.Controller;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -14,9 +12,9 @@ import renderEngine.DisplayManager;
 import toolBox.Assets;
 import world.World;
 
-public class NPC extends DynEntity{
+public class NPC extends Entity {
 	
-	public static final int type = 1;
+	public static final int OBJECT_TYPE = generateTypeId();
 	
 	//define player constants
 	private static final float RUN_SPEED = 4;
@@ -27,12 +25,13 @@ public class NPC extends DynEntity{
 	private boolean grounded;
 		
 	public NPC(Vector3f position) {
-		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(1, 2.5f, 1), new Vector3f(1, 2.5f, 1), true);
-		this.velocity = new Vector3f(0, 0, 0);
+		super(Assets.cubert, new Vector3f(1, 2.5f, 1), position);
+		this.scale = new Vector3f(1, 2.5f, 1);
 		this.grounded = false;
 	}
 
-	public boolean onUpdate(float delta){
+	@Override
+	public void onUpdate(float delta){
 		
 		float forwardInput = 1;
 		
@@ -67,7 +66,7 @@ public class NPC extends DynEntity{
 				Bullet b = new Bullet(new Vector3f(position.x, position.y + 0.6f, position.z), 
 						rotation.y + randBetween(-0.05f, 0.05f), 0 + randBetween(-0.05f, 0.05f));
 				
-				world.addDynEntity(b);
+				world.spawnEntity(b);
 			}
 		}
 		
@@ -88,12 +87,34 @@ public class NPC extends DynEntity{
 		if(collide && grounded){
 			velocity.y = randBetween(JUMP_POWER / 2f, JUMP_POWER);
 		}
-		
-		return true;
 	}
 
 	@Override
-	public int getEntityType() {
-		return type;
+	public void onCreated() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onDestroyed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onRegistered() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onObjectUpdate() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getType() {
+		return OBJECT_TYPE;
 	}
 }

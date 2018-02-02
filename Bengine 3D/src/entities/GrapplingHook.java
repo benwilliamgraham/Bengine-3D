@@ -8,15 +8,17 @@ import toolBox.Assets;
 import toolBox.Calc;
 import world.World;
 
-public class GrapplingHook extends DynEntity{
+public class GrapplingHook extends Entity {
+	
+	public static final int OBJECT_TYPE = generateTypeId();
 	
 	public final float SPEED = 64;
 	
-	public DynEntity boss;
+	public Entity boss;
 	public Vector3f endPosition;
 
-	public GrapplingHook(DynEntity boss, float yaw, float pitch) {
-		super(Assets.cubert, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(0.5f, 0.5f, 0.5f), new Vector3f(0, 0, 0), false);
+	public GrapplingHook(Entity boss, float yaw, float pitch) {
+		super(Assets.cubert, new Vector3f(0.5f, 0.5f, 0.5f), new Vector3f(0, 0, 0));
 		this.boss = boss;
 		
 		float xVel = (float) (SPEED * Math.sin(yaw) * Math.cos(pitch));
@@ -47,14 +49,32 @@ public class GrapplingHook extends DynEntity{
 	}
 
 	@Override
-	public boolean onUpdate(float delta) {
-		// TODO Auto-generated method stub
-		return false;
+	public void onCreated() {
+		
 	}
 
 	@Override
-	public int getEntityType() {
-		// TODO Auto-generated method stub
-		return 0;
+	public void onUpdate(float delta) {
+		
+	}
+
+	@Override
+	public void onDestroyed() {
+		
+	}
+
+	@Override
+	public void onRegistered() {
+		
+	}
+
+	@Override
+	public void onObjectUpdate() {
+		
+	}
+
+	@Override
+	public int getType() {
+		return OBJECT_TYPE;
 	}
 }

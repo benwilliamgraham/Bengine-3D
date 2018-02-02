@@ -13,7 +13,6 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import data.RawModel;
 import data.TexturedModel;
-import entities.DynEntity;
 import entities.Entity;
 import shaders.StaticShader;
 import toolBox.Calc;
@@ -63,20 +62,19 @@ public class Renderer {
 		GL30.glBindVertexArray(0);
 	}
 	
-	public void render(Map<String, DynEntity> entities, StaticShader shader){
-		Map<String, DynEntity> ents = new HashMap<String, DynEntity>();
-		ents.putAll(entities);
-		for (Map.Entry<String, DynEntity> entity : ents.entrySet()) {
-			if(!entity.getValue().visible) continue;
-			GL30.glBindVertexArray(entity.getValue().model.model.vaoID);
+	public void render(Map<Long, Entity> entities, StaticShader shader){
+		
+		for (Entity entity : entities.values()) {
+			if(!entity.visible) continue;
+			GL30.glBindVertexArray(entity.model.model.vaoID);
 			GL20.glEnableVertexAttribArray(0);
 			GL20.glEnableVertexAttribArray(1);
 			GL13.glActiveTexture(GL13.GL_TEXTURE0);
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, entity.getValue().model.texture.textureID);
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, entity.model.texture.textureID);
 			
-			Matrix4f transformationMatrix = Calc.createTransformationMatrix(entity.getValue().position, entity.getValue().rotation, entity.getValue().scale);
+			Matrix4f transformationMatrix = Calc.createTransformationMatrix(entity.position, entity.rotation, entity.scale);
 			shader.loadTransformationMatrix(transformationMatrix);
-			GL11.glDrawElements(GL11.GL_TRIANGLES, entity.getValue().model.model.vertexCount, GL11.GL_UNSIGNED_INT, 0);
+			GL11.glDrawElements(GL11.GL_TRIANGLES, entity.model.model.vertexCount, GL11.GL_UNSIGNED_INT, 0);
 			
 			GL20.glDisableVertexAttribArray(0);
 			GL20.glDisableVertexAttribArray(1);

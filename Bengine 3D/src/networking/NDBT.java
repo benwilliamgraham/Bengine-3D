@@ -1,15 +1,11 @@
 package networking;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.lwjgl.util.vector.Vector3f;
-
-import networking.packets.Packet;
+import networking.server.Server;
 
 //Stands for Non-Descript Binary Tag
 
@@ -17,27 +13,31 @@ public class NDBT {
 	
 	private static final byte TERMINATOR = 0xF; //terminates the NDBT when this value is read as an ID. 
 	
-	private Map<Byte, byte[]> unpackedData = new HashMap<Byte, byte[]>();
-	private byte[] data;
+	private Map<Byte, ByteBuffer> unpackedData = new HashMap<Byte, ByteBuffer>();
+	private ByteBuffer data;
+	private byte packetType;
+	private boolean isPacket = true;
 	
-	public NDBT(int size) {
-		data = new byte[size];
+	public NDBT() {
+		isPacket = false;
 	}
 	
-	public NDBT(byte[] data) {
+	public NDBT(byte packetType) {
+		this.packetType = packetType;
+	}
+	
+	public NDBT(ByteBuffer data) {
 		this.data = data;
 		
-		int pos = 0;
-		while (pos < data.length) {
-			byte id = data[pos];
+		while (data.hasRemaining()) {
+			byte id = data.get();
 			if (id == TERMINATOR) {
 				break;
 			} else {
-				int size = data[pos + 1];
+				int size = data.getInt();
 				byte[] value = new byte[size];
-				System.arraycopy(data, pos + 2, value, 0, size);			
-				unpackedData.put(id, value);
-				pos += (2 + size);
+				data.get(value);
+				unpackedData.put(id, ByteBuffer.wrap(value));
 			}
 			
 		}
@@ -45,116 +45,107 @@ public class NDBT {
 	}
 	
 	public void pack() {
-		ByteBuffer d = ByteBuffer.allocate(Packet.PACKET_SIZE);
-		for (Entry<Byte, byte[]> item : unpackedData.entrySet()) {
+		ByteBuffer d = ByteBuffer.allocate(Server.BUFFER_SIZE);
+		if (isPacket) {d.put(packetType);}
+		for (Entry<Byte, ByteBuffer> item : unpackedData.entrySet()) {
 			
-			ByteBuffer bb = ByteBuffer.allocate(item.getValue().length + 2)
+			ByteBuffer bb = ByteBuffer.allocate(item.getValue().limit() + Byte.BYTES + Integer.BYTES)
 					   .put(item.getKey())
-					   .put((byte) item.getValue().length)
+					   .putInt(item.getValue().limit())
 					   .put(item.getValue());
 			bb.flip();	
 			d.put(bb);
 			
-			/*
-			System.out.println(item.getKey());
-			System.out.println((byte) item.getValue().length);
-			
-			for (byte b : item.getValue()) {
-				System.out.print(b + " ");
-			}
-			System.out.println();
-			*/
 		}
 		
 		d.put(TERMINATOR);
 		d.flip();
 		
-		if (d.hasArray()) {
-			this.data = d.array();
-		}
+		this.data = d;
 	}
 	
 	public void add(byte id, boolean value) {
-		unpackedData.put(id, new byte[] {(byte)((value)? 1:0)});
+		ByteBuffer bb = ByteBuffer.allocate(Byte.BYTES).put((byte) ((value)? 1:0));
+		bb.flip();
+		unpackedData.put(id, bb);
+		//unpackedData.put(id, new byte[] {(byte)((value)? 1:0)});
 	}
 	
 	public void add(byte id, int value) {
 		ByteBuffer b = ByteBuffer.allocate(Integer.BYTES);
 		b.putInt(value);
 		b.flip();
-		unpackedData.put(id, b.array());
+		unpackedData.put(id, b);
+	}
+	
+	public void add(byte id, long value) {
+		ByteBuffer b = ByteBuffer.allocate(Long.BYTES);
+		b.putLong(value);
+		b.flip();
+		unpackedData.put(id, b);
 	}
 	
 	public void add(byte id, float value) {
 		ByteBuffer b = ByteBuffer.allocate(Float.BYTES);
 		b.putFloat(value);
 		b.flip();
-		unpackedData.put(id, b.array());
+		unpackedData.put(id, b);
 	}
 	
 	public void add(byte id, byte x) {
-		unpackedData.put(id, new byte[] {x});
+		ByteBuffer b = ByteBuffer.allocate(Byte.BYTES); //Lul, never gets old
+		b.put(x);
+		b.flip();
+		unpackedData.put(id, b);
 	}
 	
 	public void add(byte id, String str) {
-		byte[] data = new byte[str.length()];
-		byte[] stringData = str.getBytes();
-		System.arraycopy(stringData, 0, data, 0, stringData.length);
+		ByteBuffer d = ByteBuffer.wrap(str.getBytes());
 		
+		unpackedData.put(id, d);
+	}
+	
+	public void add(byte id, byte[] data) {
+		unpackedData.put(id, ByteBuffer.wrap(data));
+	}
+	
+	public void add(byte id, ByteBuffer data) {
 		unpackedData.put(id, data);
 	}
 	
-	public void add(byte id, Vector3f v) {
-		ByteBuffer data = ByteBuffer.allocate(3 * Float.BYTES);
-		data.putFloat(v.x)
-			.putFloat(v.y)
-			.putFloat(v.z);
-		data.flip();
-		
-		unpackedData.put(id, data.array());
-	}
-	
 	public byte getByte(byte id) {
-		return unpackedData.get(id)[0];
+		return unpackedData.get(id).duplicate().get();
 	}
 	
 	public boolean getBool(byte id) {
-		return (unpackedData.get(id)[0] == 0)? false:true;
+		return (unpackedData.get(id).duplicate().get() == 0)? false:true;
 	}
 	
 	public int getInt(byte id) {
-		ByteBuffer b = ByteBuffer.allocate(Integer.BYTES)
-				.put(unpackedData.get(id));
-		b.flip();
-		
-		return b.getInt();
+		return unpackedData.get(id).duplicate().getInt();
+	}
+	
+	public long getLong(byte id) {
+		return unpackedData.get(id).duplicate().getLong();
 	}
 	
 	public float getFloat(byte id) {
-		ByteBuffer b = ByteBuffer.allocate(Float.BYTES)
-				.put(unpackedData.get(id))
-				;
-		b.flip();
-		
-		return b.getFloat();
+		return unpackedData.get(id).duplicate().getFloat();
 	}
 	
 	public String getString(byte id) {
-		return new String(unpackedData.get(id));
+		return new String(unpackedData.get(id).duplicate().array());
 	}
 	
-	public Vector3f getVec3(byte id) {
-		
-		ByteBuffer b = ByteBuffer.allocate(unpackedData.get(id).length);
-		b.put(unpackedData.get(id));
-		b.flip();
-		
-		Vector3f v = new Vector3f(b.getFloat(), b.getFloat(), b.getFloat());
-		
-		return v;
+	public ByteBuffer getBytes(byte id) {
+		return (unpackedData.get(id).duplicate());
 	}
 	
-	public byte[] toBytes() {
-		return data;
+	public boolean hasElement(byte id) {
+		return (unpackedData.containsKey(id));
+	}
+	
+	public ByteBuffer toBytes() {
+		return data.duplicate();
 	}
 }

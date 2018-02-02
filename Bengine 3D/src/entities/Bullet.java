@@ -2,25 +2,23 @@ package entities;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import data.TexturedModel;
-import networking.packets.UpdateEntityPacket;
 import renderEngine.DisplayManager;
 import toolBox.Assets;
 import toolBox.Calc;
-import world.World;
 
-public class Bullet extends DynEntity {
+public class Bullet extends Entity {
 	
-	public static final int type = 2;
+	public static final int OBJECT_TYPE = generateTypeId();
 	
 	public final float SPEED = 128;
 
 	public Bullet() {
-		super(Assets.cubert, new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f), new Vector3f(0, 0, 0), false);
+		super(Assets.cubert, new Vector3f(0.1f, 0.1f, 0.1f), new Vector3f(0, 0, 0));
+		this.scale = new Vector3f(0.1f, 0.1f, 0.1f);
 	}
 	
 	public Bullet(Vector3f position, float yaw, float pitch) {
-		super(Assets.cubert, position, new Vector3f(0, 0, 0), new Vector3f(0.1f, 0.1f, 0.1f), new Vector3f(0, 0, 0), false);
+		super(Assets.cubert, new Vector3f(0.1f, 0.1f, 0.1f), position);
 		float xVel = (float) (SPEED * Math.sin(yaw) * Math.cos(pitch)); 
 		float yVel = (float) (SPEED * Math.sin(-pitch)); 
 		float zVel = (float) (SPEED * Math.cos(yaw) * Math.cos(pitch)); 
@@ -38,10 +36,10 @@ public class Bullet extends DynEntity {
 	}
 
 	@Override
-	public boolean onUpdate(float delta) {
-		if (!isRemote) {
+	public void onUpdate(float delta) {
+		if (isLocalAuthority()) {
 			//movement and detection
-			DynEntity intersection = getIntersection(world, new Vector3f(velocity.x / DisplayManager.FPS, velocity.y / DisplayManager.FPS, velocity.z / DisplayManager.FPS));
+			Entity intersection = getIntersection(world, new Vector3f(velocity.x / DisplayManager.FPS, velocity.y / DisplayManager.FPS, velocity.z / DisplayManager.FPS));
 			if(intersection != null){
 				intersection.health -= 1;
 				//world.networkClient.updateEntity(intersection);
@@ -49,7 +47,6 @@ public class Bullet extends DynEntity {
 				//world.client.updateVelocity(intersection.key, intersection.velocity);
 				//world.client.updateHealth(intersection.key, intersection.health);
 				this.kill();
-				return false;
 			}else{
 				float magnitude = Calc.calculateMagnitude(velocity) / DisplayManager.FPS;
 				
@@ -67,7 +64,6 @@ public class Bullet extends DynEntity {
 					if(world.checkSolid(checkPos)){
 						world.destroyVoxel((int) checkPos.x, (int) checkPos.y, (int) checkPos.z);
 						this.kill();
-						return false;
 					}
 				}
 			}
@@ -77,19 +73,31 @@ public class Bullet extends DynEntity {
 			position.z += velocity.z / DisplayManager.FPS;
 		}
 		
-		return true;
-	}
-	
-	@Override
-	public void onNetworkUpdate(UpdateEntityPacket u) {
-		if (u.pos != null) {
-			this.position = u.pos;
-		}
 	}
 
 	@Override
-	public int getEntityType() {
-		// TODO Auto-generated method stub
-		return type;
+	public void onCreated() {
+		
 	}
+
+	@Override
+	public void onDestroyed() {
+		
+	}
+
+	@Override
+	public void onRegistered() {
+		
+	}
+
+	@Override
+	public void onObjectUpdate() {
+		
+	}
+
+	@Override
+	public int getType() {
+		return OBJECT_TYPE;
+	}
+
 }
