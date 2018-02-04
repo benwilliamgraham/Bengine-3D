@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -35,7 +36,7 @@ public class MagicaServer extends Server {
 
 	public int updateRate = 120;
 	
-	public Map<Long, Entity> entities = new HashMap<Long, Entity>();
+	public Map<Long, Entity> entities = new ConcurrentHashMap<Long, Entity>();
 	
 	public MagicaServer() throws IOException {
 		super(2290);

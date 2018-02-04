@@ -9,22 +9,17 @@ import org.lwjgl.opengl.PixelFormat;
 
 public class DisplayManager {
 	
-	public static final float FPS = 64;
+	public static float FPS = 64;
 	
-	public static void createDisplay(int width, int height, boolean fullscreen){
+	public static void createDisplay(DisplayMode mode, boolean fullscreen){
 		
 		ContextAttribs attribs = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
 		
 		try {
-			if(fullscreen){
-				Display.setDisplayMode(Display.getDesktopDisplayMode());
-				Display.setFullscreen(true);
-			}
-			else{
-				Display.setDisplayMode(new DisplayMode(width, height));
-			}
+			Display.setDisplayMode(mode);
+			Display.setFullscreen(fullscreen);
 			Display.create(new PixelFormat(), attribs);
-			Display.setTitle("");
+			Display.setTitle("Magica: The game about sand.");
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
