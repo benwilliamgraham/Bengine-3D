@@ -103,11 +103,11 @@ public class ObjectMessage extends NetworkMessage {
     	
     	ObjectParser parser = new ObjectParser();
     	
-    	if (this.mutability != null) {
+    	if (this.visibility != null) {
     		data.add(OBJECT_VISIBILITY, parser.serialize(this.visibility));
     	}
     	
-    	if (this.visibility != null) {
+    	if (this.mutability != null) {
     		data.add(OBJECT_MUTABILITY, parser.serialize(this.mutability));
     	}
     	

@@ -66,6 +66,10 @@ public class MagicaServer extends Server {
 			Entity e = (Entity) object;
 			entities.put(object.getInstanceID(), e);
 		}
+		
+		if (object instanceof Bullet) {
+			System.out.println("Added bullet on the server side.");
+		}
 	}
 	
 	@Override

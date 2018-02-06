@@ -9,6 +9,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
 import networking.messages.NetworkMessage;
+import networking.messages.RPCMessage;
 
 import java.nio.ByteBuffer;
 
@@ -35,6 +36,10 @@ public class Connection {
 	}
 	
 	public void send(NetworkMessage message) {
+		if (message instanceof RPCMessage) {
+			System.out.println("Sending RPC.");
+		}
+		
 		try {
 			ByteBuffer data = message.getBytes();
 			

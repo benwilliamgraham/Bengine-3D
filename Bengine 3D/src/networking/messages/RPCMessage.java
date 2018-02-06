@@ -55,6 +55,8 @@ public class RPCMessage extends NetworkMessage {
 		data.add(FUNCTION_NAME, this.functionName);
 		data.add(PARAMS, writeParams(this.params));
 		
+		data.pack();
+		
 		return data.toBytes();
 	}
 

@@ -2,6 +2,7 @@ package networking.sync;
 
 import java.util.Map.Entry;
 
+import entities.Bullet;
 import networking.Connection;
 import networking.client.Client;
 import networking.messages.ObjectMessage;
@@ -35,6 +36,10 @@ public class SyncedObjectManager {
 		
 		connection.send(om);
 	}
+	
+	public void destroyObject(long instanceID) {
+		trackedObjects.remove(instanceID); //TODO: need to add a network message to remove on all clients, not yet tho.
+	}
 
 	public boolean isRegistered(ObjectMessage om) {
 		return trackedObjects.containsKey(om.objectInstanceId);
@@ -45,6 +50,7 @@ public class SyncedObjectManager {
 	}
 	
 	public void handleRPC(RPCMessage m) {
+		System.out.println("Recieved RPC");
 		if (trackedObjects.containsKey(m.objectInstanceId)) {
 			SyncedObject obj = trackedObjects.get(m.objectInstanceId);
 			

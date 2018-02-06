@@ -13,6 +13,7 @@ import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector3f;
 
+import entities.Bullet;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
@@ -201,6 +202,10 @@ public class World extends Client {
 			entities.put(obj.getInstanceID(), e);
 			e.onCreated();
 		}
+		
+		if (obj instanceof Bullet) {
+			System.out.println("Bullet added to scene For:" + this.name);
+		}
 	}
 	
 	@Override
@@ -331,7 +336,7 @@ public class World extends Client {
 	}
 
 	public void destroyEntity(long instanceID) {
-		//TODO:
-		
+		this.entities.remove(instanceID);
+		this.objectManager.destroyObject(instanceID);
 	}
 }

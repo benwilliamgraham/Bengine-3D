@@ -12,6 +12,9 @@ public class Bullet extends Entity {
 	
 	public final float SPEED = 128;
 
+	@SyncedField("position")
+	public Vector3f networkedPosition = new Vector3f();
+	
 	public Bullet() {
 		super(Assets.cubert, new Vector3f(0.1f, 0.1f, 0.1f), new Vector3f(0, 0, 0));
 		this.scale = new Vector3f(0.1f, 0.1f, 0.1f);
@@ -63,6 +66,7 @@ public class Bullet extends Entity {
 							velocity.z * distRatio / DisplayManager.FPS), null), null);
 					if(world.checkSolid(checkPos)){
 						world.destroyVoxel((int) checkPos.x, (int) checkPos.y, (int) checkPos.z);
+						RPC("destroyTerrain", RPC.ALL_REMOTES, (int) checkPos.x, (int) checkPos.y, (int) checkPos.z);
 						this.kill();
 					}
 				}
@@ -71,8 +75,18 @@ public class Bullet extends Entity {
 			position.x += velocity.x / DisplayManager.FPS;
 			position.y += velocity.y / DisplayManager.FPS;
 			position.z += velocity.z / DisplayManager.FPS;
+			
+			networkedPosition = new Vector3f(position);
+		} else {
+			position = new Vector3f(networkedPosition);
 		}
 		
+	}
+	
+	@RPC("destroyTerrain")
+	public void destroyTerrain(int x, int y, int z) {
+		System.out.println("Remote procedure called");
+		world.destroyVoxel(x, y, z);
 	}
 
 	@Override

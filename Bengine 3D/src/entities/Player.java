@@ -102,11 +102,9 @@ public class Player extends Entity {
 				if(usingItem == false){
 					usingItem = true;
 					
-					for(int n = 0; n < 5; n++){
-						Bullet b = new Bullet(new Vector3f(position.x, position.y + 1.1f, position.z), 
-								yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f));
-						world.spawnEntity(b);
-					}
+					Bullet b = new Bullet(new Vector3f(position.x, position.y + 1.1f, position.z), 
+							yaw, pitch);
+					world.spawnEntity(b);
 					
 					//world.createDynEntity(new GrapplingHook(this, yaw + randBetween(-0.05f, 0.05f), pitch + randBetween(-0.05f, 0.05f)));
 				}

@@ -98,15 +98,17 @@ public class NetworkedClient implements Endpoint {
 			System.out.println("Recieved debug message: " + ((DebugMessage) message).message);
 		} else if (message instanceof RPCMessage) {
 			RPCMessage msg = (RPCMessage) message;
-			
+			System.out.println("RPC recieved on the server.");
 			if (msg.rpcMode == SyncedObject.RPC.SERVER_ONLY) {
 				server.objectManager.handleRPC(msg);
 			} else if (msg.rpcMode == SyncedObject.RPC.ALL_REMOTES) {
 				SyncedObject obj = server.objectManager.getObject(msg.objectInstanceId);
-				if (obj.mutability.hasPermission(msg.getEndpoint().getEndpointId())) {
+				System.out.println(obj.mutability.getPermissions().size());
+				if (obj.mutability.hasPermission(getEndpointId()) || obj.getOwner() == getEndpointId()) {
+					System.out.println("Sending RPC to remotes.");
 					for (NetworkedClient c : server.getClients()) {
 						if (obj.visibility.hasPermission(c.getEndpointId())) {
-							c.connection.send(msg);
+							c.connection.send(msg); System.out.println("sent");
 						}
 					}
 				}

@@ -23,7 +23,7 @@ import networking.Connection;
 
 public abstract class Server implements Endpoint {
 	
-	public static final int BUFFER_SIZE = 512;
+	public static final int BUFFER_SIZE = 2048;
 
 	protected Map<Long, NetworkedClient> clients;
 	protected SyncedObjectManager objectManager;

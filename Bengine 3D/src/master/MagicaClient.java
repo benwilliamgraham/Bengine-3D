@@ -70,7 +70,7 @@ public class MagicaClient extends JFrame {
 		contentPane.add(lblServerAddress);
 		
 		serverAddress = new JTextField();
-		serverAddress.setText("localhost");
+		serverAddress.setText("127.0.0.1");
 		serverAddress.setBounds(115, 33, 174, 20);
 		contentPane.add(serverAddress);
 		serverAddress.setColumns(10);
@@ -106,7 +106,7 @@ public class MagicaClient extends JFrame {
 			
 			DisplayMode displayMode = displayModes.get(resolution.getSelectedIndex());
 			setVisible(false);
-			startGame(displayMode, chckbxFullscreen.isSelected(), name.getText(), serverAddress.getText());
+			startGame(displayMode, chckbxFullscreen.isSelected(), serverAddress.getText(), name.getText());
 		});
 	}
 	
