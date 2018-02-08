@@ -61,6 +61,7 @@ public abstract class Game {
 			float delta = (currentTime - lastTick) / 1000.0f;
 			
 			if (delta >= 1.0f / framerateCap) {
+				
 				//TODO: maybe some synchronization stuff.
 				currentState.onUpdate(delta);
 				
@@ -156,7 +157,9 @@ public abstract class Game {
 	
 	private String loadFileAsString(String filePath) {
 		try {
-			FileInputStream is = new FileInputStream(new File(filePath));
+			File file = new File(filePath);
+			
+			FileInputStream is = new FileInputStream(file);
 			
 			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 			

@@ -21,6 +21,8 @@ import bengine.networking.serialization.serializers.LongSerializer;
 import bengine.networking.serialization.serializers.PermissionSerializer;
 import bengine.networking.serialization.serializers.StringSerializer;
 import bengine.networking.serialization.serializers.Vector3fSerializer;
+import bengine.rendering.Material;
+import bengine.rendering.Shader;
 import magica.states.TestState;
 
 public class Magica extends Game {
@@ -41,6 +43,12 @@ public class Magica extends Game {
 	
 	@Override
 	protected void onCreated() {
+		Shader testShader = createShader("./assets/shader/default.json");
+		
+		Material testMaterial = new Material(testShader); 
+		
+		Assets.testMaterial = testMaterial;
+		
 		currentState = new TestState();
 	}
 

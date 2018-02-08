@@ -28,7 +28,6 @@ public class Mesh implements Drawable {
 		this.normals = normals;
 		this.texCoords = texCoords;
 		this.indicies = IntBuffer.wrap(indicies);
-		
 		renderObject = renderer.createVAO(isStatic, store(verticies), store(normals), store(texCoords));
 	}
 	
@@ -75,7 +74,9 @@ public class Mesh implements Drawable {
 		FloatBuffer buf = FloatBuffer.allocate(data.length * 3);
 		
 		for (Vector3f vec : data) {
-			vec.get(buf);
+			buf.put(vec.x);
+			buf.put(vec.y);
+			buf.put(vec.z);
 		}
 		
 		buf.flip();
