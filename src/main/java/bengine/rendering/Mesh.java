@@ -1,11 +1,15 @@
 package bengine.rendering;
 
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL11.glDrawElements;
 import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -23,16 +27,24 @@ public class Mesh implements Drawable {
 	
 	private Renderer renderer;
 	
+	private boolean isStatic = false;
+	
 	public Mesh(Vector3f[] verticies, Vector3f[] normals, Vector3f[] texCoords, int[] indicies, boolean isStatic) {
 		this.verticies = verticies;
 		this.normals = normals;
 		this.texCoords = texCoords;
-		this.indicies = IntBuffer.wrap(indicies);
-		renderObject = renderer.createVAO(isStatic, store(verticies), store(normals), store(texCoords));
+		this.indicies = store(indicies);
+		this.isStatic = isStatic;
 	}
 	
 	public Mesh(Vector3f[] verticies, Vector3f[] normals, Vector3f[] texCoords, int[] indicies) {
-		this(verticies, normals, texCoords, indicies, false);
+		this(verticies, normals, texCoords, indicies, true);
+	}
+	
+	public void create(Renderer renderer) {
+		this.renderer = renderer;
+		
+		renderObject = renderer.createVAO(isStatic, store(verticies), store(normals), store(texCoords));
 	}
 	
 	public void update() {
@@ -43,25 +55,27 @@ public class Mesh implements Drawable {
 	@Override
 	public void render(Matrix4f transformMatrix) {
 		Shader s = renderer.getShader();
-		Camera c = renderer.getCamera();
+		//Camera c = renderer.getCamera();
 		
 		glBindVertexArray(renderObject[0]);
 		
 		glEnableVertexAttribArray(Renderer.VERTEX_INDEX);
-		glEnableVertexAttribArray(Renderer.NORMAL_INDEX);
-		glEnableVertexAttribArray(Renderer.TEX_COORD_INDEX);
+		//glEnableVertexAttribArray(Renderer.NORMAL_INDEX);
+		//glEnableVertexAttribArray(Renderer.TEX_COORD_INDEX);
 		
-			Matrix4f transformedView = c.generateViewmodel()
-					.mul(transformMatrix);
+			//Matrix4f transformedView = c.generateViewmodel()
+			//		.mul(transformMatrix);
 			
-			s.pushView(transformedView);
+			//s.pushView(transformedView);
+			
+			//glDrawArrays(GL_TRIANGLES, 0, 6);
 			
 			glDrawElements(GL_TRIANGLES, indicies);
 			
 		
 		glDisableVertexAttribArray(Renderer.VERTEX_INDEX);
-		glDisableVertexAttribArray(Renderer.NORMAL_INDEX);
-		glDisableVertexAttribArray(Renderer.TEX_COORD_INDEX);
+		//glDisableVertexAttribArray(Renderer.NORMAL_INDEX);
+		//glDisableVertexAttribArray(Renderer.TEX_COORD_INDEX);
 		
 		glBindVertexArray(0);
 	}
@@ -71,16 +85,28 @@ public class Mesh implements Drawable {
 	}
 	
 	private FloatBuffer store(Vector3f[] data) {
-		FloatBuffer buf = FloatBuffer.allocate(data.length * 3);
+		FloatBuffer buf = ByteBuffer.allocateDirect(data.length * 3 * Float.BYTES)
+				.order(ByteOrder.nativeOrder())
+				.asFloatBuffer();
 		
 		for (Vector3f vec : data) {
-			buf.put(vec.x);
-			buf.put(vec.y);
-			buf.put(vec.z);
+			vec.get(buf);
+			buf.position(buf.position() + 3);
 		}
 		
 		buf.flip();
 		
+		return buf;
+	}
+	
+	private IntBuffer store(int[] data) {
+		IntBuffer buf = ByteBuffer.allocateDirect(data.length * Integer.BYTES)
+				.order(ByteOrder.nativeOrder())
+				.asIntBuffer();
+		
+		buf.put(data);
+		
+		buf.flip();
 		return buf;
 	}
 }

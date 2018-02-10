@@ -2,6 +2,7 @@ package bengine.rendering;
 
 import static org.lwjgl.opengl.GL20.*;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import org.joml.Matrix4f;
@@ -25,7 +26,7 @@ public class Shader {
 	
 	public void pushView(Matrix4f viewMatrix) {
 		
-		FloatBuffer matrixData = FloatBuffer.allocate(16);
+		FloatBuffer matrixData = ByteBuffer.allocateDirect(16 * Float.BYTES).asFloatBuffer();
 		
 		viewMatrix.get(matrixData);
 		

@@ -12,9 +12,8 @@ public class TestEntity extends Entity {
 	
 	}*/
 
-	public TestEntity(Mesh model, Vector3f dimensions, Vector3f position) {
-		super(model, dimensions, position);
-		// TODO Auto-generated constructor stub
+	public TestEntity() {
+		super(Assets.squareMesh, new Vector3f(1.0f, 1.0f, 0.0f), new Vector3f(0.0f, 0.0f, 0.0f));
 	}
 
 	@Override

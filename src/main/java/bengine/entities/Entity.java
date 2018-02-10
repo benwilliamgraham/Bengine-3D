@@ -40,18 +40,19 @@ public abstract class Entity extends SyncedObject {
 	public abstract void onUpdate(float delta);
 	
 	public void onDraw(Renderer renderer) {
+		
 		Matrix4f transformMatrix = new Matrix4f()
 				.scale(this.scale)
 				.rotate(this.rotation)
 				.translate(this.position);
 		
-		renderer.useShader(this.material.shader);
+		//renderer.useShader(this.material.shader);
 		
-		renderer.getShader().push("baseColor", this.material.baseColor);
+		//renderer.getShader().push("baseColor", this.material.baseColor);
 		
-		if (material.texture != null) {
+		/*if (material.texture != null) {
 			renderer.getShader().pushTexture(this.material.texture);
-		}
+		}*/
 		
 		this.model.render(transformMatrix);
 		

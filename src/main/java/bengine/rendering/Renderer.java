@@ -39,7 +39,7 @@ public class Renderer {
 			this.currentShader = shader;
 		}
 		
-		glUseProgram(this.currentShader.shader);
+		//glUseProgram(this.currentShader.shader);
 	}
 	
 	public Shader getShader() {
@@ -93,10 +93,11 @@ public class Renderer {
 		int vertBuffer = glGenBuffers();
 		
 		glBindBuffer(GL_ARRAY_BUFFER, vertBuffer);
-		glBufferData(GL_ARRAY_BUFFER, verticies, (isStatic)? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, verticies, GL_STATIC_DRAW);
 		glVertexAttribPointer(VERTEX_INDEX, 3, GL_FLOAT, false, 0, 0L);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		
-		int normalBuffer = glGenBuffers();
+		/*int normalBuffer = glGenBuffers();
 		
 		glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
 		glBufferData(GL_ARRAY_BUFFER, normals, (isStatic)? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
@@ -106,11 +107,11 @@ public class Renderer {
 		
 		glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
 		glBufferData(GL_ARRAY_BUFFER, texCoords, GL_STATIC_DRAW);
-		glVertexAttribPointer(TEX_COORD_INDEX, 3, GL_FLOAT, false, 0, 0L);
+		glVertexAttribPointer(TEX_COORD_INDEX, 3, GL_FLOAT, false, 0, 0L);*/
 		
 		glBindVertexArray(0);
 		
-		return new int[] {vao, vertBuffer, normalBuffer, texCoordBuffer};
+		return new int[] {vao, vertBuffer/*, normalBuffer, texCoordBuffer*/};
 	}
 	
 	public void updateBuffer(int buffer, FloatBuffer data) {

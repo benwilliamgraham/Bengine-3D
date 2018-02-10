@@ -1,5 +1,10 @@
 package bengine;
 
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glEnd;
+import static org.lwjgl.opengl.GL11.glVertex2f;
+
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,6 +27,7 @@ import org.lwjgl.opengl.PixelFormat;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 
+import bengine.entities.Camera;
 import bengine.rendering.Renderer;
 import bengine.rendering.Shader;
 import bengine.rendering.Texture;
@@ -30,9 +36,12 @@ public abstract class Game {
 	
 	protected State currentState;
 	
+	protected Camera camera;
+	
 	protected int framerateCap = Integer.MAX_VALUE;
 	
 	protected Renderer renderer;
+	
 	
 	private boolean isRunning = true;
 	private long lastTick = 0;
@@ -43,14 +52,24 @@ public abstract class Game {
 	
 	protected abstract void onConfigure();
 	protected abstract void onCreated();
+	protected abstract void onUpdate(float delta);
 	protected abstract void onDestroyed();
+	
+	public void switchState(State newState) {
+		if (currentState != null) {
+			currentState.onDestroyed();
+		}
+		
+		currentState = newState;
+		currentState.onCreated();
+	}
 	
 	public void create() {
 		onConfigure();
 		
 		this.renderer = new Renderer();
 		
-		this.renderer.initialize();
+		//this.renderer.initialize();
 		
 		onCreated();
 		
@@ -63,14 +82,15 @@ public abstract class Game {
 			if (delta >= 1.0f / framerateCap) {
 				
 				//TODO: maybe some synchronization stuff.
-				currentState.onUpdate(delta);
+				//currentState.onUpdate(delta);
+				
+				onUpdate(delta);
 				
 				//Prepare the drawing state.
-				renderer.clear();
+				//renderer.clear();
 				
-				currentState.onDraw(renderer);
+				//currentState.onDraw(renderer);
 			}
-			
 			Display.update(); //if we update the display every tick, regardless of whether or not we draw anything new, then we don't get input lag when using vsync.
 			if (Display.isCloseRequested()) {
 				break;
@@ -87,19 +107,27 @@ public abstract class Game {
 	}
 	
 	protected void createDisplay(DisplayMode mode, boolean fullscreen, String title) {
-		ContextAttribs attribs = new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
 		
 		try {
+			PixelFormat pixelFormat = new PixelFormat();
+            ContextAttribs contextAttributes = new ContextAttribs(3, 2)
+                .withForwardCompatible(true)
+                .withProfileCore(true);
+            
 			Display.setDisplayMode(mode);
 			Display.setFullscreen(fullscreen);
-			Display.create(new PixelFormat(), attribs);
 			Display.setTitle(title);
-			Display.makeCurrent();
+			Display.create(pixelFormat, contextAttributes);
+			
+			GL11.glViewport(0, 0, mode.getWidth(), mode.getHeight());
+			
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
 		
-		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+		
+		
+		
 	}
 	
 	protected Shader createShader(String shaderFile) {
@@ -179,9 +207,5 @@ public abstract class Game {
 			e.printStackTrace();
 		}
 		return null;
-	}
-	
-	private void tick() {
-		
 	}
 }

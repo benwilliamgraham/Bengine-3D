@@ -87,7 +87,8 @@ public class MagicaLauncher extends JFrame {
 		
 		try {
 			for (DisplayMode mode : Display.getAvailableDisplayModes()) {
-				if (mode.getFrequency() >= 60 && mode.isFullscreenCapable()) {
+				float displayAspect = (float)Math.floor((float) mode.getWidth() / mode.getHeight() * 10) / 10;
+				if (mode.getFrequency() >= 60 && mode.isFullscreenCapable() && (displayAspect == 1.7f || displayAspect == 1.3f) && mode.getWidth() >= 640) {
 					displayModes.add(mode);
 				}
 			}

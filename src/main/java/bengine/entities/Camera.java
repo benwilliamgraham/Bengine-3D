@@ -19,6 +19,8 @@ public class Camera {
 		viewMatrix = new Matrix4f();
 		viewMatrix.perspective(fov, (float) Display.getWidth() / Display.getHeight(), 0.1f, farPlane);
 		
+		this.rotation = new Quaternionf();
+		
 		this.clearColor = new Vector3f();
 	}
 	

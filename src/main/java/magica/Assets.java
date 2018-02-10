@@ -6,22 +6,28 @@ import bengine.rendering.Material;
 import bengine.rendering.Mesh;
 
 public class Assets {
-	public static Mesh squareMesh = new Mesh(
-			new Vector3f[] {
-					new Vector3f(-0.5f, -0.5f, 0.0f), 
-					new Vector3f(0.5f, -0.5f, 0.0f),
-					new Vector3f(0.5f, 0.5f, 0.0f)},
-			new Vector3f[] {
-					new Vector3f(0.0f, 0.0f, 0.0f),
-					new Vector3f(0.0f, 0.0f, 0.0f),
-					new Vector3f(0.0f, 0.0f, 0.0f)
-			},
-			new Vector3f[] {
-				new Vector3f(0.0f, 0.0f, 0.0f),
-				new Vector3f(1.0f, 0.0f, 0.0f),
-				new Vector3f(1.0f, 1.0f, 0.0f)
-			},
-			new int[] {0, 1, 2});
+	public static Mesh squareMesh = null;
 	
-	public static Material testMaterial = null;
+	static {
+		try {
+		 squareMesh = new Mesh(
+					new Vector3f[] {
+							new Vector3f(-10.0f, -10.0f, 0.0f), 
+							new Vector3f(10.0f, -10.0f, 0.0f),
+							new Vector3f(0.0f, 10.0f, 0.0f)},
+					new Vector3f[] {
+							new Vector3f(0.0f, 0.0f, 0.0f),
+							new Vector3f(0.0f, 0.0f, 0.0f),
+							new Vector3f(0.0f, 0.0f, 0.0f)
+					},
+					new Vector3f[] {
+						new Vector3f(0.0f, 0.0f, 0.0f),
+						new Vector3f(1.0f, 0.0f, 0.0f),
+						new Vector3f(1.0f, 1.0f, 0.0f)
+					},
+					new int[] {0, 1, 2});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
