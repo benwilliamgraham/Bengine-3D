@@ -48,7 +48,9 @@ public class TestState implements State {
 
 	@Override
 	public void onDestroyed() {
-		
+		for (Entity e : this.entities.values()) {
+			e.onDestroyed();
+		}
 	}
 	
 }

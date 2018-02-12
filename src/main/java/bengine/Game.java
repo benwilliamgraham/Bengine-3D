@@ -94,15 +94,17 @@ public abstract class Game {
 				
 				this.renderer.useCamera(camera);
 				
-				//TODO: maybe some synchronization stuff.
-				//currentState.onUpdate(delta);
-				
 				onUpdate(delta);
 				
-				//Prepare the drawing state.
-				//renderer.clear();
+				//TODO: maybe some synchronization stuff.
 				
-				//currentState.onDraw(renderer);
+				if (currentState != null) currentState.onUpdate(delta);
+				
+				
+				//Prepare the drawing state.
+				renderer.clear();
+				
+				if (currentState != null) currentState.onDraw(renderer);
 			}
 			Display.update(); //if we update the display every tick, regardless of whether or not we draw anything new, then we don't get input lag when using vsync.
 			//checkGLError();

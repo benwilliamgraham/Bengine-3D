@@ -4,6 +4,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import bengine.Transform;
 import bengine.networking.sync.SyncedObject;
 import bengine.rendering.Material;
 import bengine.rendering.Mesh;
@@ -13,8 +14,9 @@ public abstract class Entity extends SyncedObject {
 	
 	private static final float collisionSkin = 0.05f; 
 	
-	public Vector3f position, scale, velocity;
-	public Quaternionf rotation;
+	public Transform transform;
+	
+	public Vector3f scale, velocity;
 	
 	public Mesh model;
 	
@@ -27,10 +29,9 @@ public abstract class Entity extends SyncedObject {
 	public float health = 0;
 	
 	public Entity(Mesh model, Vector3f dimensions, Vector3f position) {
-		this.position = position;
 		this.model = model;
 		this.dimensions = dimensions;
-		this.rotation = new Quaternionf();
+		this.transform = new Transform(position, new Quaternionf());
 		this.scale = new Vector3f(1.0f, 1.0f, 1.0f);
 		this.velocity = new Vector3f(0.0f, 0.0f, 0.0f);
 	}
@@ -43,16 +44,16 @@ public abstract class Entity extends SyncedObject {
 		
 		Matrix4f transformMatrix = new Matrix4f()
 				.scale(this.scale)
-				.rotate(this.rotation)
-				.translate(this.position);
+				.rotate(this.transform.rotation)
+				.translate(this.transform.position);
 		
-		//renderer.useShader(this.material.shader);
+		renderer.useShader(this.material.shader);
 		
-		//renderer.getShader().push("baseColor", this.material.baseColor);
+		renderer.getShader().push("baseColor", this.material.baseColor);
 		
-		/*if (material.texture != null) {
+		if (this.material.texture != null) {
 			renderer.getShader().pushTexture(this.material.texture);
-		}*/
+		}
 		
 		this.model.render(transformMatrix);
 		

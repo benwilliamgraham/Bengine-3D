@@ -39,6 +39,7 @@ import bengine.networking.serialization.serializers.Vector3fSerializer;
 import bengine.rendering.Material;
 import bengine.rendering.Mesh;
 import bengine.rendering.Shader;
+import magica.states.TestState;
 
 public class Magica extends Game {
 	
@@ -68,83 +69,31 @@ public class Magica extends Game {
 		
 		testMaterial.texture = createTexture("./assets/misc/hatch.png");
 		
-		//Assets.squareMesh.create(renderer);
+		Assets.create(renderer);
 		
-		// switchState(new TestState(testMaterial));
-		
-		Vector3f[] vertices = new Vector3f[] {
-				new Vector3f(-0.5f,  0.5f,  0.0f),
-				new Vector3f(-0.5f, -0.5f,  0.0f),
-				new Vector3f( 0.5f, -0.5f,  0.0f),
-				
-				new Vector3f( 0.5f, -0.5f,  0.0f),
-				new Vector3f( 0.5f,  0.5f,  0.0f),
-				new Vector3f(-0.5f,  0.5f,  0.0f),
-			};
-			
-			Vector3f[] normals = new Vector3f[] {
-				new Vector3f(0.0f, 0.0f, 0.0f),
-				new Vector3f(0.0f, 0.0f, 0.0f),
-				new Vector3f(0.0f, 0.0f, 0.0f),
-				
-				new Vector3f(0.0f, 0.0f, 0.0f),
-				new Vector3f(0.0f, 0.0f, 0.0f),
-				new Vector3f(0.0f, 0.0f, 0.0f),
-			};
-			
-			Vector3f[] texCoords = new Vector3f[] {
-				new Vector3f( 0.0f,  1.0f,  0.0f),
-				new Vector3f( 0.0f,  0.0f,  0.0f),
-				new Vector3f( 1.0f,  0.0f,  0.0f),
-				
-				new Vector3f( 1.0f,  0.0f,  0.0f),
-				new Vector3f( 1.0f,  1.0f,  0.0f),
-				new Vector3f( 0.0f,  1.0f,  0.0f)
-			};
-			
-			int[] indices = new int[] {0, 1, 2, 3, 4, 5};
-			
-			m = new Mesh(vertices, normals, texCoords, indices);
-			
-			m.create(renderer);
+		switchState(new TestState(testMaterial));
 	}
 
 	@Override
 	protected void onUpdate(float delta) {
 		
-		Vector3f eulerRotation = new Vector3f();
-		
-		camera.rotation.getEulerAnglesXYZ(eulerRotation);
-		
 		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-			camera.position.x -= Math.sin(eulerRotation.y) * 2.0f * delta;
-			camera.position.z += Math.cos(eulerRotation.y) * 2.0f * delta;
+			camera.transform.move(camera.transform.forwards().mul(2.0f * delta));
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-			camera.position.x += Math.sin(eulerRotation.y) * 2.0f * delta;
-			camera.position.z -= Math.cos(eulerRotation.y) * 2.0f * delta;
+			camera.transform.move(camera.transform.forwards().mul(-2.0f * delta));
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-			camera.position.x += Math.cos(eulerRotation.y) * 2.0f * delta;
-			camera.position.z += Math.sin(eulerRotation.y) * 2.0f * delta;
+			camera.transform.move(camera.transform.right().mul(2.0f * delta));
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
-			camera.position.x -= Math.cos(eulerRotation.y) * 2.0f * delta;
-			camera.position.z -= Math.sin(eulerRotation.y) * 2.0f * delta;
+			camera.transform.move(camera.transform.right().mul(-2.0f * delta));
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-			camera.rotation.rotateAxis((float) Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
+			camera.transform.rotation.rotateAxis((float) Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
 		} else if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-			camera.rotation.rotateAxis((float) -Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
+			camera.transform.rotation.rotateAxis((float) -Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
 		}
-		
-		renderer.clear(); 
-		
-		renderer.useShader(testMaterial.shader);
-		
-		renderer.getShader().pushTexture(testMaterial.texture);
-		
-		m.render(new Matrix4f().identity());
 	}
 	
 	@Override
