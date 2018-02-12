@@ -1,22 +1,26 @@
 package bengine;
 
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glVertex2f;
+import static org.lwjgl.opengl.GL11.*;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.FloatBuffer;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.Date;
+import java.util.Hashtable;
 
 import javax.imageio.ImageIO;
 
+import org.joml.Vector3f;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
@@ -34,6 +38,8 @@ import bengine.rendering.Texture;
 
 public abstract class Game {
 	
+	private static Game current;
+	
 	protected State currentState;
 	
 	protected Camera camera;
@@ -42,13 +48,11 @@ public abstract class Game {
 	
 	protected Renderer renderer;
 	
-	
+	private float aspectRatio;
 	private boolean isRunning = true;
 	private long lastTick = 0;
 	
-	public Game() {
-		
-	}
+	public Game() {}
 	
 	protected abstract void onConfigure();
 	protected abstract void onCreated();
@@ -65,11 +69,17 @@ public abstract class Game {
 	}
 	
 	public void create() {
+		
+		current = this;
+		
 		onConfigure();
 		
 		this.renderer = new Renderer();
 		
-		//this.renderer.initialize();
+		this.renderer.initialize();
+		
+		camera = new Camera(new Vector3f(), 120.0f, 150.0f); //Create a camera at the origin.
+		camera.name = "DefaultCamera";
 		
 		onCreated();
 		
@@ -80,6 +90,9 @@ public abstract class Game {
 			float delta = (currentTime - lastTick) / 1000.0f;
 			
 			if (delta >= 1.0f / framerateCap) {
+				lastTick = currentTime;
+				
+				this.renderer.useCamera(camera);
 				
 				//TODO: maybe some synchronization stuff.
 				//currentState.onUpdate(delta);
@@ -92,6 +105,7 @@ public abstract class Game {
 				//currentState.onDraw(renderer);
 			}
 			Display.update(); //if we update the display every tick, regardless of whether or not we draw anything new, then we don't get input lag when using vsync.
+			//checkGLError();
 			if (Display.isCloseRequested()) {
 				break;
 			}
@@ -104,6 +118,10 @@ public abstract class Game {
 	
 	public void destroy() {
 		isRunning = false;
+	}
+	
+	public float getAspect() {
+		return aspectRatio;
 	}
 	
 	protected void createDisplay(DisplayMode mode, boolean fullscreen, String title) {
@@ -120,6 +138,8 @@ public abstract class Game {
 			Display.create(pixelFormat, contextAttributes);
 			
 			GL11.glViewport(0, 0, mode.getWidth(), mode.getHeight());
+			
+			aspectRatio = (float) mode.getWidth() / mode.getHeight();
 			
 		} catch (LWJGLException e) {
 			e.printStackTrace();
@@ -163,14 +183,24 @@ public abstract class Game {
 		
 		try {
 			BufferedImage image = ImageIO.read(new File(textureFile));
+
+			ByteBuffer imageBuffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4)
+					.order(ByteOrder.nativeOrder());
+
+			for (int y = 0; y < image.getHeight(); y++) {
+				for (int x = 0; x < image.getWidth(); x++) {
+					Color c = new Color(image.getRGB(x, y));
+					
+					imageBuffer.put((byte) c.getRed());
+					imageBuffer.put((byte) c.getGreen());
+					imageBuffer.put((byte) c.getBlue());
+					imageBuffer.put((byte) c.getAlpha());
+				}
+			} //TODO: not very efficient, but everything else was cancer to work with.
 			
-			int pixels[] = new int[image.getWidth() * image.getHeight()];
+			imageBuffer.flip();
 			
-			image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
-			
-			IntBuffer imageData = IntBuffer.wrap(pixels);
-			
-			int texture = renderer.createTexture(imageData, image.getWidth(), image.getHeight());
+			int texture = renderer.createTexture(imageBuffer, image.getWidth(), image.getHeight());
 			
 			Texture tex = new Texture(texture);
 			
@@ -183,7 +213,7 @@ public abstract class Game {
 		return null;
 	}
 	
-	private String loadFileAsString(String filePath) {
+	protected String loadFileAsString(String filePath) {
 		try {
 			File file = new File(filePath);
 			
@@ -207,5 +237,22 @@ public abstract class Game {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	private void checkGLError() {
+		int error = glGetError();
+		
+		if (error != GL_NO_ERROR) {
+			
+			System.err.println("OPENGL ERROR CODE: " + error);
+			
+			//if (Display.isCreated()) Display.destroy();
+			
+			//System.exit(-1);
+		}
+	}
+	
+	public static Game getCurrent() {
+		return current;
 	}
 }

@@ -3,6 +3,7 @@ package bengine.rendering;
 import static org.lwjgl.opengl.GL20.*;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import org.joml.Matrix4f;
@@ -20,17 +21,17 @@ public class Shader {
 	public Shader(int shaderHandle) {
 		this.shader = shaderHandle;
 		
-		this.viewUniform = glGetUniformLocation(shaderHandle, "viewMatrix");
+		this.viewUniform = glGetUniformLocation(shaderHandle, "viewmodelMatrix");
 		this.textureUniform = glGetUniformLocation(shaderHandle, "modelTexture");
 	}
 	
 	public void pushView(Matrix4f viewMatrix) {
 		
-		FloatBuffer matrixData = ByteBuffer.allocateDirect(16 * Float.BYTES).asFloatBuffer();
+		FloatBuffer matrixData = ByteBuffer.allocateDirect(16 * Float.BYTES)
+				.order(ByteOrder.nativeOrder())
+				.asFloatBuffer();
 		
 		viewMatrix.get(matrixData);
-		
-		matrixData.flip();
 		
 		glUniformMatrix4(this.viewUniform, false, matrixData);
 	}
@@ -76,9 +77,10 @@ public class Shader {
 		int uniformId = glGetUniformLocation(shader, uniform);
 		
 		if (uniformId != -1) {
-			FloatBuffer data = FloatBuffer.allocate(9);
+			FloatBuffer data = ByteBuffer.allocateDirect(Float.BYTES * 9)
+					.order(ByteOrder.nativeOrder())
+					.asFloatBuffer();
 			value.get(data);
-			data.flip();
 			glUniformMatrix3(uniformId, false, data);
 		}
 	}
@@ -87,9 +89,10 @@ public class Shader {
 		int uniformId = glGetUniformLocation(shader, uniform);
 		
 		if (uniformId != -1) {
-			FloatBuffer data = FloatBuffer.allocate(16);
+			FloatBuffer data = ByteBuffer.allocateDirect(Float.BYTES * 16)
+					.order(ByteOrder.nativeOrder())
+					.asFloatBuffer();
 			value.get(data);
-			data.flip();
 			glUniformMatrix4(uniformId, false, data);
 		}
 	}

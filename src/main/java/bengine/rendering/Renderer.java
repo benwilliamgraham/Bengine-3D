@@ -18,14 +18,14 @@ public class Renderer {
 	public static final int TEX_COORD_INDEX = 2;
 	
 	Shader currentShader;
-	Camera activeCamera = new Camera(new Vector3f(), 120.0f, 150.0f);
+	Camera activeCamera;
 	
 	public Renderer() {}
 	
 	public void initialize() {
 		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
+		//glEnable(GL_DEPTH_TEST);
+		//glDepthFunc(GL_LEQUAL);
 	}
 	
 	public void clear() {
@@ -39,7 +39,7 @@ public class Renderer {
 			this.currentShader = shader;
 		}
 		
-		//glUseProgram(this.currentShader.shader);
+		glUseProgram(this.currentShader.shader);
 	}
 	
 	public Shader getShader() {
@@ -54,7 +54,7 @@ public class Renderer {
 		return activeCamera;
 	}
 	
-	public int createTexture(IntBuffer imageData, int width, int height, boolean doSubsample) {
+	public int createTexture(ByteBuffer imageData, int width, int height, boolean doSubsample) {
 		int textureHandle = glGenTextures();
 		
 		glBindTexture(GL_TEXTURE_2D, textureHandle);
@@ -72,14 +72,14 @@ public class Renderer {
 		
 		glGenerateMipmap(GL_TEXTURE_2D);
 		
-		glTexImage2D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, 0, GL_RGBA_INTEGER, GL_INT, imageData);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
 		
 		glBindTexture(GL_TEXTURE_2D, 0);
 		
 		return textureHandle;
 	}
 	
-	public int createTexture(IntBuffer imageData, int width, int height) {
+	public int createTexture(ByteBuffer imageData, int width, int height) {
 		return createTexture(imageData, width, height, true);
 	}
 	
@@ -97,7 +97,7 @@ public class Renderer {
 		glVertexAttribPointer(VERTEX_INDEX, 3, GL_FLOAT, false, 0, 0L);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		
-		/*int normalBuffer = glGenBuffers();
+		int normalBuffer = glGenBuffers();
 		
 		glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
 		glBufferData(GL_ARRAY_BUFFER, normals, (isStatic)? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
@@ -107,11 +107,11 @@ public class Renderer {
 		
 		glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
 		glBufferData(GL_ARRAY_BUFFER, texCoords, GL_STATIC_DRAW);
-		glVertexAttribPointer(TEX_COORD_INDEX, 3, GL_FLOAT, false, 0, 0L);*/
+		glVertexAttribPointer(TEX_COORD_INDEX, 3, GL_FLOAT, false, 0, 0L);
 		
 		glBindVertexArray(0);
 		
-		return new int[] {vao, vertBuffer/*, normalBuffer, texCoordBuffer*/};
+		return new int[] {vao, vertBuffer, normalBuffer, texCoordBuffer};
 	}
 	
 	public void updateBuffer(int buffer, FloatBuffer data) {

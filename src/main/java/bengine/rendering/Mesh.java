@@ -1,6 +1,7 @@
 package bengine.rendering;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL11.glDrawElements;
@@ -47,6 +48,18 @@ public class Mesh implements Drawable {
 		renderObject = renderer.createVAO(isStatic, store(verticies), store(normals), store(texCoords));
 	}
 	
+	public void destroy() {
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDeleteBuffers(renderObject[1]);
+		glDeleteBuffers(renderObject[2]);
+		glDeleteBuffers(renderObject[3]);
+		
+		
+		glBindVertexArray(0);
+		glDeleteBuffers(renderObject[0]);
+		
+	}
+	
 	public void update() {
 		renderer.updateBuffer(renderObject[1], store(verticies));
 		renderer.updateBuffer(renderObject[2], store(normals));
@@ -55,27 +68,25 @@ public class Mesh implements Drawable {
 	@Override
 	public void render(Matrix4f transformMatrix) {
 		Shader s = renderer.getShader();
-		//Camera c = renderer.getCamera();
+		Camera c = renderer.getCamera();
 		
 		glBindVertexArray(renderObject[0]);
 		
 		glEnableVertexAttribArray(Renderer.VERTEX_INDEX);
-		//glEnableVertexAttribArray(Renderer.NORMAL_INDEX);
-		//glEnableVertexAttribArray(Renderer.TEX_COORD_INDEX);
+		glEnableVertexAttribArray(Renderer.NORMAL_INDEX);
+		glEnableVertexAttribArray(Renderer.TEX_COORD_INDEX);
 		
-			//Matrix4f transformedView = c.generateViewmodel()
-			//		.mul(transformMatrix);
+			Matrix4f transformedView = c.generateViewmodel()
+					 .mul(transformMatrix);
 			
-			//s.pushView(transformedView);
-			
-			//glDrawArrays(GL_TRIANGLES, 0, 6);
+			s.pushView(transformedView);
 			
 			glDrawElements(GL_TRIANGLES, indicies);
 			
 		
 		glDisableVertexAttribArray(Renderer.VERTEX_INDEX);
-		//glDisableVertexAttribArray(Renderer.NORMAL_INDEX);
-		//glDisableVertexAttribArray(Renderer.TEX_COORD_INDEX);
+		glDisableVertexAttribArray(Renderer.NORMAL_INDEX);
+		glDisableVertexAttribArray(Renderer.TEX_COORD_INDEX);
 		
 		glBindVertexArray(0);
 	}
