@@ -1,5 +1,6 @@
 package magica;
 
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -13,14 +14,9 @@ import java.util.List;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.ContextAttribs;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.PixelFormat;
 
 import bengine.Game;
+import bengine.input.Keyboard;
 import bengine.networking.PermissionManager;
 import bengine.networking.messages.DebugMessage;
 import bengine.networking.messages.HandshakeMessage;
@@ -43,22 +39,23 @@ import magica.states.TestState;
 
 public class Magica extends Game {
 	
-	private DisplayMode displayMode;
+	private int width, height;
 	private boolean isFullscreen;
 	
 	private Mesh m;
 	
 	private Material testMaterial;
 	
-	public Magica(DisplayMode displayMode, boolean isFullscreen) {
+	public Magica(int width, int height, boolean isFullscreen) {
 		super();
-		this.displayMode = displayMode;
+		this.width = width;
+		this.height = height;
 		this.isFullscreen = isFullscreen;
 	}
 	
 	@Override
 	public void onConfigure() {
-		createDisplay(displayMode, isFullscreen, "Magica: The game about sand.");
+		createDisplay(width, height, isFullscreen, "Magica: The game about sand.");
 	}
 	
 	@Override
@@ -77,23 +74,25 @@ public class Magica extends Game {
 	@Override
 	protected void onUpdate(float delta) {
 		
-		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
+		System.out.println(Math.floor(1.0 / delta) + " FPS.");
+		
+		/*if (Keyboard.isKeyDown(GLFW_KEY_W)) {
 			camera.transform.move(camera.transform.forwards().mul(2.0f * delta));
-		} else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+		} else if (Keyboard.isKeyDown(GLFW_KEY_S)) {
 			camera.transform.move(camera.transform.forwards().mul(-2.0f * delta));
 		}
 		
-		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+		if (Keyboard.isKeyDown(GLFW_KEY_A)) {
 			camera.transform.move(camera.transform.right().mul(2.0f * delta));
-		} else if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+		} else if (Keyboard.isKeyDown(GLFW_KEY_D)) {
 			camera.transform.move(camera.transform.right().mul(-2.0f * delta));
 		}
 		
-		if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
+		if (Keyboard.isKeyDown(GLFW_KEY_RIGHT)) {
 			camera.transform.rotation.rotateAxis((float) Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
-		} else if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
+		} else if (Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
 			camera.transform.rotation.rotateAxis((float) -Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
-		}
+		}*/
 	}
 	
 	@Override
@@ -119,8 +118,8 @@ public class Magica extends Game {
 		ObjectParser.registerType(PermissionManager.class, new PermissionSerializer());
 		ObjectParser.registerType(Vector3f.class, new Vector3fSerializer());
 		
-		MagicaLauncher launcher = new MagicaLauncher((DisplayMode mode, boolean isFullscreen, String serverAddress, String name) -> {
-			Game game = new Magica(mode, isFullscreen);
+		MagicaLauncher launcher = new MagicaLauncher((int width, int height, boolean isFullscreen, String serverAddress, String name) -> {
+			Game game = new Magica(width, height, isFullscreen);
 			
 			game.create();
 		});

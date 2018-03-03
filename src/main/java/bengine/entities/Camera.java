@@ -3,7 +3,6 @@ package bengine.entities;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.Display;
 
 import bengine.Game;
 import bengine.Transform;

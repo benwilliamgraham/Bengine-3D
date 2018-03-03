@@ -11,9 +11,6 @@ import bengine.rendering.Mesh;
 import bengine.rendering.Renderer;
 
 public abstract class Entity extends SyncedObject {
-	
-	private static final float collisionSkin = 0.05f; 
-	
 	public Transform transform;
 	
 	public Vector3f scale, velocity;
@@ -27,6 +24,14 @@ public abstract class Entity extends SyncedObject {
 	
 	@SyncedField("health")
 	public float health = 0;
+	
+	public Entity() {
+		this.model = null;
+		this.dimensions = new Vector3f(1.0f, 1.0f, 1.0f);
+		this.transform = new Transform();
+		this.scale = new Vector3f(1.0f, 1.0f, 1.0f);
+		this.velocity = new Vector3f(0.0f, 0.0f, 0.0f);
+	}
 	
 	public Entity(Mesh model, Vector3f dimensions, Vector3f position) {
 		this.model = model;
@@ -116,12 +121,5 @@ public abstract class Entity extends SyncedObject {
 		
 		return null;
 	}
-	
-	public void kill() {
-		this.world.destroyEntity(getInstanceID());
-	}*/
-	
-	protected float randBetween(float min, float max){
-		return (float) Math.random() * (max - min) + min;
-	}
+	*/
 }

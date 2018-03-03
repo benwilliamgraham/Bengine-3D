@@ -1,6 +1,8 @@
 package bengine;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.system.MemoryUtil.*;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -21,17 +23,16 @@ import java.util.Hashtable;
 import javax.imageio.ImageIO;
 
 import org.joml.Vector3f;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.ContextAttribs;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.PixelFormat;
+import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.system.MemoryStack;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 
 import bengine.entities.Camera;
+import bengine.input.Keyboard;
+import bengine.input.Mouse;
 import bengine.rendering.Renderer;
 import bengine.rendering.Shader;
 import bengine.rendering.Texture;
@@ -46,13 +47,19 @@ public abstract class Game {
 	
 	protected int framerateCap = Integer.MAX_VALUE;
 	
+	protected int width, height;
+	
 	protected Renderer renderer;
 	
 	private float aspectRatio;
 	private boolean isRunning = true;
 	private long lastTick = 0;
 	
-	public Game() {}
+	private long windowHandle = 0;
+	
+	public Game() {
+		//SharedLibraryLoader.load();
+	}
 	
 	protected abstract void onConfigure();
 	protected abstract void onCreated();
@@ -106,15 +113,18 @@ public abstract class Game {
 				
 				if (currentState != null) currentState.onDraw(renderer);
 			}
-			Display.update(); //if we update the display every tick, regardless of whether or not we draw anything new, then we don't get input lag when using vsync.
-			//checkGLError();
-			if (Display.isCloseRequested()) {
+			
+			glfwSwapBuffers(windowHandle);
+			glfwPollEvents();
+			//if we update the display every tick, regardless of whether or not we draw anything new, then we don't get input lag when using vsync.
+			checkGLError();
+			if (glfwWindowShouldClose(windowHandle)) {
 				break;
 			}
 		}
 		
 		onDestroyed();
-		Display.destroy();
+		glfwTerminate();
 		System.exit(0);
 	}
 	
@@ -126,30 +136,49 @@ public abstract class Game {
 		return aspectRatio;
 	}
 	
-	protected void createDisplay(DisplayMode mode, boolean fullscreen, String title) {
+	protected void createDisplay(int width, int height, boolean fullscreen, String title) {
 		
-		try {
-			PixelFormat pixelFormat = new PixelFormat();
-            ContextAttribs contextAttributes = new ContextAttribs(3, 2)
-                .withForwardCompatible(true)
-                .withProfileCore(true);
-            
-			Display.setDisplayMode(mode);
-			Display.setFullscreen(fullscreen);
-			Display.setTitle(title);
-			Display.create(pixelFormat, contextAttributes);
-			
-			GL11.glViewport(0, 0, mode.getWidth(), mode.getHeight());
-			
-			aspectRatio = (float) mode.getWidth() / mode.getHeight();
-			
-		} catch (LWJGLException e) {
-			e.printStackTrace();
+		if (!glfwInit()) {
+			System.err.println("Failed to initialize GLFW.");
+			System.exit(1);
 		}
 		
+		glfwDefaultWindowHints();
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 		
+		windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
 		
+		try ( MemoryStack stack = MemoryStack.stackPush() ) {
+			IntBuffer pWidth = stack.mallocInt(1); // int*
+			IntBuffer pHeight = stack.mallocInt(1); // int*
+
+			glfwGetWindowSize(windowHandle, pWidth, pHeight);
+
+			GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+			glfwSetWindowPos(
+				windowHandle,
+				(vidmode.width() - pWidth.get(0)) / 2,
+				(vidmode.height() - pHeight.get(0)) / 2
+			);
+		} // center the window on the screen.
 		
+		glfwMakeContextCurrent(windowHandle);
+		
+		glfwShowWindow(windowHandle);
+		
+		aspectRatio = (float) width / height;
+		
+		this.width = width;
+		this.height = height;
+		
+		GL.createCapabilities();
+		
+		glViewport(0, 0, width, height);
+		
+		Mouse.create(windowHandle);
+		Keyboard.create(windowHandle);
 	}
 	
 	protected Shader createShader(String shaderFile) {
@@ -252,6 +281,10 @@ public abstract class Game {
 			
 			//System.exit(-1);
 		}
+	}
+	
+	public Renderer getRenderer() {
+		return renderer;
 	}
 	
 	public static Game getCurrent() {

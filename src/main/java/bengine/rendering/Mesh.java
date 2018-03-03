@@ -21,20 +21,22 @@ import bengine.entities.Camera;
 
 public class Mesh implements Drawable {
 	
-	public Vector3f[] verticies, normals, texCoords;
-	public IntBuffer indicies;
+	public Vector3f[] vertices, normals, texCoords;
+	public IntBuffer indices;
 	
 	private int[] renderObject;
 	
 	private Renderer renderer;
 	
-	private boolean isStatic = false;
+	private boolean isStatic = true;
 	
-	public Mesh(Vector3f[] verticies, Vector3f[] normals, Vector3f[] texCoords, int[] indicies, boolean isStatic) {
-		this.verticies = verticies;
+	public Mesh() {}
+	
+	public Mesh(Vector3f[] vertices, Vector3f[] normals, Vector3f[] texCoords, int[] indices, boolean isStatic) {
+		this.vertices = vertices;
 		this.normals = normals;
 		this.texCoords = texCoords;
-		this.indicies = store(indicies);
+		this.indices = store(indices);
 		this.isStatic = isStatic;
 	}
 	
@@ -45,7 +47,7 @@ public class Mesh implements Drawable {
 	public void create(Renderer renderer) {
 		this.renderer = renderer;
 		
-		renderObject = renderer.createVAO(isStatic, store(verticies), store(normals), store(texCoords));
+		renderObject = renderer.createVAO(isStatic, store(vertices), store(normals), store(texCoords));
 	}
 	
 	public void destroy() {
@@ -61,7 +63,7 @@ public class Mesh implements Drawable {
 	}
 	
 	public void update() {
-		renderer.updateBuffer(renderObject[1], store(verticies));
+		renderer.updateBuffer(renderObject[1], store(vertices));
 		renderer.updateBuffer(renderObject[2], store(normals));
 	}
 	
@@ -81,7 +83,7 @@ public class Mesh implements Drawable {
 			
 			s.pushView(transformedView);
 			
-			glDrawElements(GL_TRIANGLES, indicies);
+			glDrawElements(GL_TRIANGLES, indices);
 			
 		
 		glDisableVertexAttribArray(Renderer.VERTEX_INDEX);
@@ -118,6 +120,20 @@ public class Mesh implements Drawable {
 		buf.put(data);
 		
 		buf.flip();
+		return buf;
+	}
+	
+	protected IntBuffer store(Integer[] data) {
+		IntBuffer buf = ByteBuffer.allocateDirect(data.length * Integer.BYTES)
+				.order(ByteOrder.nativeOrder())
+				.asIntBuffer();
+		
+		for (int x : data) {
+			buf.put(x);
+		}
+		
+		buf.flip();
+		
 		return buf;
 	}
 }

@@ -32,8 +32,7 @@ public class Shader {
 				.asFloatBuffer();
 		
 		viewMatrix.get(matrixData);
-		
-		glUniformMatrix4(this.viewUniform, false, matrixData);
+		glUniformMatrix4fv(this.viewUniform, false, matrixData);
 	}
 	
 	public void pushTexture(Texture texture) {
@@ -81,7 +80,7 @@ public class Shader {
 					.order(ByteOrder.nativeOrder())
 					.asFloatBuffer();
 			value.get(data);
-			glUniformMatrix3(uniformId, false, data);
+			glUniformMatrix3fv(uniformId, false, data);
 		}
 	}
 	
@@ -93,7 +92,7 @@ public class Shader {
 					.order(ByteOrder.nativeOrder())
 					.asFloatBuffer();
 			value.get(data);
-			glUniformMatrix4(uniformId, false, data);
+			glUniformMatrix4fv(uniformId, false, data);
 		}
 	}
 }

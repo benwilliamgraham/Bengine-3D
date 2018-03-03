@@ -13,10 +13,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-
 public class MagicaLauncher extends JFrame {
 	
 	private static final String[] sampleNames = new String[] {
@@ -83,24 +79,15 @@ public class MagicaLauncher extends JFrame {
 		chckbxFullscreen.setBounds(5, 110, 97, 23);
 		contentPane.add(chckbxFullscreen);
 		
-		ArrayList<DisplayMode> displayModes = new ArrayList<DisplayMode>();
+		DisplayMode[] displayModes = new DisplayMode[] {
+				new DisplayMode(640, 480),
+				new DisplayMode(800, 600),
+				new DisplayMode(1024, 768),
+				new DisplayMode(1280, 1024),
+				new DisplayMode(1366, 768)
+		};
 		
-		try {
-			for (DisplayMode mode : Display.getAvailableDisplayModes()) {
-				float displayAspect = (float)Math.floor((float) mode.getWidth() / mode.getHeight() * 10) / 10;
-				if (mode.getFrequency() >= 60 && mode.isFullscreenCapable() && (displayAspect == 1.7f || displayAspect == 1.3f) && mode.getWidth() >= 640) {
-					displayModes.add(mode);
-				}
-			}
-			
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		displayModes.sort(Comparator.comparingInt(DisplayMode::getWidth));
-		
-		JComboBox resolution = new JComboBox(displayModes.toArray());
+		JComboBox resolution = new JComboBox(displayModes);
 		resolution.setBounds(115, 64, 174, 20);
 		contentPane.add(resolution);
 		
@@ -110,13 +97,35 @@ public class MagicaLauncher extends JFrame {
 		
 		btnStartGame.addActionListener((ActionEvent e) -> {
 			
-			DisplayMode displayMode = displayModes.get(resolution.getSelectedIndex());
+			DisplayMode displayMode = displayModes[resolution.getSelectedIndex()];
 			setVisible(false);
-			callback.start(displayMode, chckbxFullscreen.isSelected(), serverAddress.getText(), name.getText());
+			callback.start(displayMode.getWidth(), displayMode.getHeight(), chckbxFullscreen.isSelected(), serverAddress.getText(), name.getText());
 		});
 	}
 	
 	public static interface MagicaCallback {
-		public void start(DisplayMode mode, boolean isFullscreen, String serverAddress, String playerName);
+		public void start(int width, int height, boolean isFullscreen, String serverAddress, String playerName);
+	}
+	
+	public static class DisplayMode {
+		public int width, height;
+		
+		public DisplayMode(int width, int height) {
+			this.width = width;
+			this.height = height;
+		}
+		
+		public int getWidth() {
+			return width;
+		}
+		
+		public int getHeight() {
+			return height;
+		}
+		
+		@Override 
+		public String toString() {
+			return this.width + " X " + this.height;
+		}
 	}
 }

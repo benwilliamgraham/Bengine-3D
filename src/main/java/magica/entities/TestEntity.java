@@ -1,9 +1,10 @@
-package magica;
+package magica.entities;
 
 import org.joml.Vector3f;
 
 import bengine.entities.Entity;
 import bengine.rendering.Mesh;
+import magica.Assets;
 
 public class TestEntity extends Entity {
 	/*public TestEntity() {
@@ -13,7 +14,7 @@ public class TestEntity extends Entity {
 	}*/
 
 	public TestEntity() {
-		super(Assets.squareMesh, new Vector3f(1.0f, 1.0f, 0.0f), new Vector3f(0.0f, 0.0f, 0.0f));
+		super(Assets.squareMesh, new Vector3f(1.0f, 1.0f, 0.0f), new Vector3f(0.0f, 0.0f, -2.0f));
 	}
 
 	@Override
@@ -23,7 +24,7 @@ public class TestEntity extends Entity {
 
 	@Override
 	public void onUpdate(float delta) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

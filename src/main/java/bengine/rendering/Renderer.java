@@ -24,8 +24,8 @@ public class Renderer {
 	
 	public void initialize() {
 		glEnable(GL_CULL_FACE);
-		//glEnable(GL_DEPTH_TEST);
-		//glDepthFunc(GL_LEQUAL);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
 	}
 	
 	public void clear() {
