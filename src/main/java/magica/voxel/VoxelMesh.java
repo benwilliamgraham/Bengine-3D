@@ -147,9 +147,9 @@ public class VoxelMesh extends Mesh {
 			}
 		}
 		
-		this.vertices = vertices.toArray(new Vector3f[vertices.size()]);
+		/*this.vertices = vertices.toArray(new Vector3f[vertices.size()]);
 		this.normals = normals.toArray(new Vector3f[normals.size()]);
-		this.texCoords = new Vector3f[] {};
+		this.texCoords = new Vector3f[] {};*/
 		this.indices = store(indices.toArray(new Integer[indices.size()]));
 	}
 }

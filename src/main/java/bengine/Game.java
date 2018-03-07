@@ -227,7 +227,7 @@ public abstract class Game {
 					imageBuffer.put((byte) c.getBlue());
 					imageBuffer.put((byte) c.getAlpha());
 				}
-			} //TODO: not very efficient, but everything else was cancer to work with.
+			} //TODO: not very efficient, but everything else was cancer to work with. switch to sdl later.
 			
 			imageBuffer.flip();
 			

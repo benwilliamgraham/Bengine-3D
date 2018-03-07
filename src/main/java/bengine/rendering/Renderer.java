@@ -114,6 +114,47 @@ public class Renderer {
 		return new int[] {vao, vertBuffer, normalBuffer, texCoordBuffer};
 	}
 	
+	public int[] createVAO(boolean isStatic, FloatBuffer verticies, FloatBuffer normals, FloatBuffer texCoords, FloatBuffer jointWeights, IntBuffer joints) {
+		int vao = glGenVertexArrays();
+		
+		glBindVertexArray(vao);
+		
+		int vertBuffer = glGenBuffers();
+		
+		glBindBuffer(GL_ARRAY_BUFFER, vertBuffer);
+		glBufferData(GL_ARRAY_BUFFER, verticies, GL_STATIC_DRAW);
+		glVertexAttribPointer(VERTEX_INDEX, 3, GL_FLOAT, false, 0, 0L);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		
+		int normalBuffer = glGenBuffers();
+		
+		glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+		glBufferData(GL_ARRAY_BUFFER, normals, (isStatic)? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(NORMAL_INDEX, 3, GL_FLOAT, false, 0, 0L);
+		
+		int texCoordBuffer = glGenBuffers();
+		
+		glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
+		glBufferData(GL_ARRAY_BUFFER, texCoords, GL_STATIC_DRAW);
+		glVertexAttribPointer(TEX_COORD_INDEX, 3, GL_FLOAT, false, 0, 0L);
+		
+		int jointWeightBuffer = glGenBuffers();
+		
+		glBindBuffer(GL_ARRAY_BUFFER, jointWeightBuffer);
+		glBufferData(GL_ARRAY_BUFFER, jointWeights, GL_STATIC_DRAW);
+		glVertexAttribPointer(4, 4, GL_FLOAT, false, 0, 0L);
+		
+		int jointIDBuffer = glGenBuffers();
+		
+		glBindBuffer(GL_ARRAY_BUFFER, jointIDBuffer);
+		glBufferData(GL_ARRAY_BUFFER, joints, GL_STATIC_DRAW);
+		glVertexAttribPointer(5, 4, GL_INT, false, 0, 0L);
+		
+		glBindVertexArray(0);
+		
+		return new int[] {vao, vertBuffer, normalBuffer, texCoordBuffer, jointWeightBuffer, jointIDBuffer};
+	}
+	
 	public void updateBuffer(int buffer, FloatBuffer data) {
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
 		glBufferData(GL_ARRAY_BUFFER, data, GL_DYNAMIC_DRAW);

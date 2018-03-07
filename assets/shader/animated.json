@@ -1,0 +1,4 @@
+{
+	"vertexShader": "./assets/shader/animated.vert",
+	"fragmentShader": "./assets/shader/specular.frag"
+}

@@ -50,7 +50,7 @@ public abstract class Entity extends SyncedObject {
 		Matrix4f transformMatrix = new Matrix4f()
 				.scale(this.scale)
 				.rotate(this.transform.rotation)
-				.translate(this.transform.position);
+				.translateLocal(this.transform.position);
 		
 		renderer.useShader(this.material.shader);
 		

@@ -22,7 +22,9 @@ public class Transform {
 	}
 	
 	public void rotate(Vector3f euler) {
-		this.rotation.rotate(euler.x, euler.y, euler.z);
+		this.rotation.rotateAxis(euler.x, right());
+		this.rotation.rotateAxis(euler.y, up());
+		this.rotation.rotateAxis(euler.z, forwards());
 	}
 	
 	public Vector3f forwards() {

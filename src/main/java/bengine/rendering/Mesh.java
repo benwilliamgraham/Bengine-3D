@@ -16,12 +16,14 @@ import java.nio.IntBuffer;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
+import org.joml.Vector4i;
 
 import bengine.entities.Camera;
 
 public class Mesh implements Drawable {
 	
-	public Vector3f[] vertices, normals, texCoords;
+	public Vertex[] vertices;
 	public IntBuffer indices;
 	
 	private int[] renderObject;
@@ -30,24 +32,51 @@ public class Mesh implements Drawable {
 	
 	private boolean isStatic = true;
 	
+	private boolean hasSkinData;
+	
 	public Mesh() {}
 	
-	public Mesh(Vector3f[] vertices, Vector3f[] normals, Vector3f[] texCoords, int[] indices, boolean isStatic) {
+	public Mesh(Vertex[] vertices, int[] indices, boolean isStatic) {
 		this.vertices = vertices;
-		this.normals = normals;
-		this.texCoords = texCoords;
 		this.indices = store(indices);
 		this.isStatic = isStatic;
 	}
 	
-	public Mesh(Vector3f[] verticies, Vector3f[] normals, Vector3f[] texCoords, int[] indicies) {
-		this(verticies, normals, texCoords, indicies, true);
+	public Mesh(Vertex[] vertices, int[] indicies) {
+		this(vertices, indicies, true);
 	}
 	
 	public void create(Renderer renderer) {
 		this.renderer = renderer;
 		
-		renderObject = renderer.createVAO(isStatic, store(vertices), store(normals), store(texCoords));
+		Vector3f[] positions = new Vector3f[vertices.length];
+		Vector3f[] normals = new Vector3f[vertices.length];
+		Vector3f[] texCoords = new Vector3f[vertices.length];
+		Vector4f[] jointWeights = new Vector4f[vertices.length];
+		Vector4i[] jointIDS = new Vector4i[vertices.length];
+		
+		hasSkinData = false;
+		
+		for (int x = 0; x < vertices.length; x++) {
+			Vertex v = vertices[x];
+			
+			positions[x] = v.position;
+			normals[x] = v.normal;
+			texCoords[x] = v.texCoord;
+			
+			if (v.skinData != null) {
+				jointWeights[x] = v.skinData.weights;
+				jointIDS[x] = v.skinData.joints;
+				
+				hasSkinData = true;
+			}
+		}
+		
+		if (hasSkinData) {
+			renderObject = renderer.createVAO(isStatic, store(positions), store(normals), store(texCoords), store(jointWeights), store(jointIDS));
+		} else {
+			renderObject = renderer.createVAO(isStatic, store(positions), store(normals), store(texCoords));
+		}
 	}
 	
 	public void destroy() {
@@ -63,8 +92,29 @@ public class Mesh implements Drawable {
 	}
 	
 	public void update() {
-		renderer.updateBuffer(renderObject[1], store(vertices));
+		Vector3f[] positions = new Vector3f[vertices.length];
+		Vector3f[] normals = new Vector3f[vertices.length];
+		
+		for (int x = 0; x < vertices.length; x++) {
+			Vertex v = vertices[x];
+			
+			positions[x] = v.position;
+			normals[x] = v.normal;
+		}
+		
+		renderer.updateBuffer(renderObject[1], store(positions));
 		renderer.updateBuffer(renderObject[2], store(normals));
+	}
+	
+	public void transform(Matrix4f transformMatrix) {
+		
+		for (Vertex v : vertices) {
+			v.transform(transformMatrix);
+		}
+		
+		if (!isStatic) {
+			update();
+		}
 	}
 	
 	@Override
@@ -77,6 +127,8 @@ public class Mesh implements Drawable {
 		glEnableVertexAttribArray(Renderer.VERTEX_INDEX);
 		glEnableVertexAttribArray(Renderer.NORMAL_INDEX);
 		glEnableVertexAttribArray(Renderer.TEX_COORD_INDEX);
+		glEnableVertexAttribArray(4);
+		glEnableVertexAttribArray(5);
 		
 			Matrix4f transformedView = c.generateViewmodel()
 					 .mul(transformMatrix);
@@ -89,12 +141,29 @@ public class Mesh implements Drawable {
 		glDisableVertexAttribArray(Renderer.VERTEX_INDEX);
 		glDisableVertexAttribArray(Renderer.NORMAL_INDEX);
 		glDisableVertexAttribArray(Renderer.TEX_COORD_INDEX);
+		glDisableVertexAttribArray(4);
+		glDisableVertexAttribArray(5);
 		
 		glBindVertexArray(0);
 	}
 	
 	public void setRenderer(Renderer r) {
 		this.renderer = r;
+	}
+	
+	private FloatBuffer store(Vector4f[] data) {
+		FloatBuffer buf = ByteBuffer.allocateDirect(data.length * 4 * Float.BYTES)
+				.order(ByteOrder.nativeOrder())
+				.asFloatBuffer();
+		
+		for (Vector4f vec : data) {
+			vec.get(buf);
+			buf.position(buf.position() + 4);
+		}
+		
+		buf.flip();
+		
+		return buf;
 	}
 	
 	private FloatBuffer store(Vector3f[] data) {
@@ -105,6 +174,21 @@ public class Mesh implements Drawable {
 		for (Vector3f vec : data) {
 			vec.get(buf);
 			buf.position(buf.position() + 3);
+		}
+		
+		buf.flip();
+		
+		return buf;
+	}
+	
+	private IntBuffer store(Vector4i[] data) {
+		IntBuffer buf = ByteBuffer.allocateDirect(data.length * 4 * Integer.BYTES)
+				.order(ByteOrder.nativeOrder())
+				.asIntBuffer();
+		
+		for (Vector4i vec : data) {
+			vec.get(buf);
+			buf.position(buf.position() + 4);
 		}
 		
 		buf.flip();

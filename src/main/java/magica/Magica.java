@@ -1,21 +1,15 @@
 package magica;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.List;
 
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import bengine.Game;
+import bengine.ModelLoader;
+import bengine.animation.Animation;
+import bengine.animation.Skeleton;
 import bengine.input.Keyboard;
 import bengine.networking.PermissionManager;
 import bengine.networking.messages.DebugMessage;
@@ -44,6 +38,10 @@ public class Magica extends Game {
 	
 	private Mesh m;
 	
+	private Skeleton s;
+	
+	private Animation a;
+	
 	private Material testMaterial;
 	
 	public Magica(int width, int height, boolean isFullscreen) {
@@ -60,7 +58,7 @@ public class Magica extends Game {
 	
 	@Override
 	protected void onCreated() {
-	Shader testShader = createShader("./assets/shader/default.json");
+		Shader testShader = createShader("./assets/shader/animated.json");
 		
 		testMaterial = new Material(testShader);
 		
@@ -69,14 +67,26 @@ public class Magica extends Game {
 		Assets.create(renderer);
 		
 		switchState(new TestState(testMaterial));
+		
+		ModelLoader modelLoader = new ModelLoader("./assets/misc/robot_rigged.fbx");
+		
+		m = modelLoader.generateMeshes()[0];
+		
+		s = modelLoader.generateSkeletons()[0];
+		
+		for (Animation a : modelLoader.generateAnimations().values()) {
+			System.out.println(a.getName());
+		}
+		
+		
 	}
 
 	@Override
 	protected void onUpdate(float delta) {
 		
-		System.out.println(Math.floor(1.0 / delta) + " FPS.");
+		//System.out.println(Math.floor(1.0 / delta) + " FPS.");
 		
-		/*if (Keyboard.isKeyDown(GLFW_KEY_W)) {
+		if (Keyboard.isKeyDown(GLFW_KEY_W)) {
 			camera.transform.move(camera.transform.forwards().mul(2.0f * delta));
 		} else if (Keyboard.isKeyDown(GLFW_KEY_S)) {
 			camera.transform.move(camera.transform.forwards().mul(-2.0f * delta));
@@ -92,7 +102,9 @@ public class Magica extends Game {
 			camera.transform.rotation.rotateAxis((float) Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
 		} else if (Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
 			camera.transform.rotation.rotateAxis((float) -Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
-		}*/
+		}
+		
+		
 	}
 	
 	@Override
@@ -108,7 +120,7 @@ public class Magica extends Game {
 		NetworkMessage.registerMessage(ObjectMessage.class);
 		NetworkMessage.registerMessage(DebugMessage.class);
 		NetworkMessage.registerMessage(RPCMessage.class);
-				
+		
 		ObjectParser.registerType(Integer.class, new IntSerializer());
 		ObjectParser.registerType(Float.class, new FloatSerializer());
 		ObjectParser.registerType(String.class, new StringSerializer());

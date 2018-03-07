@@ -3,6 +3,7 @@ package magica.states;
 import java.util.Map;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.HashMap;
@@ -33,9 +34,8 @@ public class TestState implements State {
 	@Override
 	public void onCreated() {
 		
-		Entity testEntity = new TestEntity();
-		testEntity.material = testMaterial;
-		this.entities.put(testEntity.getInstanceID(), testEntity);
+		
+		
 	}
 
 	@Override
