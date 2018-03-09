@@ -21,41 +21,29 @@ import org.joml.Vector4i;
 
 import bengine.entities.Camera;
 
-public class Mesh implements Drawable {
+public class Mesh {
 	
 	public Vertex[] vertices;
 	public IntBuffer indices;
 	
-	private int[] renderObject;
-	
-	private Renderer renderer;
-	
-	private boolean isStatic = true;
-	
-	private boolean hasSkinData;
+	private VAO renderObject;
+	private VBO positionObject, normalObject, texCoordObject, jointWeightObject, jointObject;
 	
 	public Mesh() {}
 	
-	public Mesh(Vertex[] vertices, int[] indices, boolean isStatic) {
+	public Mesh(Vertex[] vertices, int[] indices) {
 		this.vertices = vertices;
 		this.indices = store(indices);
-		this.isStatic = isStatic;
 	}
 	
-	public Mesh(Vertex[] vertices, int[] indicies) {
-		this(vertices, indicies, true);
-	}
-	
-	public void create(Renderer renderer) {
-		this.renderer = renderer;
-		
+	public void create() {
 		Vector3f[] positions = new Vector3f[vertices.length];
 		Vector3f[] normals = new Vector3f[vertices.length];
 		Vector3f[] texCoords = new Vector3f[vertices.length];
 		Vector4f[] jointWeights = new Vector4f[vertices.length];
 		Vector4i[] jointIDS = new Vector4i[vertices.length];
 		
-		hasSkinData = false;
+		boolean hasSkinData = false;
 		
 		for (int x = 0; x < vertices.length; x++) {
 			Vertex v = vertices[x];
@@ -65,30 +53,33 @@ public class Mesh implements Drawable {
 			texCoords[x] = v.texCoord;
 			
 			if (v.skinData != null) {
-				jointWeights[x] = v.skinData.weights;
-				jointIDS[x] = v.skinData.joints;
+				jointWeights[x] = v.skinData.getWeightData();
+				jointIDS[x] = v.skinData.getBoneData();
 				
 				hasSkinData = true;
 			}
 		}
 		
+		this.renderObject = new VAO();
+		
+		positionObject = new VBO(store(positions), false);
+		normalObject = new VBO(store(normals), false);
+		texCoordObject = new VBO(store(texCoords), false);
+		
 		if (hasSkinData) {
-			renderObject = renderer.createVAO(isStatic, store(positions), store(normals), store(texCoords), store(jointWeights), store(jointIDS));
-		} else {
-			renderObject = renderer.createVAO(isStatic, store(positions), store(normals), store(texCoords));
+			jointWeightObject = new VBO(store(jointWeights), false);
+			jointObject = new VBO(store(jointIDS), false);
 		}
+		
 	}
 	
 	public void destroy() {
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(renderObject[1]);
-		glDeleteBuffers(renderObject[2]);
-		glDeleteBuffers(renderObject[3]);
-		
-		
-		glBindVertexArray(0);
-		glDeleteBuffers(renderObject[0]);
-		
+		this.renderObject.destroy();
+		this.positionObject.destroy();
+		this.normalObject.destroy();
+		this.texCoordObject.destroy();
+		this.jointObject.destroy();
+		this.jointWeightObject.destroy();
 	}
 	
 	public void update() {
@@ -102,53 +93,30 @@ public class Mesh implements Drawable {
 			normals[x] = v.normal;
 		}
 		
-		renderer.updateBuffer(renderObject[1], store(positions));
-		renderer.updateBuffer(renderObject[2], store(normals));
+		
 	}
 	
 	public void transform(Matrix4f transformMatrix) {
-		
 		for (Vertex v : vertices) {
 			v.transform(transformMatrix);
 		}
-		
-		if (!isStatic) {
-			update();
-		}
 	}
 	
-	@Override
 	public void render(Matrix4f transformMatrix) {
-		Shader s = renderer.getShader();
-		Camera c = renderer.getCamera();
+		//Shader s = renderer.getShader();
+		//Camera c = renderer.getCamera();
 		
-		glBindVertexArray(renderObject[0]);
+		renderObject.bind();
 		
-		glEnableVertexAttribArray(Renderer.VERTEX_INDEX);
-		glEnableVertexAttribArray(Renderer.NORMAL_INDEX);
-		glEnableVertexAttribArray(Renderer.TEX_COORD_INDEX);
-		glEnableVertexAttribArray(4);
-		glEnableVertexAttribArray(5);
-		
-			Matrix4f transformedView = c.generateViewmodel()
-					 .mul(transformMatrix);
+			//Matrix4f transformedView = c.generateViewmodel()
+			//		 .mul(transformMatrix);
 			
-			s.pushView(transformedView);
+			//s.pushView(transformedView);
 			
 			glDrawElements(GL_TRIANGLES, indices);
 			
 		
-		glDisableVertexAttribArray(Renderer.VERTEX_INDEX);
-		glDisableVertexAttribArray(Renderer.NORMAL_INDEX);
-		glDisableVertexAttribArray(Renderer.TEX_COORD_INDEX);
-		glDisableVertexAttribArray(4);
-		glDisableVertexAttribArray(5);
-		
-		glBindVertexArray(0);
-	}
-	
-	public void setRenderer(Renderer r) {
-		this.renderer = r;
+		renderObject.unbind();
 	}
 	
 	private FloatBuffer store(Vector4f[] data) {

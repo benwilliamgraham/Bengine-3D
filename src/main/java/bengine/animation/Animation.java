@@ -69,10 +69,12 @@ public class Animation {
 		
 		int numBones = this.skeleton.bones.size();
 		
-		FloatBuffer fb = ByteBuffer.allocateDirect(numBones * 16 * Float.BYTES)
+		FloatBuffer fb = ByteBuffer.allocateDirect(50 * 16 * Float.BYTES)
 				.order(ByteOrder.nativeOrder()).asFloatBuffer();
 		
-		for (Bone b : this.skeleton.bones.values()) {
+		int index = 0;
+		
+		for (Bone b : this.skeleton.bones) {
 			
 			Matrix4f transform = new Matrix4f(b.offsetMatrix);
 			
@@ -83,12 +85,22 @@ public class Animation {
 			Vector3f scale = InterpolateScale(a.scaleKeyframes, time);
 			
 			transform
-				.scale(scale)
-				.rotate(rotation)
-				.translateLocal(position);
+				//.scale(scale)
+				//.rotate(rotation)
+				.translate(position);
 			
-			transform.get(fb);
-			fb.position(fb.position() + 16);
+			//transform.get(fb);
+			
+			//transform.identity();
+			
+			fb.put(transform.m00());fb.put(transform.m01());fb.put(transform.m02());fb.put(transform.m03());
+			fb.put(transform.m10());fb.put(transform.m11());fb.put(transform.m12());fb.put(transform.m13());
+			fb.put(transform.m20());fb.put(transform.m21());fb.put(transform.m22());fb.put(transform.m23());
+			fb.put(transform.m30());fb.put(transform.m31());fb.put(transform.m32());fb.put(transform.m33());
+			
+			//new Matrix4f().identity().get(index, fb);
+			
+			index += 16;
 		}
 		
 		fb.flip();

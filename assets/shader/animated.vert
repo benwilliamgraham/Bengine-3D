@@ -18,20 +18,22 @@ uniform mat4 viewmodelMatrix;
 
 void main(void){
 
-	vec4 totalPos = vec4(0.0);
-	vec4 totalNormal = vec4(0.0);
+	vec4 totalPos = vec4(0.0, 0.0, 0.0, 1.0);
+	vec4 totalNormal = vec4(0.0, 0.0, 0.0, 0.0);
 
-	for (int i = 0; i < MAX_WEIGHTS; i++) {
-		mat4 jointTransform = jointTransforms[jointIDS[i]];
+	for (int i = 0; i < MAX_JOINTS; i++) {
+		if (jointIDS[i] != -1) {
+		
+			mat4 jointTransform = jointTransforms[jointIDS[i]];
 
-		vec4 localPos = jointTransform * vec4(position, 1.0);
-		totalPos += localPos * jointWeights[i];
+			totalPos += jointTransform * vec4(position, 1.0) * jointWeights[i];
 
-		vec4 localNormal = jointTransform * vec4(normal, 0.0);
-		totalNormal += localNormal * jointWeights[i];
+			vec4 localNormal = jointTransform * vec4(normal, 0.0);
+			totalNormal += localNormal * jointWeights[i];
+		}
 	}
 
-	pass_normal = totalNormal.xyz;
+	pass_normal = normal;
 	pass_textureCoords = texCoords;
 	pass_position = (viewmodelMatrix * totalPos).xyz;
 	gl_Position = viewmodelMatrix * totalPos;

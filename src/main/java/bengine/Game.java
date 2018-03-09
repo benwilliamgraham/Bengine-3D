@@ -85,7 +85,7 @@ public abstract class Game {
 		
 		this.renderer.initialize();
 		
-		camera = new Camera(new Vector3f(), 120.0f, 150.0f); //Create a camera at the origin.
+		camera = new Camera(new Vector3f(0, 0, -2.0f), 120.0f, 150.0f); //Create a camera at the origin.
 		camera.name = "DefaultCamera";
 		
 		onCreated();

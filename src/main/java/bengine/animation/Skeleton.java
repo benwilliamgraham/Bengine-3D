@@ -1,16 +1,28 @@
 package bengine.animation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Skeleton {
-	public Map<String, Bone> bones;
+	public List<Bone> bones;
 	
 	public Skeleton() {
-		this.bones = new HashMap<String, Bone>();
+		this.bones = new ArrayList<Bone>();
 	}
 	
 	public void AddBone(Bone bone) {
-		this.bones.put(bone.name, bone);
+		this.bones.add(bone);
+	}
+	
+	public Bone GetBone(String boneName) {
+		for (Bone b : this.bones) {
+			if (b.name.equals(boneName)) {
+				return b;
+			}
+		}
+		
+		return null;
 	}
 }

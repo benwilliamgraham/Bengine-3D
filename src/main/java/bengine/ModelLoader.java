@@ -110,16 +110,6 @@ public class ModelLoader {
 				
 				Bone bone = new Bone(aBone.mName().dataString(), aBone.mOffsetMatrix());
 				
-				int numWeights = aBone.mNumWeights();
-				
-				AIVertexWeight.Buffer weightBuffer = aBone.mWeights();
-				
-				for (int z = 0; z < numWeights; z++) {
-					AIVertexWeight vWeight = weightBuffer.get(z);
-					
-					bone.weights.put(vWeight.mVertexId(), vWeight.mWeight());
-				}
-			
 				skeletons[n].AddBone(bone);
 				
 			}
@@ -181,6 +171,27 @@ public class ModelLoader {
 				v.texCoord = texCoord;
 				
 				vertices[x] = v;
+			}
+			
+			//Load skinning data
+			
+			for (int b = 0; b < a.mNumBones(); b++) {
+				AIBone bone = AIBone.create(a.mBones().get(b));
+				
+				for (int w = 0; w < bone.mNumWeights(); w++) {
+					AIVertexWeight weight = bone.mWeights().get(w);
+					
+					int vertexIndex = weight.mVertexId();
+					
+					if (vertices[vertexIndex].skinData == null) {
+						vertices[vertexIndex].skinData = new Vertex.SkinData();
+					}
+					
+					Vertex.SkinData skinData = vertices[vertexIndex].skinData;
+					
+					skinData.AddWeight(b, weight.mWeight());
+				}
+				
 			}
 			
 			//Load indices

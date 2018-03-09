@@ -2,8 +2,11 @@ package magica;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import bengine.Game;
@@ -66,19 +69,35 @@ public class Magica extends Game {
 		
 		Assets.create(renderer);
 		
-		switchState(new TestState(testMaterial));
-		
 		ModelLoader modelLoader = new ModelLoader("./assets/misc/robot_rigged.fbx");
 		
 		m = modelLoader.generateMeshes()[0];
+		//m.transform(Assets.blenderTransformMatrix);
+		m.create(getRenderer());
 		
 		s = modelLoader.generateSkeletons()[0];
 		
 		for (Animation a : modelLoader.generateAnimations().values()) {
 			System.out.println(a.getName());
+			
+			if (a.getName().equals("Armature|ArmWave")) {
+				this.a = a;
+				this.a.attach(s);
+			}
 		}
 		
+		FloatBuffer boneData = this.a.GetBoneDataAtTime(0.0f);
 		
+		while (boneData.hasRemaining()) {
+			float[] boneMatrix = new float[16];
+			
+			boneData.get(boneMatrix);
+			
+			System.out.println(Arrays.toString(boneMatrix));
+		}
+
+		
+		switchState(new TestState(testMaterial, m, a));
 	}
 
 	@Override
@@ -103,8 +122,6 @@ public class Magica extends Game {
 		} else if (Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
 			camera.transform.rotation.rotateAxis((float) -Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
 		}
-		
-		
 	}
 	
 	@Override

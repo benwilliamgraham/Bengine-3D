@@ -9,7 +9,9 @@ import org.joml.Vector3i;
 import java.util.HashMap;
 
 import bengine.Game;
+import bengine.ModelLoader;
 import bengine.State;
+import bengine.animation.Animation;
 import bengine.entities.Entity;
 import bengine.rendering.Material;
 import bengine.rendering.Mesh;
@@ -23,18 +25,22 @@ public class TestState implements State {
 	
 	private Material testMaterial;
 	
-	private Mesh voxelMesh;
+	private Mesh m;
+	private Animation a;
 	
-	public TestState(Material testMaterial) {
+	private float time = 0.0f;
+	
+	public TestState(Material testMaterial, Mesh m, Animation a) {
 		this.entities = new HashMap<Long, Entity>();
 		this.testMaterial = testMaterial;
+		
+		this.m = m;
+		this.a = a;
 		
 	}
 	
 	@Override
 	public void onCreated() {
-		
-		
 		
 	}
 
@@ -45,7 +51,7 @@ public class TestState implements State {
 			e.onUpdate(delta);
 		}
 		
-		
+		time += delta;
 	}
 
 	@Override
@@ -53,11 +59,14 @@ public class TestState implements State {
 		
 		renderer.useShader(testMaterial.shader);
 		
-		//voxelMesh.render(new Matrix4f().identity());
+		renderer.getShader().push("jointTransforms", a.GetBoneDataAtTime(0.0f));
 		
-		for (Entity e : this.entities.values()) {
+		m.render(new Matrix4f().identity());
+		
+		
+		/*for (Entity e : this.entities.values()) {
 			e.onDraw(renderer);
-		}
+		}*/
 	}
 
 	@Override

@@ -95,4 +95,10 @@ public class Shader {
 			glUniformMatrix4fv(uniformId, false, data);
 		}
 	}
+	
+	public void push(String uniform, FloatBuffer data) {
+		int uniformId = glGetUniformLocation(shader, uniform);
+		
+		glUniformMatrix4fv(uniformId, false, data);
+	}
 }
