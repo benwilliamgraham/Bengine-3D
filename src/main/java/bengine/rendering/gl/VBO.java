@@ -9,40 +9,41 @@ import java.nio.IntBuffer;
 public class VBO {
 	
 	protected int glBufferObject = -1;
-	protected boolean dynamic = false;
 	
-	public VBO(FloatBuffer data, boolean dynamic) {
+	private int target, usage;
+	
+	public VBO(FloatBuffer data, int target, int usage) {
 		this.glBufferObject = glGenBuffers();
-		this.dynamic = dynamic;
+		
+		this.target = target;
+		this.usage = usage;
 		
 		bind();
-		glBufferData(GL_ARRAY_BUFFER, data, (dynamic)? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+		glBufferData(target, data, usage);
 		unbind();
 	}
 	
-	public VBO(IntBuffer data, boolean dynamic) {
+	public VBO(IntBuffer data, int target, int usage) {
 		this.glBufferObject = glGenBuffers();
-		this.dynamic = dynamic;
+		
+		this.target = target;
+		this.usage = usage;
 		
 		bind();
-		glBufferData(GL_ARRAY_BUFFER, data, (dynamic)? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+		glBufferData(target, data, usage);
 		unbind();
 	}
 	
 	public void setData(FloatBuffer data) {
-		if (dynamic) {
-			bind();
-			glBufferData(GL_ARRAY_BUFFER, data, GL_DYNAMIC_DRAW);
-			unbind();
-		}
+		bind();
+		glBufferData(target, data, usage);
+		unbind();
 	}
 	
 	public void setData(IntBuffer data) {
-		if (dynamic) {
-			bind();
-			glBufferData(GL_ARRAY_BUFFER, data, GL_DYNAMIC_DRAW);
-			unbind();
-		}
+		bind();
+		glBufferData(target, data, usage);
+		unbind();
 	}
 	
 	public void bind() {

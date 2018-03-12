@@ -41,6 +41,9 @@ public class Shader extends Asset {
 		synchronized(getGame().renderLock) {
 			getGame().grab(); //Bring the opengl context into the loader thread.
 			
+			//TODO: fix issue where shader creation fails randomly without an error message.
+			//Likely related to a thread switching issue with opengl.
+			
 			vertexShader = glCreateShader(GL_VERTEX_SHADER);
 			
 			glShaderSource(vertexShader, vertexSource);
