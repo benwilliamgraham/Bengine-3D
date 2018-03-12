@@ -1,19 +1,16 @@
 package magica;
 
-import static org.lwjgl.glfw.GLFW.*;
-
-import java.nio.FloatBuffer;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import bengine.Game;
-import bengine.ModelLoader;
-import bengine.animation.Animation;
-import bengine.animation.Skeleton;
-import bengine.input.Keyboard;
+import bengine.State;
+import bengine.assets.AssetLoader;
+import bengine.assets.AssetManager;
+import bengine.assets.Model;
+import bengine.assets.Shader;
 import bengine.networking.PermissionManager;
 import bengine.networking.messages.DebugMessage;
 import bengine.networking.messages.HandshakeMessage;
@@ -29,23 +26,12 @@ import bengine.networking.serialization.serializers.LongSerializer;
 import bengine.networking.serialization.serializers.PermissionSerializer;
 import bengine.networking.serialization.serializers.StringSerializer;
 import bengine.networking.serialization.serializers.Vector3fSerializer;
-import bengine.rendering.Material;
-import bengine.rendering.Mesh;
-import bengine.rendering.Shader;
 import magica.states.TestState;
 
 public class Magica extends Game {
 	
 	private int width, height;
 	private boolean isFullscreen;
-	
-	private Mesh m;
-	
-	private Skeleton s;
-	
-	private Animation a;
-	
-	private Material testMaterial;
 	
 	public Magica(int width, int height, boolean isFullscreen) {
 		super();
@@ -61,67 +47,31 @@ public class Magica extends Game {
 	
 	@Override
 	protected void onCreated() {
-		Shader testShader = createShader("./assets/shader/animated.json");
 		
-		testMaterial = new Material(testShader);
-		
-		testMaterial.texture = createTexture("./assets/misc/hatch.png");
-		
-		Assets.create(renderer);
-		
-		ModelLoader modelLoader = new ModelLoader("./assets/misc/robot_rigged.fbx");
-		
-		m = modelLoader.generateMeshes()[0];
-		//m.transform(Assets.blenderTransformMatrix);
-		m.create(getRenderer());
-		
-		s = modelLoader.generateSkeletons()[0];
-		
-		for (Animation a : modelLoader.generateAnimations().values()) {
-			System.out.println(a.getName());
-			
-			if (a.getName().equals("Armature|ArmWave")) {
-				this.a = a;
-				this.a.attach(s);
-			}
-		}
-		
-		FloatBuffer boneData = this.a.GetBoneDataAtTime(0.0f);
-		
-		while (boneData.hasRemaining()) {
-			float[] boneMatrix = new float[16];
-			
-			boneData.get(boneMatrix);
-			
-			System.out.println(Arrays.toString(boneMatrix));
-		}
+		AssetLoader loader = new AssetLoader(this) {
 
+			@Override
+			protected void onLoaded(AssetManager assets) {
+				State newState = new TestState(assets);
+				
+				
+				switchState(newState);
+			}
+			
+		};
 		
-		switchState(new TestState(testMaterial, m, a));
+		loader.addAsset("defaultShader", new Shader(new File("./assets/shader/default.json")));
+		loader.addAsset("animatedShader", new Shader(new File("./assets/shader/animated.json")));
+		loader.addAsset("robotModel", new Model(new File("./assets/misc/robot_rigged.fbx")));
+		loader.addAsset("simpleShader", new Shader(new File("./assets/shader/simple/simple.json")));
+		
+		switchState(loader.load()); //Switch to the loading state while we load the assets.
 	}
 
 	@Override
 	protected void onUpdate(float delta) {
 		
 		//System.out.println(Math.floor(1.0 / delta) + " FPS.");
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_W)) {
-			camera.transform.move(camera.transform.forwards().mul(2.0f * delta));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_S)) {
-			camera.transform.move(camera.transform.forwards().mul(-2.0f * delta));
-		}
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_A)) {
-			camera.transform.move(camera.transform.right().mul(2.0f * delta));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_D)) {
-			camera.transform.move(camera.transform.right().mul(-2.0f * delta));
-		}
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_RIGHT)) {
-			camera.transform.rotation.rotateAxis((float) Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
-			camera.transform.rotation.rotateAxis((float) -Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
-		}
 	}
 	
 	@Override

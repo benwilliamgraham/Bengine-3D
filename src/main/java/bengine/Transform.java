@@ -1,6 +1,7 @@
 package bengine;
 
 import org.joml.Vector3f;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 public class Transform {
@@ -46,5 +47,11 @@ public class Transform {
 		this.rotation.invert(invRot);
 		return new Vector3f(0.0f, 1.0f, 0.0f)
 				.rotate(invRot);
+	}
+
+	public Matrix4f apply(Matrix4f transformMatrix) {
+		return transformMatrix
+			.rotate(this.rotation)
+			.translate(this.position);
 	}
 }

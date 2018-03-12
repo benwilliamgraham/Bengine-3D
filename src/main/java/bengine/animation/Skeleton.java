@@ -1,9 +1,7 @@
 package bengine.animation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Skeleton {
 	public List<Bone> bones;
@@ -24,5 +22,15 @@ public class Skeleton {
 		}
 		
 		return null;
+	}
+	
+	public int ResolveName(String boneName) {
+		for (int i = 0; i < bones.size(); i++) {
+			if (bones.get(i).name.equals(boneName)) {
+				return i;
+			}
+		}
+		
+		return -1;
 	}
 }

@@ -1,79 +1,86 @@
 package magica.states;
 
-import java.util.Map;
+import static org.lwjgl.glfw.GLFW.*;
 
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
-
-import java.util.HashMap;
 
 import bengine.Game;
-import bengine.ModelLoader;
+import bengine.Scene;
 import bengine.State;
-import bengine.animation.Animation;
-import bengine.entities.Entity;
+import bengine.assets.AssetManager;
+import bengine.input.Keyboard;
 import bengine.rendering.Material;
-import bengine.rendering.Mesh;
 import bengine.rendering.Renderer;
 import magica.entities.TestEntity;
-import magica.voxel.VoxelMesh;
 
 public class TestState implements State {
-
-	protected Map<Long, Entity> entities;
 	
-	private Material testMaterial;
+	protected Game game;
 	
-	private Mesh m;
-	private Animation a;
+	protected Renderer renderer;
+	protected Scene scene;
 	
-	private float time = 0.0f;
+	private AssetManager assets;
 	
-	public TestState(Material testMaterial, Mesh m, Animation a) {
-		this.entities = new HashMap<Long, Entity>();
-		this.testMaterial = testMaterial;
+	private Material defaultMaterial;
+	
+	public TestState(AssetManager assets) {
+		this.assets = assets;
 		
-		this.m = m;
-		this.a = a;
+		defaultMaterial = new Material(assets.getAsset("defaultShader"));
 		
+		renderer = new Renderer(defaultMaterial);
 	}
 	
 	@Override
-	public void onCreated() {
+	public void onCreated(Game game) {
+		this.game = game;
+		this.scene = new Scene(assets);
 		
+		TestEntity robotEntity = new TestEntity();
+		
+		this.scene.addEntity(robotEntity);	
 	}
 
 	@Override
 	public void onUpdate(float delta) {
 		
-		for (Entity e : this.entities.values()) {
-			e.onUpdate(delta);
+		if (Keyboard.isKeyDown(GLFW_KEY_W)) {
+			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul(2.0f * delta));
+		} else if (Keyboard.isKeyDown(GLFW_KEY_S)) {
+			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul(-2.0f * delta));
 		}
 		
-		time += delta;
+		if (Keyboard.isKeyDown(GLFW_KEY_A)) {
+			scene.getCamera().transform.move(scene.getCamera().transform.right().mul(2.0f * delta));
+		} else if (Keyboard.isKeyDown(GLFW_KEY_D)) {
+			scene.getCamera().transform.move(scene.getCamera().transform.right().mul(-2.0f * delta));
+		}
+		
+		if (Keyboard.isKeyDown(GLFW_KEY_RIGHT)) {
+			scene.getCamera().transform.rotation.rotateAxis((float) Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
+		} else if (Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
+			scene.getCamera().transform.rotation.rotateAxis((float) -Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
+		}
+		
+		
+		scene.update(delta);
 	}
 
 	@Override
-	public void onDraw(Renderer renderer) {
+	public void onDraw() {
+		renderer.clear(scene.getCamera().clearColor);
 		
-		renderer.useShader(testMaterial.shader);
-		
-		renderer.getShader().push("jointTransforms", a.GetBoneDataAtTime(0.0f));
-		
-		m.render(new Matrix4f().identity());
-		
-		
-		/*for (Entity e : this.entities.values()) {
-			e.onDraw(renderer);
-		}*/
+		renderer.render(scene);
 	}
 
 	@Override
 	public void onDestroyed() {
-		for (Entity e : this.entities.values()) {
-			e.onDestroyed();
-		}
+		assets.destroy();
 	}
+
 	
+	public Renderer getRenderer() {
+		return renderer;
+	}
 }

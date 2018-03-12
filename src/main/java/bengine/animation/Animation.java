@@ -1,60 +1,41 @@
 package bengine.animation;
 
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.lwjgl.assimp.AIAnimation;
+import org.lwjgl.assimp.AIMatrix4x4;
+import org.lwjgl.assimp.AINode;
+import org.lwjgl.assimp.AINodeAnim;
+import org.lwjgl.assimp.AIQuatKey;
+import org.lwjgl.assimp.AIQuaternion;
+import org.lwjgl.assimp.AIScene;
+import org.lwjgl.assimp.AIVector3D;
+import org.lwjgl.assimp.AIVectorKey;
+
 public class Animation {
 	
+	public boolean doLoop = false;
+	
 	public float duration;
+	public float time;
 	
 	protected String name;
 	protected Skeleton skeleton;
-	protected Map<String, BoneAnimationData> animationData;
+	protected AIAnimation animationData;
+	protected AIScene scene;
 	
-	public Animation(String name) {
-		this.name = name;
-		this.animationData = new HashMap<String, BoneAnimationData>();
-	}
+	private boolean isPlaying;
 	
-	public void AddPositionKeyframe(String bone, KeyFrame frame) {
-		
-		if (!animationData.containsKey(bone)) {
-			animationData.put(bone, new BoneAnimationData());
-		}
-		
-		animationData.get(bone).AddPositionKeyframe(frame);
-	}
-	
-	public void AddRotationKeyframe(String bone, KeyFrame frame) {
-		
-		if (!animationData.containsKey(bone)) {
-			animationData.put(bone, new BoneAnimationData());
-		}
-		
-		animationData.get(bone).AddRotationKeyframe(frame);
-	}
-	
-	public void AddScalingKeyframe(String bone, KeyFrame frame) {
-
-		if (!animationData.containsKey(bone)) {
-			animationData.put(bone, new BoneAnimationData());
-		}
-		
-		animationData.get(bone).AddScalingKeyframe(frame);
+	public Animation(AIAnimation animation, AIScene scene) {
+		this.name = animation.mName().dataString();
+		this.duration = (float) animation.mDuration();
+		this.animationData = animation;
+		this.scene = scene;
 	}
 	
 	public void attach(Skeleton k) {
@@ -63,49 +44,45 @@ public class Animation {
 		}
 	}
 	
-	public FloatBuffer GetBoneDataAtTime(float t) {
+	public void play() {
+		isPlaying = true;
+	}
+	
+	public void pause() {
+		isPlaying = false;
+	}
+	
+	public void update(float delta) {
+		if (isPlaying) {
+			time += delta;
+		}
+	}
+	
+	public void reset() {
+		time = 0;
+	}
+	
+	public Matrix4f[] GetBoneData() {
 		
-		float time = t % this.duration;
+		float animTime = convertAnimTime(time);
 		
-		int numBones = this.skeleton.bones.size();
-		
-		FloatBuffer fb = ByteBuffer.allocateDirect(50 * 16 * Float.BYTES)
-				.order(ByteOrder.nativeOrder()).asFloatBuffer();
-		
-		int index = 0;
-		
-		for (Bone b : this.skeleton.bones) {
-			
-			Matrix4f transform = new Matrix4f(b.offsetMatrix);
-			
-			BoneAnimationData a = this.animationData.get(b.name);
-			
-			Vector3f position = InterpolatePosition(a.positionKeyframes, time);
-			Quaternionf rotation = InterpolateRotation(a.rotationKeyframes, time);
-			Vector3f scale = InterpolateScale(a.scaleKeyframes, time);
-			
-			transform
-				//.scale(scale)
-				//.rotate(rotation)
-				.translate(position);
-			
-			//transform.get(fb);
-			
-			//transform.identity();
-			
-			fb.put(transform.m00());fb.put(transform.m01());fb.put(transform.m02());fb.put(transform.m03());
-			fb.put(transform.m10());fb.put(transform.m11());fb.put(transform.m12());fb.put(transform.m13());
-			fb.put(transform.m20());fb.put(transform.m21());fb.put(transform.m22());fb.put(transform.m23());
-			fb.put(transform.m30());fb.put(transform.m31());fb.put(transform.m32());fb.put(transform.m33());
-			
-			//new Matrix4f().identity().get(index, fb);
-			
-			index += 16;
+		if (animTime > duration) {
+			if (doLoop) {
+				animTime = animTime % duration;
+			} else {
+				animTime = duration;
+			}
 		}
 		
-		fb.flip();
+		ReadSkeletonPositions(animTime, scene.mRootNode(), new Matrix4f().identity()); //"Poses" the skeleton, so to speak.
 		
-		return fb;
+		Matrix4f[] boneMatricies = new Matrix4f[skeleton.bones.size()]; 
+		
+		for (int b = 0; b < boneMatricies.length; b++) {
+			boneMatricies[b] = new Matrix4f(skeleton.bones.get(b).finalTransform);
+		}
+		
+		return boneMatricies;
 	}
 	
 	public Skeleton getSkeleton() {
@@ -116,143 +93,160 @@ public class Animation {
 		return name;
 	}
 	
-	private Vector3f InterpolatePosition(List<KeyFrame> frames, float time) {
+	private void ReadSkeletonPositions(float time, AINode node, Matrix4f parentTransform) {
 		
-		Vector3f position = new Vector3f();
+		Matrix4f globalInverseTransform = convertMat(scene.mRootNode().mTransformation()).invert();
 		
-		ListIterator<KeyFrame> i = frames.listIterator();
+		Matrix4f nodeTransformation = convertMat(node.mTransformation());
 		
-		while (i.hasNext()) {
-			KeyFrame k1 = i.next();
+		AINodeAnim nodeAnimation = GetNodeAnim(animationData, node.mName().dataString());
+		
+		if (nodeAnimation != null) {
 			
-			if (k1.time > time) {
-				position = new Vector3f();
-			} else if (k1.time == time) {
-				position = new Vector3f(k1.position);
-			} if (k1.time < time) {
-				if (i.hasNext()) { //is there another element in the list after this.
-					KeyFrame k2 = i.next();
-					
-					if (k2.time > time) {
-						float delta = (time - k1.time) / (k2.time - k1.time);
-						position = new Vector3f();
-						k1.position.lerp(k2.position, delta, position);
-						break;
-					} else {
-						i.previous();
-						continue;
-					}
-				}
-			}
+			Matrix4f position = GetPositionAt(time, nodeAnimation);
+			Matrix4f rotation = GetRotationAt(time, nodeAnimation);
+			Matrix4f scaling  = GetScalingAt(time, nodeAnimation);
+			
+			nodeTransformation = new Matrix4f()
+					.identity()
+					.mul(position)
+					.mul(rotation)
+					.mul(scaling);
 		}
 		
-		return position;
-	}
-	
-	private Vector3f InterpolateScale(List<KeyFrame> frames, float time) {
-		Vector3f scale = new Vector3f();
+		Matrix4f globalTransform = new Matrix4f()
+				.mul(parentTransform)
+				.mul(nodeTransformation);
 		
-		ListIterator<KeyFrame> i = frames.listIterator();
+		Bone b = skeleton.GetBone(node.mName().dataString());
 		
-		while (i.hasNext()) {
-			KeyFrame k1 = i.next();
-			
-			if (k1.time > time) {
-				scale = new Vector3f(1, 1, 1);
-			} else if (k1.time == time) {
-				scale = new Vector3f(k1.scale);
-			} if (k1.time < time) {
-				if (i.hasNext()) { //is there another element in the list after this.
-					KeyFrame k2 = i.next();
-					
-					if (k2.time > time) {
-						float delta = (time - k1.time) / (k2.time - k1.time);
-						scale = new Vector3f();
-						k1.scale.lerp(k2.scale, delta, scale);
-						break;
-					} else {
-						i.previous();
-						continue;
-					}
-				}
-			}
+		if (b != null) {
+			b.finalTransform = globalInverseTransform
+					.mul(globalTransform)
+					.mul(b.offsetMatrix);
 		}
 		
-		return scale;
-	}
-	
-	private Quaternionf InterpolateRotation(List<KeyFrame> frames, float time) {
-		Quaternionf rotation = new Quaternionf();
-		
-		ListIterator<KeyFrame> i = frames.listIterator();
-		
-		while (i.hasNext()) {
-			KeyFrame k1 = i.next();
-			
-			if (k1.time > time) {
-				rotation = new Quaternionf();
-			} else if (k1.time == time) {
-				rotation = new Quaternionf(k1.rotation);
-			} if (k1.time < time) {
-				if (i.hasNext()) { //is there another element in the list after this.
-					KeyFrame k2 = i.next();
-					
-					if (k2.time > time) {
-						float delta = (time - k1.time) / (k2.time - k1.time);
-						rotation = new Quaternionf();
-						k1.rotation.slerp(k2.rotation, delta, rotation);
-						break;
-					} else {
-						i.previous();
-						continue;
-					}
-				}
-			}
-		}
-		
-		return rotation;
-	}
-	
-	public static class BoneAnimationData {
-		
-		public List<KeyFrame> positionKeyframes, rotationKeyframes, scaleKeyframes;
-		
-		public BoneAnimationData() {
-			this.positionKeyframes = new ArrayList<KeyFrame>();
-			this.rotationKeyframes = new ArrayList<KeyFrame>();
-			this.scaleKeyframes = new ArrayList<KeyFrame>();
-		}
-		
-		public void AddPositionKeyframe(KeyFrame frame) {
-			this.positionKeyframes.add(frame);
-			
-			this.positionKeyframes.sort(new KFComparator());
-		}
-		
-		public void AddRotationKeyframe(KeyFrame frame) {
-			this.rotationKeyframes.add(frame);
-			
-			this.rotationKeyframes.sort(new KFComparator());
-		}
-		
-		public void AddScalingKeyframe(KeyFrame frame) {
-			this.scaleKeyframes.add(frame);
-			
-			this.scaleKeyframes.sort(new KFComparator());
+		for (int c = 0; c < node.mNumChildren(); c++) {
+			ReadSkeletonPositions(time, AINode.create(node.mChildren().get(c)), globalTransform);
 		}
 	}
 	
-	static class KFComparator implements Comparator<KeyFrame> {
-
-		@Override
-		public int compare(KeyFrame o1, KeyFrame o2) {
-			if (o1.time > o2.time) {
-				return 1;
-			} else if (o1.time < o2.time) {
-				return -1;
+	private AINodeAnim GetNodeAnim(AIAnimation a, String nodeName) {
+		
+		for (int c = 0; c < a.mNumChannels(); c++) {
+			AINodeAnim nodeAnim = AINodeAnim.create(a.mChannels().get(c));
+			
+			if (nodeAnim.mNodeName().dataString().equals(nodeName)) {
+				return nodeAnim;
 			}
-			return 0;
 		}
 		
+		return null;
+	}
+	
+	private Matrix4f GetPositionAt(float time, AINodeAnim nodeAnimation) {
+		
+		Matrix4f mat = new Matrix4f().identity();
+		
+		if (nodeAnimation.mNumPositionKeys() == 1) {
+			mat.translate(convertVec(nodeAnimation.mPositionKeys().get().mValue()));
+		}
+		
+		AIVectorKey start = null, end = null;
+		
+		float factor = 0;
+		
+		for (int k = 0; k < nodeAnimation.mNumPositionKeys() - 1; k++) {
+			if (time < nodeAnimation.mPositionKeys().get(k + 1).mTime()) {
+				start = nodeAnimation.mPositionKeys().get(k);
+				end = nodeAnimation.mPositionKeys().get(k + 1);
+				
+				factor = (float) ((end.mTime() - time) / (end.mTime() - start.mTime()));
+				break;
+			}
+		}
+		
+		Vector3f position = convertVec(start.mValue()).lerp(convertVec(end.mValue()), factor);
+		
+		mat.translate(position);
+		
+		return mat;
+	}
+	
+	private Matrix4f GetRotationAt(float time, AINodeAnim nodeAnimation) {
+		Matrix4f mat = new Matrix4f().identity();
+		
+		if (nodeAnimation.mNumRotationKeys() == 1) {
+			mat.rotate(convertQuat(nodeAnimation.mRotationKeys().get().mValue()));
+		}
+		
+		AIQuatKey start = null, end = null;
+		
+		float factor = 0;
+		
+		for (int k = 0; k < nodeAnimation.mNumRotationKeys() - 1; k++) {
+			if (time < nodeAnimation.mRotationKeys().get(k + 1).mTime()) {
+				start = nodeAnimation.mRotationKeys().get(k);
+				end = nodeAnimation.mRotationKeys().get(k + 1);
+				
+				factor = (float) ((end.mTime() - time) / (end.mTime() - start.mTime()));
+				break;
+			}
+		}
+		
+		Quaternionf rotation = convertQuat(start.mValue()).nlerp(convertQuat(end.mValue()), factor);
+		
+		mat.rotate(rotation);
+		
+		return mat;
+	}
+	
+	private Matrix4f GetScalingAt(float time, AINodeAnim nodeAnimation) {
+		Matrix4f mat = new Matrix4f().identity();
+		
+		if (nodeAnimation.mNumScalingKeys() == 1) {
+			mat.scale(convertVec(nodeAnimation.mPositionKeys().get().mValue()));
+		}
+		
+		AIVectorKey start = null, end = null;
+		
+		float factor = 0;
+		
+		for (int k = 0; k < nodeAnimation.mNumScalingKeys() - 1; k++) {
+			if (time < nodeAnimation.mScalingKeys().get(k + 1).mTime()) {
+				start = nodeAnimation.mScalingKeys().get(k);
+				end = nodeAnimation.mScalingKeys().get(k + 1);
+				
+				factor = (float) ((end.mTime() - time) / (end.mTime() - start.mTime()));
+				break;
+			}
+		}
+		
+		Vector3f scale = convertVec(start.mValue()).lerp(convertVec(end.mValue()), factor);
+		
+		mat.scale(scale);
+		
+		return mat;
+	}
+	
+	private float convertAnimTime(float time) {
+		float ticksPerSecond = (animationData.mTicksPerSecond() == 0)? 24: (float) animationData.mTicksPerSecond();
+		return time * ticksPerSecond;
+	}
+	
+	private Matrix4f convertMat(AIMatrix4x4 mat) {
+		return new Matrix4f(
+				mat.a1(), mat.a2(), mat.a3(), mat.a4(),
+				mat.b1(), mat.b2(), mat.b3(), mat.b4(),
+				mat.c1(), mat.c2(), mat.c3(), mat.c4(),
+				mat.d1(), mat.d2(), mat.d3(), mat.d4());
+	}
+	
+	private Quaternionf convertQuat(AIQuaternion quat) {
+		return new Quaternionf(quat.x(), quat.y(), quat.z(), quat.w());
+	}
+	
+	private Vector3f convertVec(AIVector3D vec) {
+		return new Vector3f(vec.x(), vec.y(), vec.z());
 	}
 }

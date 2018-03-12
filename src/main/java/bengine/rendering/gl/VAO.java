@@ -1,8 +1,9 @@
-package bengine.rendering;
+package bengine.rendering.gl;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -15,7 +16,7 @@ public class VAO {
 		this.glArrayObject = glGenVertexArrays();
 	}
 	
-	public void attach(int index, VBO buffer, int glType, int size, int bytes) {
+	public VAO attach(int index, VBO buffer, int glType, int size) {
 		attribs.add(index);
 		
 		bind();
@@ -23,6 +24,8 @@ public class VAO {
 		glVertexAttribPointer(index, size, glType, false, 0, 0L);
 		buffer.unbind();
 		unbind();
+		
+		return this;
 	}
 	
 	public void bind() {

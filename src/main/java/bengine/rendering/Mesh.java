@@ -19,12 +19,19 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.joml.Vector4i;
 
+import bengine.animation.Skeleton;
 import bengine.entities.Camera;
+import bengine.rendering.gl.VAO;
+import bengine.rendering.gl.VBO;
 
-public class Mesh {
+public class Mesh implements Drawable {
 	
 	public Vertex[] vertices;
 	public IntBuffer indices;
+	
+	public Skeleton skeleton;
+	
+	public int materialIndex;
 	
 	private VAO renderObject;
 	private VBO positionObject, normalObject, texCoordObject, jointWeightObject, jointObject;
@@ -66,11 +73,18 @@ public class Mesh {
 		normalObject = new VBO(store(normals), false);
 		texCoordObject = new VBO(store(texCoords), false);
 		
+		renderObject.attach(0, positionObject, GL_FLOAT, 3);
+		//renderObject.attach(1, normalObject, GL_FLOAT, 3);
+		//renderObject.attach(2, texCoordObject, GL_FLOAT, 3);
+		
 		if (hasSkinData) {
 			jointWeightObject = new VBO(store(jointWeights), false);
 			jointObject = new VBO(store(jointIDS), false);
+			
+			//renderObject.attach(3, jointWeightObject, GL_FLOAT, 4);
+			//renderObject.attach(4, jointObject, GL_FLOAT, 4);
+			
 		}
-		
 	}
 	
 	public void destroy() {
@@ -102,21 +116,14 @@ public class Mesh {
 		}
 	}
 	
-	public void render(Matrix4f transformMatrix) {
-		//Shader s = renderer.getShader();
-		//Camera c = renderer.getCamera();
-		
-		renderObject.bind();
-		
-			//Matrix4f transformedView = c.generateViewmodel()
-			//		 .mul(transformMatrix);
-			
-			//s.pushView(transformedView);
-			
-			glDrawElements(GL_TRIANGLES, indices);
-			
-		
-		renderObject.unbind();
+	@Override
+	public VAO getRenderable() {
+		return this.renderObject;
+	}
+	
+	@Override
+	public IntBuffer getIndices() {
+		return this.indices;
 	}
 	
 	private FloatBuffer store(Vector4f[] data) {

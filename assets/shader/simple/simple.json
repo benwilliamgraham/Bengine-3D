@@ -1,0 +1,4 @@
+{
+	"vertexShader": "./assets/shader/simple/simple.vert",
+	"fragmentShader": "./assets/shader/simple/simple.frag"
+}

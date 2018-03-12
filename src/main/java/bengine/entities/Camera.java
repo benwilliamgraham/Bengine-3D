@@ -25,9 +25,11 @@ public class Camera {
 		this.clearColor = new Vector3f(0.4f, 0.6f, 0.9f);
 	}
 	
+	public void onUpdate(float delta) {}
+	
 	public Matrix4f generateViewmodel() {
 		return new Matrix4f(viewMatrix)
 				.rotate(this.transform.rotation)
-				.translate(this.transform.position);
+				.translate(new Vector3f(this.transform.position).mul(-1));
 	}
 }

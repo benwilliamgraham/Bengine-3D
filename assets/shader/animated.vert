@@ -21,7 +21,7 @@ void main(void){
 	vec4 totalPos = vec4(0.0, 0.0, 0.0, 1.0);
 	vec4 totalNormal = vec4(0.0, 0.0, 0.0, 0.0);
 
-	for (int i = 0; i < MAX_JOINTS; i++) {
+	for (int i = 0; i < MAX_WEIGHTS; i++) {
 		if (jointIDS[i] != -1) {
 		
 			mat4 jointTransform = jointTransforms[jointIDS[i]];

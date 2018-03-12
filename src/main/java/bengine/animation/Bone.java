@@ -1,6 +1,8 @@
 package bengine.animation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.joml.Matrix4f;
@@ -9,13 +11,10 @@ import org.lwjgl.assimp.AIMatrix4x4;
 public class Bone {
 	
 	public String name;
-	public Matrix4f offsetMatrix;
-	public Map<Integer, Float> weights;
+	public Matrix4f offsetMatrix, finalTransform;
 	
 	public Bone(String name, AIMatrix4x4 offsetMatrix) {
 		this.name = name;
-		
-		this.weights = new HashMap<Integer, Float>();
 		
 		this.offsetMatrix = new Matrix4f();
 		

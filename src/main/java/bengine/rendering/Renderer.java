@@ -1,209 +1,33 @@
 package bengine.rendering;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
 
-import org.joml.*;
+import org.joml.Vector3f;
 
-import bengine.entities.Camera;
-
-import java.nio.*;
+import bengine.Scene;
+import bengine.State;
+import bengine.assets.Shader;
+import bengine.entities.Entity;
+import bengine.rendering.renderers.EntityRenderer;
 
 public class Renderer {
 	
-	public static final int VERTEX_INDEX = 0;
-	public static final int NORMAL_INDEX = 1;
-	public static final int TEX_COORD_INDEX = 2;
+	EntityRenderer renderer;
 	
-	Shader currentShader;
-	Camera activeCamera;
-	
-	public Renderer() {}
-	
-	public void initialize() {
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
+	public Renderer(Material defaultMaterial) {
+		renderer = new EntityRenderer(defaultMaterial);
 	}
 	
-	public void clear() {
-		glClearColor(activeCamera.clearColor.x, activeCamera.clearColor.y, activeCamera.clearColor.z, 1.0f);
+	public void clear(Vector3f color) {
+		glClearColor(color.x, color.y, color.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	
-	public void useShader(Shader shader) {
+	public void render(Scene scene) {
 		
-		if (shader != null) {
-			this.currentShader = shader;
+		for (Entity e : scene.getEntities()) {
+			renderer.render(e, scene.getCamera());
 		}
 		
-		glUseProgram(this.currentShader.shader);
-	}
-	
-	public Shader getShader() {
-		return currentShader;
-	}
-	
-	public void useCamera(Camera camera) {
-		this.activeCamera = camera;
-	}
-	
-	public Camera getCamera() { 
-		return activeCamera;
-	}
-	
-	public int createTexture(ByteBuffer imageData, int width, int height, boolean doSubsample) {
-		int textureHandle = glGenTextures();
-		
-		glBindTexture(GL_TEXTURE_2D, textureHandle);
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		
-		if (doSubsample) {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		} else {
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		}
-		
-		glGenerateMipmap(GL_TEXTURE_2D);
-		
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-		
-		glBindTexture(GL_TEXTURE_2D, 0);
-		
-		return textureHandle;
-	}
-	
-	public int createTexture(ByteBuffer imageData, int width, int height) {
-		return createTexture(imageData, width, height, true);
-	}
-	
-	public int[] createVAO(boolean isStatic, FloatBuffer verticies, FloatBuffer normals, FloatBuffer texCoords) {
-		
-		//Create the opengl objects.
-		int vao = glGenVertexArrays();
-		
-		glBindVertexArray(vao);
-		
-		int vertBuffer = glGenBuffers();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, vertBuffer);
-		glBufferData(GL_ARRAY_BUFFER, verticies, GL_STATIC_DRAW);
-		glVertexAttribPointer(VERTEX_INDEX, 3, GL_FLOAT, false, 0, 0L);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		
-		int normalBuffer = glGenBuffers();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-		glBufferData(GL_ARRAY_BUFFER, normals, (isStatic)? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-		glVertexAttribPointer(NORMAL_INDEX, 3, GL_FLOAT, false, 0, 0L);
-		
-		int texCoordBuffer = glGenBuffers();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
-		glBufferData(GL_ARRAY_BUFFER, texCoords, GL_STATIC_DRAW);
-		glVertexAttribPointer(TEX_COORD_INDEX, 3, GL_FLOAT, false, 0, 0L);
-		
-		glBindVertexArray(0);
-		
-		return new int[] {vao, vertBuffer, normalBuffer, texCoordBuffer};
-	}
-	
-	public int[] createVAO(boolean isStatic, FloatBuffer verticies, FloatBuffer normals, FloatBuffer texCoords, FloatBuffer jointWeights, IntBuffer joints) {
-		int vao = glGenVertexArrays();
-		
-		glBindVertexArray(vao);
-		
-		int vertBuffer = glGenBuffers();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, vertBuffer);
-		glBufferData(GL_ARRAY_BUFFER, verticies, GL_STATIC_DRAW);
-		glVertexAttribPointer(VERTEX_INDEX, 3, GL_FLOAT, false, 0, 0L);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		
-		int normalBuffer = glGenBuffers();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
-		glBufferData(GL_ARRAY_BUFFER, normals, (isStatic)? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-		glVertexAttribPointer(NORMAL_INDEX, 3, GL_FLOAT, false, 0, 0L);
-		
-		int texCoordBuffer = glGenBuffers();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
-		glBufferData(GL_ARRAY_BUFFER, texCoords, GL_STATIC_DRAW);
-		glVertexAttribPointer(TEX_COORD_INDEX, 3, GL_FLOAT, false, 0, 0L);
-		
-		int jointWeightBuffer = glGenBuffers();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, jointWeightBuffer);
-		glBufferData(GL_ARRAY_BUFFER, jointWeights, GL_STATIC_DRAW);
-		glVertexAttribPointer(4, 4, GL_FLOAT, false, 0, 0L);
-		
-		int jointIDBuffer = glGenBuffers();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, jointIDBuffer);
-		glBufferData(GL_ARRAY_BUFFER, joints, GL_STATIC_DRAW);
-		glVertexAttribPointer(5, 4, GL_INT, false, 0, 0L);
-		
-		glBindVertexArray(0);
-		
-		return new int[] {vao, vertBuffer, normalBuffer, texCoordBuffer, jointWeightBuffer, jointIDBuffer};
-	}
-	
-	public void updateBuffer(int buffer, FloatBuffer data) {
-		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, data, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-	
-	public int compileShader(String shaderSource, boolean isVertex) throws Exception {
-		int shader = glCreateShader((isVertex)? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
-		
-		glShaderSource(shader, shaderSource);
-		glCompileShader(shader);
-		
-		if (glGetShaderi(shader, GL_COMPILE_STATUS) == GL_FALSE) {
-			int infoLogLength = glGetShaderi(shader, GL_INFO_LOG_LENGTH);
-			String shaderStackTrace = glGetShaderInfoLog(shader, infoLogLength);
-			
-			glDeleteShader(shader);
-			
-			throw new Exception(shaderStackTrace);
-		}
-		
-		
-		return shader;
-	}
-	
-	public int createShaderProgram(int vertexShader, int fragmentShader) throws Exception {
-		int program = glCreateProgram();
-		
-		glAttachShader(program, vertexShader);
-		glAttachShader(program, fragmentShader);
-		
-		glLinkProgram(program);
-		
-		if (glGetProgrami(program, GL_LINK_STATUS) == GL_FALSE) {
-			int maxLength = glGetProgrami(program, GL_INFO_LOG_LENGTH);
-			
-			String infoLog = glGetProgramInfoLog(program, maxLength);
-			
-			glDeleteProgram(program);
-			
-			glDeleteShader(vertexShader);
-			glDeleteShader(fragmentShader);
-			
-			throw new Exception(infoLog);
-		}
-		
-		glDetachShader(program, vertexShader);
-		glDetachShader(program, fragmentShader);
-		
-		return program;
 	}
 }

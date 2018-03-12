@@ -2,50 +2,52 @@ package magica.entities;
 
 import org.joml.Vector3f;
 
+import bengine.Scene;
+import bengine.animation.Animation;
 import bengine.entities.Entity;
 import bengine.rendering.Mesh;
 import bengine.rendering.Renderer;
-import magica.Assets;
 
 public class TestEntity extends Entity {
 
+	private Animation activeAnimation;
+	
 	public TestEntity() {
-		super(Assets.monkeyMesh, new Vector3f(1.0f, 1.0f, 1.0f), new Vector3f(0.0f, 0.0f, -2.0f));
+		
 	}
 
 	@Override
-	public void onCreated() {
+	public void onCreated(Scene scene) {
+		super.onCreated(scene);
 		
+		this.model = scene.getAssets().getAsset("robotModel");
 	}
 
 	@Override
 	public void onUpdate(float delta) {
+		if (activeAnimation != null) {
+			activeAnimation.update(delta);
+		}
 		
-		transform.rotate(new Vector3f(0, (float) Math.PI / 4.0f * delta, 0));
-		
-	}
-
-	@Override
-	public void onDestroyed() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onRegistered() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void onDestroyed() {}
 
 	@Override
-	public void onObjectUpdate() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void onRegistered() {}
+
+	@Override
+	public void onObjectUpdate() {}
 
 	@Override
 	public int getType() {
-		// TODO Auto-generated method stub
-		return 0;
+		return generateTypeId();
+	}
+	
+	@Override
+	public Animation getActiveAnimation() {
+		return activeAnimation;
 	}
 }

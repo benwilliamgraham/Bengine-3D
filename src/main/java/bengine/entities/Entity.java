@@ -4,67 +4,56 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import bengine.Scene;
 import bengine.Transform;
+import bengine.animation.Animation;
+import bengine.assets.Model;
 import bengine.networking.sync.SyncedObject;
 import bengine.rendering.Material;
 import bengine.rendering.Mesh;
 import bengine.rendering.Renderer;
 
 public abstract class Entity extends SyncedObject {
+	
 	public Transform transform;
 	
-	public Vector3f scale, velocity;
+	public Vector3f scale;
 	
-	public Mesh model;
+	public Model model;
 	
-	public Material material;
-	
-	public Vector3f dimensions;
 	public boolean collidable;
 	
 	@SyncedField("health")
 	public float health = 0;
 	
+	protected Material material;
+	
+	private Scene scene;
+	
 	public Entity() {
-		this.model = null;
-		this.dimensions = new Vector3f(1.0f, 1.0f, 1.0f);
 		this.transform = new Transform();
 		this.scale = new Vector3f(1.0f, 1.0f, 1.0f);
-		this.velocity = new Vector3f(0.0f, 0.0f, 0.0f);
 	}
 	
-	public Entity(Mesh model, Vector3f dimensions, Vector3f position) {
-		this.model = model;
-		this.dimensions = dimensions;
-		this.transform = new Transform(position, new Quaternionf());
-		this.scale = new Vector3f(1.0f, 1.0f, 1.0f);
-		this.velocity = new Vector3f(0.0f, 0.0f, 0.0f);
+	public void onCreated(Scene scene) {
+		this.scene = scene;
 	}
-	
-	public abstract void onCreated();
 	
 	public abstract void onUpdate(float delta);
 	
-	public void onDraw(Renderer renderer) {
-		
-		Matrix4f transformMatrix = new Matrix4f()
-				.scale(this.scale)
-				.rotate(this.transform.rotation)
-				.translateLocal(this.transform.position);
-		
-		renderer.useShader(this.material.shader);
-		
-		renderer.getShader().push("baseColor", this.material.baseColor);
-		
-		if (this.material.texture != null) {
-			renderer.getShader().pushTexture(this.material.texture);
-		}
-		
-		this.model.render(transformMatrix);
-		
+	public abstract void onDestroyed();
+	
+	public Animation getActiveAnimation() {
+		return null;
 	}
 	
-	public abstract void onDestroyed();
+	public Model getModel() {
+		return model;
+	}
+	
+	public Scene getScene() {
+		return scene;
+	}
 	
 	/*public boolean checkCollision(World world, Vector3f change){
 		Vector3f checkPos = new Vector3f(position).add(change);
