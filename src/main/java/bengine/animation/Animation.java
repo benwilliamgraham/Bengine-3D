@@ -65,7 +65,6 @@ public class Animation {
 	}
 	
 	public Matrix4f[] GetBoneData() {
-		
 		float animTime = convertAnimTime(time);
 		
 		if (animTime > duration) {
@@ -75,6 +74,8 @@ public class Animation {
 				animTime = duration;
 			}
 		}
+		
+		//System.out.println(time + " : " + animTime);
 		
 		globalInverseTransform = convertMat(scene.mRootNode().mTransformation()).invert();
 		
@@ -98,7 +99,6 @@ public class Animation {
 	}
 	
 	private void ReadSkeletonPositions(float time, AINode node, Matrix4f parentTransform) {
-		
 		//System.out.println("Reading node: " + node.mName().dataString());
 		
 		Matrix4f nodeTransformation = convertMat(node.mTransformation());
@@ -111,26 +111,23 @@ public class Animation {
 			
 			Matrix4f position = GetPositionAt(time, nodeAnimation);
 			Matrix4f rotation = GetRotationAt(time, nodeAnimation);
-			Matrix4f scaling  = GetScalingAt(time, nodeAnimation);
+			Matrix4f scaling  = GetScalingAt(time, nodeAnimation);//.scale(100); //Blender has an issue where the units are off. so fixing it.
 			
-			//System.out.println(scaling.toString());
+			//System.out.println(node.mName().dataString());
+			//System.out.println(position.toString());
 			
-			nodeTransformation = new Matrix4f()
-					.identity()
-					.mul(position)
-					.mul(rotation);
-					//.mul(scaling);
+			nodeTransformation = new Matrix4f(position)
+					.mul(rotation)
+					;//.mul(scaling);
 		} else {
 			//System.out.println(node.mName().dataString());
 		}
 		
-		System.out.println(node.mName().dataString());
-		System.out.println(parentTransform.toString());
-		System.out.println("Children: " + node.mNumChildren());
+		//System.out.println(parentTransform.toString());
+		//System.out.println("Children: " + node.mNumChildren());
 		
 		
-		Matrix4f globalTransform = new Matrix4f()
-				.mul(parentTransform)
+		Matrix4f globalTransform = new Matrix4f(parentTransform)
 				.mul(nodeTransformation);
 		
 		Bone b = skeleton.GetBone(node.mName().dataString());
@@ -161,80 +158,106 @@ public class Animation {
 		return null;
 	}
 	
+	private int GetPositionKey(float time, AINodeAnim nodeAnimation) {
+		for (int x = 0; x < nodeAnimation.mNumPositionKeys() - 1; x++) {
+			if ((float) nodeAnimation.mPositionKeys().get(x + 1).mTime() > time) {
+				return x;
+			}
+		}
+		
+		return 0;
+	}
+	
+	private int GetRotationKey(float time, AINodeAnim nodeAnimation) {
+		for (int x = 0; x < nodeAnimation.mNumRotationKeys() - 1; x++) {
+			if ((float) nodeAnimation.mRotationKeys().get(x + 1).mTime() > time) {
+				return x;
+			}
+		}
+		
+		return 0;
+	}
+	
+	private int GetScalingKey(float time, AINodeAnim nodeAnimation) {
+		for (int x = 0; x < nodeAnimation.mNumScalingKeys() - 1; x++) {
+			if ((float) nodeAnimation.mScalingKeys().get(x + 1).mTime() > time) {
+				return x;
+			}
+		}
+		
+		return 0;
+	}
+	
 	private Matrix4f GetPositionAt(float time, AINodeAnim nodeAnimation) {
 		
-		Matrix4f mat = new Matrix4f().identity();
+		Matrix4f posMatrix = new Matrix4f();
 		
 		if (nodeAnimation.mNumPositionKeys() == 1) {
-			return mat.translate(convertVec(nodeAnimation.mPositionKeys().get().mValue()));
-		} else if (nodeAnimation.mNumPositionKeys() == 0) {
-			return mat;
-		}
-		
-		AIVectorKey start = null, end = null;
-		
-		float factor = 0;
-		
-		for (int k = 0; k < nodeAnimation.mNumPositionKeys() - 1; k++) {
 			
-			if (time == nodeAnimation.mPositionKeys().get(k).mTime()) {
-				return mat.translate(convertVec(nodeAnimation.mPositionKeys().get(k).mValue()));
-			}
+			Vector3f position = convertVec(nodeAnimation.mPositionKeys().get(0).mValue());
 			
-			if (time < nodeAnimation.mPositionKeys().get(k + 1).mTime()) {
-				
-				start = nodeAnimation.mPositionKeys().get(k);
-				end = nodeAnimation.mPositionKeys().get(k + 1);
-				
-				factor = (float) ((end.mTime() - time) / (end.mTime() - start.mTime()));
-				break;
-			}
-		}
-		
-		if (start == null && end == null) {
-			mat.translate(convertVec(nodeAnimation.mPositionKeys().get(nodeAnimation.mNumPositionKeys() - 1).mValue()));
+			posMatrix.translate(position);
+			
 		} else {
-			Vector3f position = convertVec(start.mValue())
-					.lerp(convertVec(end.mValue()), factor);
+			int posKey = GetPositionKey(time, nodeAnimation);
 			
-			mat.translate(position);
+			if (posKey == nodeAnimation.mNumPositionKeys() - 1) { //Is this the last position in the animation? if so just stay there.
+				
+				posMatrix.translate(convertVec(nodeAnimation.mPositionKeys().get(posKey).mValue()));
+			} else {
+				AIVectorKey start = nodeAnimation.mPositionKeys().get(posKey);
+				AIVectorKey   end = nodeAnimation.mPositionKeys().get(posKey + 1);
+				
+				float startTime = (float) start.mTime();
+				float endTime = (float) end.mTime();
+				
+				float factor = (time - startTime) / (endTime - startTime);
+				
+				Vector3f startPos = convertVec(start.mValue());
+				Vector3f endPos = convertVec(end.mValue());
+				
+				Vector3f position = startPos.lerp(endPos, factor);
+				
+				posMatrix.translate(position);
+			}
+			
 		}
 		
-		return mat;
+		return posMatrix;
 	}
 	
 	private Matrix4f GetRotationAt(float time, AINodeAnim nodeAnimation) {
-		Matrix4f mat = new Matrix4f().identity();
+		Matrix4f rotMatrix = new Matrix4f();
 		
 		if (nodeAnimation.mNumRotationKeys() == 1) {
-			return mat.rotate(convertQuat(nodeAnimation.mRotationKeys().get().mValue()));
-		} else if (nodeAnimation.mNumRotationKeys() == 0) {
-			return mat;
-		}
-		
-		AIQuatKey start = null, end = null;
-		
-		float factor = 0;
-		
-		for (int k = 0; k < nodeAnimation.mNumRotationKeys() - 1; k++) {
-			if (time < nodeAnimation.mRotationKeys().get(k + 1).mTime()) {
-				start = nodeAnimation.mRotationKeys().get(k);
-				end = nodeAnimation.mRotationKeys().get(k + 1);
+			Quaternionf rotation = convertQuat(nodeAnimation.mRotationKeys().get(0).mValue());
+			
+			rotMatrix.rotate(rotation);
+		} else {
+			int rotKey = GetRotationKey(time, nodeAnimation);
+			
+			if (rotKey == nodeAnimation.mNumRotationKeys() - 1) {
 				
-				factor = (float) ((end.mTime() - time) / (end.mTime() - start.mTime()));
-				break;
+				rotMatrix.rotate(convertQuat(nodeAnimation.mRotationKeys().get(rotKey).mValue()));
+			} else {
+				AIQuatKey start = nodeAnimation.mRotationKeys().get(rotKey);
+				AIQuatKey   end = nodeAnimation.mRotationKeys().get(rotKey + 1);
+				
+				float startTime = (float) start.mTime();
+				float endTime = (float) end.mTime();
+				
+				float factor = (time - startTime) / (endTime - startTime);
+				
+				Quaternionf startRot = convertQuat(start.mValue());
+				Quaternionf   endRot = convertQuat(end.mValue());
+				
+				Quaternionf rotation = startRot.nlerp(endRot, factor);
+				
+				rotMatrix.rotate(rotation);
 			}
 		}
 		
-		if (start == null && end == null) {
-			mat.rotate(convertQuat(nodeAnimation.mRotationKeys().get(nodeAnimation.mNumRotationKeys() - 1).mValue()));
-		} else {
-			Quaternionf rotation = convertQuat(start.mValue()).nlerp(convertQuat(end.mValue()), factor);
-			
-			mat.rotate(rotation);
-		}
-		
-		return mat;
+		return rotMatrix;
 	}
 	
 	private Matrix4f GetScalingAt(float time, AINodeAnim nodeAnimation) {

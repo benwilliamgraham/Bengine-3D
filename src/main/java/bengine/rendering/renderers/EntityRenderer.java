@@ -47,7 +47,7 @@ public class EntityRenderer {
 		
 		transformMatrix.mul(e.transform.generateMatrix());
 		
-		drawNode(e.model.getRootNode(), e, viewMatrix, new Matrix4f().identity());
+		drawNode(e.model.getRootNode(), e, viewMatrix, transformMatrix);
 		
 		e.onDraw();
 	}
@@ -55,7 +55,8 @@ public class EntityRenderer {
 	private void drawNode(AINode node, Entity e, Matrix4f viewMatrix, Matrix4f transformMatrix) {
 		Mesh[] meshes = e.model.getMeshes();
 		
-		Matrix4f offset = convertMat(node.mTransformation());
+		Matrix4f offset = new Matrix4f(transformMatrix).mul(convertMat(node.mTransformation()));
+		
 		
 		if (node.mNumMeshes() > 0) {
 			
@@ -92,9 +93,11 @@ public class EntityRenderer {
 		if (m.skeleton != null && anim != null) {
 			anim.attach(m.skeleton);
 			mat.animate(anim);
+			
+			mat.camera(viewMatrix, e.transform.generateMatrix());
+		} else {
+			mat.camera(viewMatrix, transformMatrix);
 		}
-		
-		mat.camera(viewMatrix, transformMatrix);
 		
 		renderObject.bind();
 		

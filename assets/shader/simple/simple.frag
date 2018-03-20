@@ -3,6 +3,7 @@
 in vec4 pass_position;
 in vec4 pass_normal;
 in vec3 pass_texCoord;
+in vec4 pass_weights;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
@@ -18,7 +19,7 @@ void main(void){
 
 	float diffuseCoefficient = clamp((dot(pass_normal, normalize(light_position - pass_position))), 0.0, 1.0);
 
-	vec3 color = baseColor * lightAmbient + vec3(1.0, 1.0, 1.0) * diffuseCoefficient;
+	vec3 color = vec3(1.0, 1.0, 1.0) * pass_weights.x;
 
 	out_Color = vec4(color, 1.0);
 }

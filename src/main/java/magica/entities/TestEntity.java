@@ -40,7 +40,7 @@ public class TestEntity extends Entity {
 		for (Animation a : this.model.getAnimations()) {
 			System.out.println(a.getName());
 			
-			if (a.getName().equals("Armature|ArmatureAction.001")) {
+			if (a.getName().equals("Armature|ArmWave")) {
 				activeAnimation = a;
 				activeAnimation.play();
 			}
@@ -66,7 +66,7 @@ public class TestEntity extends Entity {
 		
 		if (this.activeAnimation != null) {
 		
-			glClear(GL_DEPTH_BUFFER_BIT);
+			/*glClear(GL_DEPTH_BUFFER_BIT);
 			
 			debugMaterial.bind();
 			
@@ -110,7 +110,7 @@ public class TestEntity extends Entity {
 				
 			}
 			
-			debugMaterial.unbind();
+			debugMaterial.unbind();*/
 			
 		}
 	}

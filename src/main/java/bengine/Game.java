@@ -45,7 +45,7 @@ public abstract class Game {
 	
 	protected State currentState;
 	
-	protected int framerateCap = Integer.MAX_VALUE;
+	protected int framerateCap = 120;
 	
 	protected int width, height;
 	
@@ -92,9 +92,8 @@ public abstract class Game {
 			float delta = (currentTime - lastTick) / 1000.0f;
 			
 			if (delta >= 1.0f / framerateCap) {
-				lastTick = currentTime;
-				
 				onUpdate(delta);
+				
 				
 				//TODO: maybe some synchronization stuff.
 				
@@ -102,6 +101,7 @@ public abstract class Game {
 					currentState.onUpdate(delta);
 					currentState.onDraw();
 				}
+				lastTick = currentTime;
 			}
 			
 			glfwSwapBuffers(windowHandle);

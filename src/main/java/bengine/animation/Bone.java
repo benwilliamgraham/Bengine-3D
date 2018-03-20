@@ -38,5 +38,7 @@ public class Bone {
 		this.offsetMatrix.m31(offsetMatrix.d2());
 		this.offsetMatrix.m32(offsetMatrix.d3());
 		this.offsetMatrix.m33(offsetMatrix.d4());
+		
+		this.offsetMatrix.transpose();
 	}
 }
