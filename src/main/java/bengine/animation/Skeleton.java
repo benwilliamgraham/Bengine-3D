@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Skeleton {
-	public List<Bone> bones;
+	public Bone[] bones;
 	
-	public Skeleton() {
-		this.bones = new ArrayList<Bone>();
+	public Skeleton(int numBones) {
+		this.bones = new Bone[numBones];
 	}
 	
-	public void AddBone(Bone bone) {
-		this.bones.add(bone);
+	public void AddBone(int index, Bone bone) {
+		this.bones[index] = bone;
 	}
 	
 	public Bone GetBone(String boneName) {
@@ -25,8 +25,8 @@ public class Skeleton {
 	}
 	
 	public int ResolveName(String boneName) {
-		for (int i = 0; i < bones.size(); i++) {
-			if (bones.get(i).name.equals(boneName)) {
+		for (int i = 0; i < bones.length; i++) {
+			if (bones[i].name.equals(boneName)) {
 				return i;
 			}
 		}

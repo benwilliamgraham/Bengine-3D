@@ -20,6 +20,9 @@ import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.nio.IntBuffer;
@@ -40,8 +43,6 @@ public abstract class Game {
 	
 	private static Game current;
 	
-	public Object renderLock = new Object();
-	
 	protected State currentState;
 	
 	protected int framerateCap = Integer.MAX_VALUE;
@@ -52,7 +53,7 @@ public abstract class Game {
 	private boolean isRunning = true;
 	private long lastTick = 0;
 	
-	public long windowHandle = 0;
+	private long windowHandle = 0;
 	
 	private GLCapabilities capabilities;
 	
@@ -65,23 +66,6 @@ public abstract class Game {
 	protected abstract void onCreated();
 	protected abstract void onUpdate(float delta);
 	protected abstract void onDestroyed();
-	
-	public void grab() {		
-		if (glfwGetCurrentContext() != windowHandle) {
-			
-			getLogger().log(Level.FINE, String.format("Bringing context into thread: %s", Thread.currentThread().getName()));
-			glfwMakeContextCurrent(windowHandle);
-			
-			GL.setCapabilities(capabilities);
-		}
-	}
-	
-	public void release() {
-		if (glfwGetCurrentContext() == windowHandle) {
-			getLogger().log(Level.FINE, String.format("Released context from thread: %s", Thread.currentThread().getName()));
-			glfwMakeContextCurrent(NULL);
-		}
-	}
 	
 	public void switchState(State newState) {
 		if (currentState != null) {
@@ -116,28 +100,12 @@ public abstract class Game {
 				
 				if (currentState != null) {
 					currentState.onUpdate(delta);
-					
-					synchronized (renderLock) {
-						grab();
-						
-						currentState.onDraw();
-						
-						release();
-					}
-					
-					
+					currentState.onDraw();
 				}
 			}
 			
-			synchronized(renderLock) {
-				grab();
-				
-				glfwSwapBuffers(windowHandle);
-				glfwPollEvents();
-				
-				release();
-			}
-			
+			glfwSwapBuffers(windowHandle);
+			glfwPollEvents();
 			//if we update the display every tick, regardless of whether or not we draw anything new, then we don't get input lag when using vsync.
 			//checkGLError();
 			if (glfwWindowShouldClose(windowHandle)) {
@@ -195,6 +163,16 @@ public abstract class Game {
 		
 		glViewport(0, 0, width, height);
 		
+		glEnable(GL_DEPTH_TEST);
+		
+		glDepthFunc(GL_LEQUAL);
+		
+		glFrontFace(GL_CCW);
+		
+		glCullFace(GL_FRONT);
+		
+		glVertexAttrib4iv(4, new int[] {-1, -1, -1, -1});
+		
 		Mouse.create(windowHandle);
 		Keyboard.create(windowHandle);
 	}
@@ -216,7 +194,7 @@ public abstract class Game {
 
 			@Override
 			public void publish(LogRecord record) {
-				System.out.println(record.toString());
+				System.out.println(record.getMessage());
 			}
 			
 		});
@@ -237,6 +215,10 @@ public abstract class Game {
 	
 	public float getAspect() {
 		return aspectRatio;
+	}
+	
+	protected long getWindow() {
+		return windowHandle;
 	}
 	
 	private Logger getLogger() {

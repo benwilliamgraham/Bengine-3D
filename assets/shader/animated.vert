@@ -13,7 +13,7 @@ layout(location = 2) in vec3 texCoords;
 layout(location = 3) in vec4 jointWeights;
 layout(location = 4) in ivec4 jointIDS;
 
-uniform mat4 jointTransforms[MAX_JOINTS];
+uniform mat4 boneTransforms[MAX_JOINTS];
 uniform mat4 viewmodelMatrix;
 
 void main(void){

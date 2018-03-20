@@ -56,8 +56,8 @@ public class Mesh implements Drawable {
 			Vertex v = vertices[x];
 			
 			positions[x] = v.position;
-			//normals[x] = v.normal;
-			//texCoords[x] = v.texCoord;
+			normals[x] = v.normal;
+			texCoords[x] = v.texCoord;
 			
 			if (v.skinData != null) {
 				jointWeights[x] = v.skinData.getWeightData();
@@ -70,19 +70,20 @@ public class Mesh implements Drawable {
 		this.renderObject = new VAO();
 		
 		positionObject = new VBO(store(positions), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-		//normalObject = new VBO(store(normals), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-		//texCoordObject = new VBO(store(texCoords), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+		normalObject = new VBO(store(normals), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+		texCoordObject = new VBO(store(texCoords), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 		
 		renderObject.attach(0, positionObject, GL_FLOAT, 3);
-		//renderObject.attach(1, normalObject, GL_FLOAT, 3);
-		//renderObject.attach(2, texCoordObject, GL_FLOAT, 3);
+		renderObject.attach(1, normalObject, GL_FLOAT, 3);
+		renderObject.attach(2, texCoordObject, GL_FLOAT, 3);
 		
 		if (hasSkinData) {
-			//jointWeightObject = new VBO(store(jointWeights), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-			//jointObject = new VBO(store(jointIDS), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 			
-			//renderObject.attach(3, jointWeightObject, GL_FLOAT, 4);
-			//renderObject.attach(4, jointObject, GL_FLOAT, 4);
+			jointWeightObject = new VBO(store(jointWeights), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+			jointObject = new VBO(store(jointIDS), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+			
+			renderObject.attach(3, jointWeightObject, GL_FLOAT, 4);
+			renderObject.attach(4, jointObject, GL_FLOAT, 4);
 		}
 	}
 	

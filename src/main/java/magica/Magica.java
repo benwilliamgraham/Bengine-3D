@@ -1,8 +1,11 @@
 package magica;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 import java.io.File;
 import java.util.ArrayList;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import bengine.Game;
@@ -30,6 +33,8 @@ import magica.states.TestState;
 
 public class Magica extends Game {
 	
+	public static final String WINDOW_TITLE = "Magica: The game about sand.";
+	
 	private int width, height;
 	private boolean isFullscreen;
 	
@@ -42,11 +47,13 @@ public class Magica extends Game {
 	
 	@Override
 	public void onConfigure() {
-		createDisplay(width, height, isFullscreen, "Magica: The game about sand.");
+		createDisplay(width, height, isFullscreen, WINDOW_TITLE);
 	}
 	
 	@Override
 	protected void onCreated() {
+		
+		//System.out.println(new Matrix4f().identity().translate(new Vector3f(1.0f, 0.0f, 0.0f)));
 		
 		AssetLoader loader = new AssetLoader(this) {
 
@@ -61,23 +68,26 @@ public class Magica extends Game {
 		};
 		
 		loader.addAsset("defaultShader", new Shader(new File("./assets/shader/default.json")));
-		loader.addAsset("animatedShader", new Shader(new File("./assets/shader/animated.json")));
-		loader.addAsset("robotModel", new Model(new File("./assets/misc/robot_rigged.fbx")));
+		loader.addAsset("robotModel", new Model(new File("./assets/misc/rigged_test.fbx")));
+		loader.addAsset("cubeModel", new Model(new File("./assets/misc/Cube.fbx")));
 		loader.addAsset("simpleShader", new Shader(new File("./assets/shader/simple/simple.json")));
+		loader.addAsset("wireframeShader", new Shader(new File("./assets/shader/red_wireframe/rwf.json")));
 		
 		switchState(loader.load()); //Switch to the loading state while we load the assets.
 	}
 
 	@Override
 	protected void onUpdate(float delta) {
+		glfwSetWindowTitle(getWindow(), String.format("(%d FPS) : %s", (int)Math.floor(1.0 / delta), WINDOW_TITLE));
 		
-		//System.out.println(Math.floor(1.0 / delta) + " FPS.");
 	}
 	
 	@Override
 	protected void onDestroyed() {
-		
-		
+		if (currentState != null) {
+			//TODO: Once i've finished reverting all this stuff from debugging, cuz this is probably a mem leak and i don't know cuz my gpu has like 12 gb of vram, and it's not significant enough to do anything to my computer.
+			//currentState.onDestroyed();
+		}
 	}
 	
 	public static void main(String[] args) {

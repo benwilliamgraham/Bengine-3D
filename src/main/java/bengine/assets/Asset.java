@@ -22,6 +22,8 @@ public abstract class Asset {
 	
 	public abstract void onLoad(File file) throws AssetCreationException;
 	
+	public abstract void create();
+	
 	public abstract void destroy();
 	
 	public final void load() {

@@ -36,8 +36,6 @@ public abstract class AssetLoader {
 	
 	public final State load() {
 		
-		getLogger().info("Started loading assets.");
-		
 		this.loaderThread = new AssetLoaderThread(assets); 
 		
 		this.loaderThread.start();
@@ -55,10 +53,33 @@ public abstract class AssetLoader {
 
 			@Override
 			public void onUpdate(float delta) {
-				
 				if (loaderThread.isLoaded()) {
-					g.switchState(null);
-					getLogger().info("Finished loading assets.");
+					getLogger().info("Finished loading assets. Initializing them ...");
+					
+					for (Asset a : assets.values()) {
+						try {
+							a.create();
+							
+						} catch (AssetCreationException ex) {
+							
+							StringBuilder stackTrace = new StringBuilder();
+							
+							stackTrace.append(ex.getMessage());
+							for (StackTraceElement el : ex.getStackTrace()) {
+								stackTrace.append(el.toString());
+								stackTrace.append(System.lineSeparator());
+							}
+							
+							getLogger().severe(String.format("Error creating asset: %s %n%s", ex.getAsset().getFile().toString(), stackTrace.toString()));
+							
+							if (ex.getAsset().importance == AssetImportance.CRITICAL) {
+								System.exit(1);
+							}
+						}
+					}
+					
+					getLogger().info("Done.");
+					
 					onLoaded(new AssetManager(assets));
 				}
 			}
@@ -111,6 +132,7 @@ class AssetLoaderThread extends Thread {
 			
 			try {
 				a.load();
+				
 			} catch (AssetCreationException ex) {
 				
 				StringBuilder stackTrace = new StringBuilder();

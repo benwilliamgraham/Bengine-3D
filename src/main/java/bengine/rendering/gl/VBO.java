@@ -51,7 +51,7 @@ public class VBO {
 	}
 	
 	public void unbind() {
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, -1);
 	}
 	
 	public void destroy() {

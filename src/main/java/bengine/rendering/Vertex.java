@@ -20,6 +20,7 @@ public class Vertex {
 		this.position = new Vector3f();
 		this.normal = new Vector3f();
 		this.texCoord = new Vector3f();
+		this.skinData = new SkinData();
 	}
 	
 	public void transform(Matrix4f transformMatrix) {
@@ -31,47 +32,29 @@ public class Vertex {
 	}
 	
 	public static class SkinData {
-		public Map<Integer, Float> weights = new HashMap<Integer, Float>();
+		protected int[] jointIds = new int[] {-1, -1, -1, -1};
+		protected float[] jointWeights = new float[] {0, 0, 0, 0};
+		
+		private int joints = 0;
 		
 		public Vector4f getWeightData() {
-			Vector4f weightData = new Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
-			
-			Iterator<Float> it = weights.values().iterator();
-			
-			if (!it.hasNext()) return weightData;
-			weightData.x = it.next();
-			if (!it.hasNext()) return weightData;
-			weightData.y = it.next();
-			if (!it.hasNext()) return weightData;
-			weightData.z = it.next();
-			if (!it.hasNext()) return weightData;
-			weightData.w = it.next();
-			
-			return weightData;
+			return new Vector4f(jointWeights[0], jointWeights[1], jointWeights[2], jointWeights[3]);
 		}
 		
 		public Vector4i getBoneData() { 
-			Vector4i boneData = new Vector4i(-1, -1, -1, -1);
-			
-			Iterator<Integer> it = weights.keySet().iterator();
-			
-			if (!it.hasNext()) return boneData;	
-			boneData.x = it.next();
-			if (!it.hasNext()) return boneData;
-			boneData.y = it.next();
-			if (!it.hasNext()) return boneData;
-			boneData.z = it.next();
-			if (!it.hasNext()) return boneData;
-			boneData.w = it.next();
-			
-			
-			return boneData;
+			return new Vector4i(jointIds[0], jointIds[1], jointIds[2], jointIds[3]);
 		}
 		
 		public void AddWeight(int bone, float weight) {
-			if (weights.size() == 4) {
-				weights.put(bone, weight);
+			if (joints == 4) {
+				System.out.println("Too many weights!");
+				return;
 			}
+			
+			jointIds[joints] = bone;
+			jointWeights[joints] = weight;
+			
+			joints++;
 		}
 	}
 }

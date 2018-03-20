@@ -2,6 +2,7 @@ package bengine.rendering;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import bengine.animation.Animation;
 import bengine.assets.Shader;
@@ -10,7 +11,7 @@ import bengine.assets.Texture;
 public class Material {
 	
 	public Texture texture;
-	public Vector3f baseColor = new Vector3f(1.0f);
+	public Vector3f baseColor = new Vector3f(0.4f);
 	
 	protected Shader shader;
 	
@@ -19,19 +20,40 @@ public class Material {
 	}
 	
 	public void animate(Animation anim) {
-		shader.push("jointTransforms", anim.GetBoneData());
+		Matrix4f[] boneTransforms = new Matrix4f[50];
+		
+		Matrix4f[] oBoneTransforms = anim.GetBoneData();
+		
+		for (int i = 0; i < 50; i++) {
+			if (i < oBoneTransforms.length) {
+				boneTransforms[i] = oBoneTransforms[i];
+			} else {
+				boneTransforms[i] = new Matrix4f().identity();
+			}
+		}
+		
+		shader.push("boneTransforms", boneTransforms);
 	}
 	
-	public void camera(Matrix4f cameraView) {
-		shader.push("viewmodelMatrix", cameraView);
+	public void camera(Matrix4f viewMatrix, Matrix4f transformMatrix) {
+		shader.push("viewMatrix", viewMatrix);
+		shader.push("transformMatrix", transformMatrix);
+	}
+	
+	public void color(Vector3f color) {
+		baseColor = color;
+		
+		shader.push("baseColor", baseColor);
+	}
+	
+	public void color() {
+		if (baseColor != null) {
+			color(baseColor);
+		}
 	}
 	
 	public void bind() {
 		shader.bind();
-		
-		if (baseColor != null) {
-			shader.push("baseColor", baseColor);
-		}
 		
 		if (texture != null) {
 			shader.push("texture", texture.getTexture());

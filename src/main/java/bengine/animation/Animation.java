@@ -19,7 +19,7 @@ import org.lwjgl.assimp.AIVectorKey;
 
 public class Animation {
 	
-	public boolean doLoop = false;
+	public boolean doLoop = true;
 	
 	public float duration;
 	public float time;
@@ -30,6 +30,8 @@ public class Animation {
 	protected AIScene scene;
 	
 	private boolean isPlaying;
+	
+	private Matrix4f globalInverseTransform;
 	
 	public Animation(AIAnimation animation, AIScene scene) {
 		this.name = animation.mName().dataString();
@@ -74,12 +76,14 @@ public class Animation {
 			}
 		}
 		
+		globalInverseTransform = convertMat(scene.mRootNode().mTransformation()).invert();
+		
 		ReadSkeletonPositions(animTime, scene.mRootNode(), new Matrix4f().identity()); //"Poses" the skeleton, so to speak.
 		
-		Matrix4f[] boneMatricies = new Matrix4f[skeleton.bones.size()]; 
+		Matrix4f[] boneMatricies = new Matrix4f[skeleton.bones.length]; 
 		
 		for (int b = 0; b < boneMatricies.length; b++) {
-			boneMatricies[b] = new Matrix4f(skeleton.bones.get(b).finalTransform);
+			boneMatricies[b] = new Matrix4f(skeleton.bones[b].finalTransform);
 		}
 		
 		return boneMatricies;
@@ -95,7 +99,7 @@ public class Animation {
 	
 	private void ReadSkeletonPositions(float time, AINode node, Matrix4f parentTransform) {
 		
-		Matrix4f globalInverseTransform = convertMat(scene.mRootNode().mTransformation()).invert();
+		//System.out.println("Reading node: " + node.mName().dataString());
 		
 		Matrix4f nodeTransformation = convertMat(node.mTransformation());
 		
@@ -103,16 +107,27 @@ public class Animation {
 		
 		if (nodeAnimation != null) {
 			
+			//System.out.println("Animating node: " + node.mName().dataString());
+			
 			Matrix4f position = GetPositionAt(time, nodeAnimation);
 			Matrix4f rotation = GetRotationAt(time, nodeAnimation);
 			Matrix4f scaling  = GetScalingAt(time, nodeAnimation);
 			
+			//System.out.println(scaling.toString());
+			
 			nodeTransformation = new Matrix4f()
 					.identity()
 					.mul(position)
-					.mul(rotation)
-					.mul(scaling);
+					.mul(rotation);
+					//.mul(scaling);
+		} else {
+			//System.out.println(node.mName().dataString());
 		}
+		
+		System.out.println(node.mName().dataString());
+		System.out.println(parentTransform.toString());
+		System.out.println("Children: " + node.mNumChildren());
+		
 		
 		Matrix4f globalTransform = new Matrix4f()
 				.mul(parentTransform)
@@ -121,9 +136,11 @@ public class Animation {
 		Bone b = skeleton.GetBone(node.mName().dataString());
 		
 		if (b != null) {
-			b.finalTransform = globalInverseTransform
+			b.finalTransform = new Matrix4f(globalInverseTransform)
 					.mul(globalTransform)
-					.mul(b.offsetMatrix);
+					.mul(new Matrix4f(b.offsetMatrix));
+		} else {
+			//System.out.println(node.mName().dataString());
 		}
 		
 		for (int c = 0; c < node.mNumChildren(); c++) {
@@ -149,7 +166,9 @@ public class Animation {
 		Matrix4f mat = new Matrix4f().identity();
 		
 		if (nodeAnimation.mNumPositionKeys() == 1) {
-			mat.translate(convertVec(nodeAnimation.mPositionKeys().get().mValue()));
+			return mat.translate(convertVec(nodeAnimation.mPositionKeys().get().mValue()));
+		} else if (nodeAnimation.mNumPositionKeys() == 0) {
+			return mat;
 		}
 		
 		AIVectorKey start = null, end = null;
@@ -157,7 +176,13 @@ public class Animation {
 		float factor = 0;
 		
 		for (int k = 0; k < nodeAnimation.mNumPositionKeys() - 1; k++) {
+			
+			if (time == nodeAnimation.mPositionKeys().get(k).mTime()) {
+				return mat.translate(convertVec(nodeAnimation.mPositionKeys().get(k).mValue()));
+			}
+			
 			if (time < nodeAnimation.mPositionKeys().get(k + 1).mTime()) {
+				
 				start = nodeAnimation.mPositionKeys().get(k);
 				end = nodeAnimation.mPositionKeys().get(k + 1);
 				
@@ -166,9 +191,14 @@ public class Animation {
 			}
 		}
 		
-		Vector3f position = convertVec(start.mValue()).lerp(convertVec(end.mValue()), factor);
-		
-		mat.translate(position);
+		if (start == null && end == null) {
+			mat.translate(convertVec(nodeAnimation.mPositionKeys().get(nodeAnimation.mNumPositionKeys() - 1).mValue()));
+		} else {
+			Vector3f position = convertVec(start.mValue())
+					.lerp(convertVec(end.mValue()), factor);
+			
+			mat.translate(position);
+		}
 		
 		return mat;
 	}
@@ -177,7 +207,9 @@ public class Animation {
 		Matrix4f mat = new Matrix4f().identity();
 		
 		if (nodeAnimation.mNumRotationKeys() == 1) {
-			mat.rotate(convertQuat(nodeAnimation.mRotationKeys().get().mValue()));
+			return mat.rotate(convertQuat(nodeAnimation.mRotationKeys().get().mValue()));
+		} else if (nodeAnimation.mNumRotationKeys() == 0) {
+			return mat;
 		}
 		
 		AIQuatKey start = null, end = null;
@@ -194,18 +226,25 @@ public class Animation {
 			}
 		}
 		
-		Quaternionf rotation = convertQuat(start.mValue()).nlerp(convertQuat(end.mValue()), factor);
-		
-		mat.rotate(rotation);
+		if (start == null && end == null) {
+			mat.rotate(convertQuat(nodeAnimation.mRotationKeys().get(nodeAnimation.mNumRotationKeys() - 1).mValue()));
+		} else {
+			Quaternionf rotation = convertQuat(start.mValue()).nlerp(convertQuat(end.mValue()), factor);
+			
+			mat.rotate(rotation);
+		}
 		
 		return mat;
 	}
 	
 	private Matrix4f GetScalingAt(float time, AINodeAnim nodeAnimation) {
+		
 		Matrix4f mat = new Matrix4f().identity();
 		
 		if (nodeAnimation.mNumScalingKeys() == 1) {
-			mat.scale(convertVec(nodeAnimation.mPositionKeys().get().mValue()));
+			return mat.scale(convertVec(nodeAnimation.mPositionKeys().get().mValue()));
+		} else if (nodeAnimation.mNumScalingKeys() == 0) {
+			return mat;
 		}
 		
 		AIVectorKey start = null, end = null;
@@ -222,9 +261,12 @@ public class Animation {
 			}
 		}
 		
-		Vector3f scale = convertVec(start.mValue()).lerp(convertVec(end.mValue()), factor);
-		
-		mat.scale(scale);
+		if (start == null && end == null) {
+			mat.scale(convertVec(nodeAnimation.mScalingKeys().get(nodeAnimation.mNumScalingKeys() - 1).mValue()));
+		} else {
+			Vector3f scale = convertVec(start.mValue()).lerp(convertVec(end.mValue()), factor);
+			mat.scale(scale);
+		}
 		
 		return mat;
 	}

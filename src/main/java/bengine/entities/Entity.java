@@ -41,6 +41,8 @@ public abstract class Entity extends SyncedObject {
 	
 	public abstract void onUpdate(float delta);
 	
+	public void onDraw() {}
+	
 	public abstract void onDestroyed();
 	
 	public Animation getActiveAnimation() {

@@ -8,28 +8,15 @@ layout(location = 4) in ivec4 joints;
 
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
-uniform mat4 boneTransforms[50];
 
 out vec4 pass_position;
 out vec4 pass_normal;
 out vec3 pass_texCoord;
 
-mat4 getMat(int id, float weight) {
-	if (id != -1) {
-		return weight * boneTransforms[uint(id)];
-	}
-
-	return mat4(1.0);
-}
-
 void main(void) {
-
-	mat4 animationMatrix =
-			getMat(joints.x, weights.x);
-
-	pass_position = animationMatrix * vec4(position, 1.0);
-	pass_normal = transformMatrix * vec4(normal, 0.0);
+	pass_position = vec4(position, 1.0);
+	pass_normal = vec4(normal, 0.0);
 	pass_texCoord = texCoord;
 
-	gl_Position = (viewMatrix * transformMatrix) * pass_position;
+	gl_Position = viewMatrix * pass_position;
 }

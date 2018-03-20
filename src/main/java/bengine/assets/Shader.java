@@ -21,8 +21,64 @@ public class Shader extends Asset {
 	
 	protected int shaderProgram, vertexShader, fragmentShader;
 	
+	private String vertexSource, fragmentSource;
+	
 	public Shader(File file) {
 		super(file);
+	}
+	
+	@Override
+	public void create() {
+		
+		vertexShader = glCreateShader(GL_VERTEX_SHADER);
+		
+		glShaderSource(vertexShader, vertexSource);
+		glCompileShader(vertexShader);
+		
+		if (glGetShaderi(vertexShader, GL_COMPILE_STATUS) == GL_FALSE) {
+			int infoLogLength = glGetShaderi(vertexShader, GL_INFO_LOG_LENGTH);
+			String shaderStackTrace = glGetShaderInfoLog(vertexShader, infoLogLength);
+			
+			System.out.println(shaderStackTrace);
+			
+			destroy();
+			
+			throw new AssetCreationException(this, shaderStackTrace);
+		}
+		
+		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+		
+		glShaderSource(fragmentShader, fragmentSource);
+		glCompileShader(fragmentShader);
+		
+		if (glGetShaderi(fragmentShader, GL_COMPILE_STATUS) == GL_FALSE) {
+			int infoLogLength = glGetShaderi(fragmentShader, GL_INFO_LOG_LENGTH);
+			String shaderStackTrace = glGetShaderInfoLog(fragmentShader, infoLogLength);
+			
+			destroy();
+			
+			throw new AssetCreationException(this, shaderStackTrace);
+		}
+		
+		shaderProgram = glCreateProgram();
+		
+		glAttachShader(shaderProgram, vertexShader);
+		glAttachShader(shaderProgram, fragmentShader);
+		
+		glLinkProgram(shaderProgram);
+		
+		if (glGetProgrami(shaderProgram, GL_LINK_STATUS) == GL_FALSE) {
+			int maxLength = glGetProgrami(shaderProgram, GL_INFO_LOG_LENGTH);
+			
+			String infoLog = glGetProgramInfoLog(shaderProgram, maxLength);
+			
+			destroy();
+			
+			throw new AssetCreationException(this, infoLog);
+		}
+		
+		glDetachShader(shaderProgram, vertexShader);
+		glDetachShader(shaderProgram, fragmentShader);
 	}
 	
 	@Override
@@ -32,70 +88,11 @@ public class Shader extends Asset {
 		
 		String vertShaderPath = config.getString("vertexShader", "");
 		
-		String vertexSource = loadFileAsString(vertShaderPath);
+			   vertexSource = loadFileAsString(vertShaderPath);
 		
 		String fragShaderPath = config.getString("fragmentShader", "");
 		
-		String fragmentSource = loadFileAsString(fragShaderPath);
-		
-		synchronized(getGame().renderLock) {
-			getGame().grab(); //Bring the opengl context into the loader thread.
-			
-			//TODO: fix issue where shader creation fails randomly without an error message.
-			//Likely related to a thread switching issue with opengl.
-			
-			vertexShader = glCreateShader(GL_VERTEX_SHADER);
-			
-			glShaderSource(vertexShader, vertexSource);
-			glCompileShader(vertexShader);
-			
-			if (glGetShaderi(vertexShader, GL_COMPILE_STATUS) == GL_FALSE) {
-				int infoLogLength = glGetShaderi(vertexShader, GL_INFO_LOG_LENGTH);
-				String shaderStackTrace = glGetShaderInfoLog(vertexShader, infoLogLength);
-				
-				System.out.println(shaderStackTrace);
-				
-				destroy();
-				
-				throw new AssetCreationException(this, shaderStackTrace);
-			}
-			
-			fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-			
-			glShaderSource(fragmentShader, fragmentSource);
-			glCompileShader(fragmentShader);
-			
-			if (glGetShaderi(fragmentShader, GL_COMPILE_STATUS) == GL_FALSE) {
-				int infoLogLength = glGetShaderi(fragmentShader, GL_INFO_LOG_LENGTH);
-				String shaderStackTrace = glGetShaderInfoLog(fragmentShader, infoLogLength);
-				
-				destroy();
-				
-				throw new AssetCreationException(this, shaderStackTrace);
-			}
-			
-			shaderProgram = glCreateProgram();
-			
-			glAttachShader(shaderProgram, vertexShader);
-			glAttachShader(shaderProgram, fragmentShader);
-			
-			glLinkProgram(shaderProgram);
-			
-			if (glGetProgrami(shaderProgram, GL_LINK_STATUS) == GL_FALSE) {
-				int maxLength = glGetProgrami(shaderProgram, GL_INFO_LOG_LENGTH);
-				
-				String infoLog = glGetProgramInfoLog(shaderProgram, maxLength);
-				
-				destroy();
-				
-				throw new AssetCreationException(this, infoLog);
-			}
-			
-			glDetachShader(shaderProgram, vertexShader);
-			glDetachShader(shaderProgram, fragmentShader);
-			
-			getGame().release(); //Release the opengl context back to the main thread.
-		}
+			   fragmentSource = loadFileAsString(fragShaderPath);
 	}
 	
 	public void bind() {
@@ -266,7 +263,9 @@ public class Shader extends Asset {
 					.order(ByteOrder.nativeOrder())
 					.asFloatBuffer();
 			
-			for (Matrix4f mat : values) {
+			for (int i = 0; i < values.length; i++) {
+				Matrix4f mat = values[i];
+				
 				fb.put(mat.m00());fb.put(mat.m01());fb.put(mat.m02());fb.put(mat.m03());
 				fb.put(mat.m10());fb.put(mat.m11());fb.put(mat.m12());fb.put(mat.m13());
 				fb.put(mat.m20());fb.put(mat.m21());fb.put(mat.m22());fb.put(mat.m23());

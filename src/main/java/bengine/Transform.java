@@ -48,10 +48,12 @@ public class Transform {
 		return new Vector3f(0.0f, 1.0f, 0.0f)
 				.rotate(invRot);
 	}
-
-	public Matrix4f apply(Matrix4f transformMatrix) {
-		return transformMatrix
-			.rotate(this.rotation)
-			.translate(this.position);
+	
+	public Matrix4f generateMatrix() {
+		return new Matrix4f().identity().translate(this.position).rotate(this.rotation);
+	}
+	
+	public Matrix4f generateCameraMatrix() {
+		return new Matrix4f().identity().rotate(this.rotation).translate(new Vector3f(this.position).mul(-1));
 	}
 }

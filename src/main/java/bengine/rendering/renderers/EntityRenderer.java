@@ -12,10 +12,18 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.lwjgl.assimp.AIMatrix4x4;
+import org.lwjgl.assimp.AINode;
+import org.lwjgl.assimp.AIQuaternion;
+import org.lwjgl.assimp.AIVector3D;
+import org.lwjgl.opengl.GL;
 
 import bengine.Game;
 import bengine.animation.Animation;
+import bengine.animation.Bone;
+import bengine.animation.Skeleton;
 import bengine.assets.Shader;
 import bengine.entities.Camera;
 import bengine.entities.Entity;
@@ -28,135 +36,89 @@ public class EntityRenderer {
 	
 	Material defaultMaterial;
 	
-	private Mesh testMesh;
-	
-	private int vaoId;
-	private IntBuffer indices;
-	
 	public EntityRenderer(Material defaultMaterial) {
 		this.defaultMaterial = defaultMaterial;
-		
-		Vertex[] vertices = new Vertex[3];
-		vertices[0] = new Vertex();
-		vertices[0].position = new Vector3f(-0.5f, -0.5f, 0.0f);
-		//vertices[0].normal = new Vector3f(0.0f, 0.0f, 0.0f);
-		//vertices[0].texCoord = new Vector3f(0.0f, 0.0f, 0.0f);
-		vertices[1] = new Vertex();
-		vertices[1].position = new Vector3f(0.5f, -0.5f, 0.0f);
-		//vertices[1].normal = new Vector3f(0.0f, 0.0f, 0.0f);
-		//vertices[1].texCoord = new Vector3f(0.0f, 0.0f, 0.0f);
-		vertices[2] = new Vertex();
-		vertices[2].position = new Vector3f(0.5f, 0.5f, 0.0f);
-		//vertices[2].normal = new Vector3f(0.0f, 0.0f, 0.0f);
-		//vertices[2].texCoord = new Vector3f(0.0f, 0.0f, 0.0f);
-		
-		//testMesh = new Mesh(vertices, indices);
-		
-		if (defaultMaterial != null) {
-			int[] indices = new int[] {0, 1, 2};
-			
-			this.indices = ByteBuffer.allocateDirect(indices.length * Integer.BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();
-			
-			this.indices.put(0);this.indices.put(1);this.indices.put(2);
-			
-			this.indices.flip();
-			
-			FloatBuffer positionData = ByteBuffer.allocateDirect(6 * Float.BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-			positionData.put(-0.5f);positionData.put(-0.5f);
-			positionData.put(-0.5f);positionData.put( 0.5f);
-			positionData.put( 0.5f);positionData.put( 0.5f);
-			positionData.flip();
-			//testMesh.create();
-			vaoId = glGenVertexArrays();
-			
-			glBindVertexArray(vaoId);
-			
-			int positionBuffer = glGenBuffers();
-			
-			glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-			glBufferData(GL_ARRAY_BUFFER, positionData, GL_STATIC_DRAW);
-			glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0L);
-			glBindBuffer(GL_ARRAY_BUFFER, -1);
-			
-			glBindVertexArray(-1);
-		}
 	}
 	
 	public void render(Entity e, Camera c) {
 		
-		Shader simpleShader = e.getScene().getAssets().getAsset("simpleShader");
+		Matrix4f viewMatrix = c.generateView();
+		Matrix4f transformMatrix = new Matrix4f().identity();
 		
-		Matrix4f transformMatrix = c.generateViewmodel();
+		transformMatrix.mul(e.transform.generateMatrix());
 		
-		e.transform.apply(transformMatrix);
+		drawNode(e.model.getRootNode(), e, viewMatrix, new Matrix4f().identity());
 		
+		e.onDraw();
+	}
+	
+	private void drawNode(AINode node, Entity e, Matrix4f viewMatrix, Matrix4f transformMatrix) {
 		Mesh[] meshes = e.model.getMeshes();
 		
-		//VAO renderObject = testMesh.getRenderable();
-		//IntBuffer indices = testMesh.getIndices();
+		Matrix4f offset = convertMat(node.mTransformation());
 		
-		simpleShader.bind();
+		if (node.mNumMeshes() > 0) {
+			
+			for (int x = 0; x < node.mNumMeshes(); x++) {
+				Mesh mesh = meshes[node.mMeshes().get(x)];
+				
+				drawMesh(mesh, e, viewMatrix, offset);
+			}
+		}
 		
-		//renderObject.bind();
-		glBindVertexArray(vaoId);
+		if (node.mNumChildren() > 0) {
+			for (int x = 0; x < node.mNumChildren(); x++) {
+				AINode child = AINode.create(node.mChildren().get(x));
+				
+				drawNode(child, e, viewMatrix, transformMatrix);
+			}
+		}
+	}
+	
+	private void drawMesh(Mesh m, Entity e, Matrix4f viewMatrix, Matrix4f transformMatrix) {
+		int matIndex = m.materialIndex;
 		
-		glEnableVertexAttribArray(0);
+		Animation anim = e.getActiveAnimation();
+		
+		Skeleton s = m.skeleton;
+		
+		Material mat = (e.model.getMaterial(matIndex) == null)? defaultMaterial : e.model.getMaterial(matIndex);
+		
+		VAO renderObject = m.getRenderable();
+		IntBuffer indices = m.getIndices();
+		
+		mat.bind();
+		
+		if (m.skeleton != null && anim != null) {
+			anim.attach(m.skeleton);
+			mat.animate(anim);
+		}
+		
+		mat.camera(viewMatrix, transformMatrix);
+		
+		renderObject.bind();
 		
 		glDrawElements(GL_TRIANGLES, indices);
 		
-		glDisableVertexAttribArray(0);
+		renderObject.unbind();
 		
-		glBindVertexArray(-1);
-		//renderObject.unbind();
-		
-		/*glBegin(GL_TRIANGLES);
-			glVertex2f(-0.5f, -0.5f);
-			glVertex2f( 0.5f, -0.5f);
-			glVertex2f( 0.5f,  0.5f);
-		glEnd();*/
-		
-		simpleShader.unbind();
-		
-		//simpleShader.bind();
-		
-		//renderObject.bind();
-		
-		//glBindVertexArray();
-		
-		//glDrawElements(GL_TRIANGLES, indices);
-		
-		//renderObject.unbind();
-		
-		//simpleShader.unbind();
-		
-		/*for (Mesh m : meshes) { 
-			
-			int matIndex = m.materialIndex;
-			
-			//Animation anim = e.getActiveAnimation();
-			
-			Material mat = (e.model.getMaterial(matIndex) == null)? defaultMaterial : e.model.getMaterial(matIndex);
-			
-			VAO renderObject = m.getRenderable();
-			IntBuffer indices = m.getIndices();
-			
-			//mat.bind();
-			
-			if (m.skeleton != null && anim != null) {
-				if (anim.getSkeleton().equals(m.skeleton)) {
-					mat.animate(anim);
-				}
-			}
-			
-			//mat.camera(transformMatrix);
-			
-			renderObject.bind();
-			
-			glDrawElements(GL_TRIANGLES, indices);
-			
-			renderObject.unbind();
-			
-			//mat.unbind();
-		}*/
+		mat.unbind();
+	}
+	
+	private Matrix4f convertMat(AIMatrix4x4 mat) {
+		return new Matrix4f(
+				mat.a1(), mat.a2(), mat.a3(), mat.a4(),
+				mat.b1(), mat.b2(), mat.b3(), mat.b4(),
+				mat.c1(), mat.c2(), mat.c3(), mat.c4(),
+				mat.d1(), mat.d2(), mat.d3(), mat.d4())
+				.transpose();
+	}
+	
+	private Quaternionf convertQuat(AIQuaternion quat) {
+		return new Quaternionf(quat.x(), quat.y(), quat.z(), quat.w());
+	}
+	
+	private Vector3f convertVec(AIVector3D vec) {
+		return new Vector3f(vec.x(), vec.y(), vec.z());
 	}
 }

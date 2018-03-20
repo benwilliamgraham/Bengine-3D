@@ -37,7 +37,7 @@ public class VAO {
 	}
 	
 	public void unbind() {
-		glBindVertexArray(0);
+		glBindVertexArray(-1);
 		
 		for (Integer i : attribs) {
 			glDisableVertexAttribArray(i);

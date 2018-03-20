@@ -27,9 +27,8 @@ public class Camera {
 	
 	public void onUpdate(float delta) {}
 	
-	public Matrix4f generateViewmodel() {
+	public Matrix4f generateView() {
 		return new Matrix4f(viewMatrix)
-				.rotate(this.transform.rotation)
-				.translate(new Vector3f(this.transform.position).mul(-1));
+				.mul(transform.generateCameraMatrix());
 	}
 }

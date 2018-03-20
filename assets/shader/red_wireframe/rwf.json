@@ -1,0 +1,4 @@
+{
+	"vertexShader": "./assets/shader/red_wireframe/rwf.vert",
+	"fragmentShader": "./assets/shader/red_wireframe/rwf.frag"
+}

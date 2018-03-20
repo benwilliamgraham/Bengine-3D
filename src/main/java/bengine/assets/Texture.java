@@ -29,6 +29,13 @@ public class Texture extends Asset {
 	}
 	
 	@Override
+	public void create() {
+		textureHandle = glGenTextures();
+		
+		update(glWrapMode, glFilterMode);
+	}
+	
+	@Override
 	public void onLoad(File file) throws AssetCreationException {
 		int[] width, height, comp;
 		
@@ -44,10 +51,6 @@ public class Texture extends Asset {
 		
 		this.width = width[0];
 		this.height = height[0];
-		
-		textureHandle = glGenTextures();
-		
-		update(glWrapMode, glFilterMode);
 	}
 	
 	public void update(int glWrapMode, int glFilterMode) {
