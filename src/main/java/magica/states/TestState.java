@@ -12,6 +12,7 @@ import bengine.input.Keyboard;
 import bengine.rendering.Material;
 import bengine.rendering.Renderer;
 import magica.entities.CubeEntity;
+import magica.entities.SphereEntity;
 import magica.entities.TestEntity;
 
 public class TestState implements State {
@@ -40,11 +41,15 @@ public class TestState implements State {
 		
 		scene.getCamera().transform.move(new Vector3f(0, 0, 10));
 		
-		TestEntity.debugMaterial = new Material(assets.getAsset("wireframeShader"));
-		
 		TestEntity robotEntity = new TestEntity();
+		robotEntity.transform.position.x += 2;
 		
 		this.scene.addEntity(robotEntity);
+		
+		SphereEntity sphere = new SphereEntity();
+		sphere.transform.position.x -= 2;
+		
+		scene.addEntity(sphere);
 	}
 
 	@Override

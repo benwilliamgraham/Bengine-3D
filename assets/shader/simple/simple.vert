@@ -15,23 +15,19 @@ out vec4 pass_normal;
 out vec3 pass_texCoord;
 out vec4 pass_weights;
 
-mat4 getMat(int id, float weight) {
-	if (id != -1) {
-		return weight * boneTransforms[uint(id)];
-	}
-
-	return mat4(1.0);
+vec4 animate(vec4 input) {
+	return (((boneTransforms[joints.x]) * input) * weights.x +
+			((boneTransforms[joints.y]) * input) * weights.y +
+			((boneTransforms[joints.z]) * input) * weights.z +
+			((boneTransforms[joints.w]) * input) * weights.w);
 }
 
 void main(void) {
 
-	mat4 animationMatrix =
-			getMat(joints.x, weights.x);
-
-	pass_position = transformMatrix * animationMatrix * vec4(position, 1.0);
-	pass_normal = transformMatrix * vec4(normal, 0.0);
+	pass_position = vec4(position, 1.0);
+	pass_normal = vec4(normal, 0.0);
 	pass_texCoord = texCoord;
 	pass_weights = weights;
 
-	gl_Position = viewMatrix * pass_position;
+	gl_Position = viewMatrix * transformMatrix * pass_position;
 }

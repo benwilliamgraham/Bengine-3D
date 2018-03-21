@@ -68,8 +68,9 @@ public class Magica extends Game {
 		};
 		
 		loader.addAsset("defaultShader", new Shader(new File("./assets/shader/default.json")));
-		loader.addAsset("robotModel", new Model(new File("./assets/misc/robot_rigged.fbx")));
+		loader.addAsset("robotModel", new Model(new File("./assets/misc/chicken.fbx")));
 		loader.addAsset("cubeModel", new Model(new File("./assets/misc/Cube.fbx")));
+		loader.addAsset("sphereModel", new Model(new File("./assets/misc/sphere.fbx")));
 		loader.addAsset("simpleShader", new Shader(new File("./assets/shader/simple/simple.json")));
 		loader.addAsset("wireframeShader", new Shader(new File("./assets/shader/red_wireframe/rwf.json")));
 		

@@ -40,7 +40,7 @@ public class TestEntity extends Entity {
 		for (Animation a : this.model.getAnimations()) {
 			System.out.println(a.getName());
 			
-			if (a.getName().equals("Armature|ArmWave")) {
+			if (a.getName().equals("Armature|Walk")) {
 				activeAnimation = a;
 				activeAnimation.play();
 			}

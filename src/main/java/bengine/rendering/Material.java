@@ -38,6 +38,15 @@ public class Material {
 	public void camera(Matrix4f viewMatrix, Matrix4f transformMatrix) {
 		shader.push("viewMatrix", viewMatrix);
 		shader.push("transformMatrix", transformMatrix);
+		
+		Matrix4f normalMatrix = new Matrix4f(transformMatrix);
+		
+		normalMatrix
+			.invert()
+			.transpose();
+		
+		shader.push("normalMatrix", normalMatrix);
+		
 	}
 	
 	public void color(Vector3f color) {

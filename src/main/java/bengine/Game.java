@@ -45,15 +45,16 @@ public abstract class Game {
 	
 	protected State currentState;
 	
-	protected int framerateCap = 120;
+	protected int framerateCap = 60;
 	
 	protected int width, height;
 	
 	private float aspectRatio;
 	private boolean isRunning = true;
-	private long lastTick = 0;
 	
 	private long windowHandle = 0;
+	
+	private long lastTick, variableYieldTime, lastTime;
 	
 	private GLCapabilities capabilities;
 	
@@ -85,29 +86,23 @@ public abstract class Game {
 		
 		onCreated();
 		
-		lastTick = new Date().getTime();
+		lastTick = System.nanoTime();
 		
 		while (isRunning) {
-			long currentTime = new Date().getTime();
-			float delta = (currentTime - lastTick) / 1000.0f;
+			long currentTime = System.nanoTime();
+			float delta = (float) ((currentTime - lastTick) / 1000000000.0d);
+			lastTick = currentTime;
 			
-			if (delta >= 1.0f / framerateCap) {
-				onUpdate(delta);
-				
-				
-				//TODO: maybe some synchronization stuff.
-				
-				if (currentState != null) {
-					currentState.onUpdate(delta);
-					currentState.onDraw();
-				}
-				lastTick = currentTime;
+			onUpdate(delta);
+			//TODO: maybe some synchronization stuff.
+			
+			if (currentState != null) {
+				currentState.onUpdate(delta);
+				currentState.onDraw();
 			}
 			
 			glfwSwapBuffers(windowHandle);
 			glfwPollEvents();
-			//if we update the display every tick, regardless of whether or not we draw anything new, then we don't get input lag when using vsync.
-			//checkGLError();
 			if (glfwWindowShouldClose(windowHandle)) {
 				break;
 			}
@@ -212,6 +207,52 @@ public abstract class Game {
 			//System.exit(-1);
 		}
 	}
+
+	/**
+     * An accurate sync method that adapts automatically
+     * to the system it runs on to provide reliable results.
+     * 
+     * @param fps The desired frame rate, in frames per second
+     * @author kappa (On the LWJGL Forums)
+     */
+    private void sync(int fps) {
+        if (fps <= 0) return;
+          
+        long sleepTime = 1000000000 / fps; // nanoseconds to sleep this frame
+        // yieldTime + remainder micro & nano seconds if smaller than sleepTime
+        long yieldTime = Math.min(sleepTime, variableYieldTime + sleepTime % (1000*1000));
+        long overSleep = 0; // time the sync goes over by
+          
+        try {
+            while (true) {
+                long t = System.nanoTime() - lastTime;
+                  
+                if (t < sleepTime - yieldTime) {
+                    Thread.sleep(1);
+                }else if (t < sleepTime) {
+                    // burn the last few CPU cycles to ensure accuracy
+                    Thread.yield();
+                }else {
+                    overSleep = t - sleepTime;
+                    break; // exit while loop
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }finally{
+            lastTime = System.nanoTime() - Math.min(overSleep, sleepTime);
+             
+            // auto tune the time sync should yield
+            if (overSleep > variableYieldTime) {
+                // increase by 200 microseconds (1/5 a ms)
+                variableYieldTime = Math.min(variableYieldTime + 200*1000, sleepTime);
+            }
+            else if (overSleep < variableYieldTime - 200*1000) {
+                // decrease by 2 microseconds
+                variableYieldTime = Math.max(variableYieldTime - 2*1000, 0);
+            }
+        }
+    }
 	
 	public float getAspect() {
 		return aspectRatio;
