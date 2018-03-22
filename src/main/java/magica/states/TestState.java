@@ -9,6 +9,7 @@ import bengine.Scene;
 import bengine.State;
 import bengine.assets.AssetManager;
 import bengine.input.Keyboard;
+import bengine.input.Mouse;
 import bengine.rendering.Material;
 import bengine.rendering.Renderer;
 import magica.entities.CubeEntity;
@@ -26,10 +27,12 @@ public class TestState implements State {
 	
 	private Material defaultMaterial;
 	
+	private boolean isPaused, lockCamera;
+	
 	public TestState(AssetManager assets) {
 		this.assets = assets;
 		
-		defaultMaterial = new Material(assets.getAsset("simpleShader"));
+		defaultMaterial = new Material(assets.getAsset("defaultShader"));
 		
 		renderer = new Renderer(defaultMaterial);
 	}
@@ -38,6 +41,8 @@ public class TestState implements State {
 	public void onCreated(Game game) {
 		this.game = game;
 		this.scene = new Scene(assets);
+		
+		Mouse.lockCursor();
 		
 		scene.getCamera().transform.move(new Vector3f(0, 0, 10));
 		
@@ -55,24 +60,46 @@ public class TestState implements State {
 	@Override
 	public void onUpdate(float delta) {
 		
+		float speed = 2;
+		
+		if (Keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT)) {
+			speed = 5;
+		}
+		
 		if (Keyboard.isKeyDown(GLFW_KEY_W)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul(-2.0f * delta));
+			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul(-speed * delta));
 		} else if (Keyboard.isKeyDown(GLFW_KEY_S)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul(2.0f * delta));
+			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul( speed * delta));
 		}
 		
 		if (Keyboard.isKeyDown(GLFW_KEY_A)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.right().mul(-2.0f * delta));
+			scene.getCamera().transform.move(scene.getCamera().transform.right().mul(-speed * delta));
 		} else if (Keyboard.isKeyDown(GLFW_KEY_D)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.right().mul(2.0f * delta));
+			scene.getCamera().transform.move(scene.getCamera().transform.right().mul( speed * delta));
 		}
 		
-		if (Keyboard.isKeyDown(GLFW_KEY_RIGHT)) {
-			scene.getCamera().transform.rotation.rotateAxis((float) Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_LEFT)) {
-			scene.getCamera().transform.rotation.rotateAxis((float) -Math.PI / 4 * delta, new Vector3f(0.0f, 1.0f, 0.0f));
+		if (Keyboard.isKeyDown(GLFW_KEY_SPACE)) {
+			scene.getCamera().transform.move(scene.getCamera().transform.up().mul( speed * delta));
+		} else if (Keyboard.isKeyDown(GLFW_KEY_LEFT_CONTROL)) {
+			scene.getCamera().transform.move(scene.getCamera().transform.up().mul(-speed * delta));
 		}
 		
+		if (Keyboard.isKeyDown(GLFW_KEY_C)) {
+			Mouse.unlockCursor();
+			lockCamera = true;
+		} else if (Keyboard.isKeyDown(GLFW_KEY_V)) {
+			Mouse.lockCursor();
+			lockCamera = false;
+		}
+		
+		if (Keyboard.isKeyDown(GLFW_KEY_ESCAPE)) {
+			game.destroy();
+		}
+		
+		if (!lockCamera) {
+			scene.getCamera().transform.rotation.rotateLocalX(Mouse.getDY() * delta);
+			scene.getCamera().transform.rotation.rotateY(Mouse.getDX() * delta);
+		}
 		
 		scene.update(delta);
 	}

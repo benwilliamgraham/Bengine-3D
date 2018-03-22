@@ -22,6 +22,11 @@ public class Mouse {
 		});
 	}
 	
+	public static void update() {
+		lastX = mouseX;
+		lastY = mouseY;
+	}
+	
 	public static int getDX() {
 		return (int) (mouseX - lastX);
 	}

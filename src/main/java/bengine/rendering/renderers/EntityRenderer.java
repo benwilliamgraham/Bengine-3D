@@ -57,10 +57,11 @@ public class EntityRenderer {
 		
 		Matrix4f offset = new Matrix4f(transformMatrix).mul(convertMat(node.mTransformation()));
 		
-		
 		if (node.mNumMeshes() > 0) {
 			
 			for (int x = 0; x < node.mNumMeshes(); x++) {
+				int id = node.mMeshes().get(x);
+				
 				Mesh mesh = meshes[node.mMeshes().get(x)];
 				
 				drawMesh(mesh, e, viewMatrix, offset);
@@ -71,7 +72,7 @@ public class EntityRenderer {
 			for (int x = 0; x < node.mNumChildren(); x++) {
 				AINode child = AINode.create(node.mChildren().get(x));
 				
-				drawNode(child, e, viewMatrix, transformMatrix);
+				drawNode(child, e, viewMatrix, new Matrix4f(transformMatrix));
 			}
 		}
 	}

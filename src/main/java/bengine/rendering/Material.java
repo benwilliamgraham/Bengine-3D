@@ -3,6 +3,8 @@ package bengine.rendering;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 
 import bengine.animation.Animation;
 import bengine.assets.Shader;
@@ -11,12 +13,16 @@ import bengine.assets.Texture;
 public class Material {
 	
 	public Texture texture;
-	public Vector3f baseColor = new Vector3f(0.4f);
+	public Vector3f ambientColor, diffuseColor, specularColor;
+	public float shininess = 5.0f;
 	
 	protected Shader shader;
 	
 	public Material(Shader shader) {
 		this.shader = shader;
+		this.ambientColor = new Vector3f(0.2f, 0.2f, 0.2f);
+		this.diffuseColor = new Vector3f(0.5f, 0.5f, 0.5f);
+		this.specularColor = new Vector3f(1.0f, 1.0f, 0.7f);
 	}
 	
 	public void animate(Animation anim) {
@@ -49,24 +55,23 @@ public class Material {
 		
 	}
 	
-	public void color(Vector3f color) {
-		baseColor = color;
-		
-		shader.push("baseColor", baseColor);
-	}
-	
-	public void color() {
-		if (baseColor != null) {
-			color(baseColor);
-		}
-	}
-	
 	public void bind() {
 		shader.bind();
 		
 		if (texture != null) {
-			shader.push("texture", texture.getTexture());
+			texture.bind();
+			
+			shader.push("baseTexture", 0);
+			shader.push("doTexture", 1);
+		} else {
+			shader.push("doTexture", 0);
 		}
+		
+		//Pass this material's values to the uniform in the shader.
+		shader.push("material.ambient", this.ambientColor);
+		shader.push("material.diffuse", this.diffuseColor);
+		shader.push("material.specular", this.specularColor);
+		shader.push("material.shininess", this.shininess);
 	}
 	
 	public void unbind() {

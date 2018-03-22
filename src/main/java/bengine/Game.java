@@ -101,6 +101,7 @@ public abstract class Game {
 				currentState.onDraw();
 			}
 			
+			Mouse.update();
 			glfwSwapBuffers(windowHandle);
 			glfwPollEvents();
 			if (glfwWindowShouldClose(windowHandle)) {
@@ -157,6 +158,10 @@ public abstract class Game {
 		capabilities = GL.createCapabilities();
 		
 		glViewport(0, 0, width, height);
+		
+		glEnable(GL_BLEND);
+		
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		glEnable(GL_DEPTH_TEST);
 		

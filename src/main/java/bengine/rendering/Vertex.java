@@ -13,13 +13,19 @@ import org.joml.Vector4i;
 
 public class Vertex {
 	
-	public Vector3f position, normal, texCoord;
+	public Vector3f position, normal;
+	public Vector3f[] uvData;
 	public SkinData skinData;
 	
-	public Vertex() {
+	public Vertex(int uvChannels) {
 		this.position = new Vector3f();
 		this.normal = new Vector3f();
-		this.texCoord = new Vector3f();
+		this.uvData = new Vector3f[uvChannels];
+		
+		for (int c = 0; c < uvChannels; c++) {
+			uvData[c] = new Vector3f(0, 0, 0);
+		}
+		
 		this.skinData = new SkinData();
 	}
 	

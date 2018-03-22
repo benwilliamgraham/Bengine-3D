@@ -14,6 +14,7 @@ import bengine.assets.AssetLoader;
 import bengine.assets.AssetManager;
 import bengine.assets.Model;
 import bengine.assets.Shader;
+import bengine.assets.Texture;
 import bengine.networking.PermissionManager;
 import bengine.networking.messages.DebugMessage;
 import bengine.networking.messages.HandshakeMessage;
@@ -68,11 +69,10 @@ public class Magica extends Game {
 		};
 		
 		loader.addAsset("defaultShader", new Shader(new File("./assets/shader/default.json")));
-		loader.addAsset("robotModel", new Model(new File("./assets/misc/chicken.fbx")));
+		loader.addAsset("chickenModel", new Model(new File("./assets/misc/chicken.fbx")));
 		loader.addAsset("cubeModel", new Model(new File("./assets/misc/Cube.fbx")));
 		loader.addAsset("sphereModel", new Model(new File("./assets/misc/sphere.fbx")));
-		loader.addAsset("simpleShader", new Shader(new File("./assets/shader/simple/simple.json")));
-		loader.addAsset("wireframeShader", new Shader(new File("./assets/shader/red_wireframe/rwf.json")));
+		loader.addAsset("chickenTexture", new Texture(new File("./assets/textures/chicken.png")));
 		
 		switchState(loader.load()); //Switch to the loading state while we load the assets.
 	}

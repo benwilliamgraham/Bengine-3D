@@ -81,10 +81,10 @@ public class Animation {
 		
 		ReadSkeletonPositions(animTime, scene.mRootNode(), new Matrix4f().identity()); //"Poses" the skeleton, so to speak.
 		
-		Matrix4f[] boneMatricies = new Matrix4f[skeleton.bones.length]; 
+		Matrix4f[] boneMatricies = new Matrix4f[skeleton.bones.size()]; 
 		
 		for (int b = 0; b < boneMatricies.length; b++) {
-			boneMatricies[b] = new Matrix4f(skeleton.bones[b].finalTransform);
+			boneMatricies[b] = new Matrix4f(skeleton.bones.get(b).finalTransform);
 		}
 		
 		return boneMatricies;
@@ -114,7 +114,7 @@ public class Animation {
 			Matrix4f scaling  = GetScalingAt(time, nodeAnimation);//.scale(100); //Blender has an issue where the units are off. so fixing it.
 			
 			//System.out.println(node.mName().dataString());
-			//System.out.println(position.toString());
+			//System.out.print ln(position.toString());
 			
 			nodeTransformation = new Matrix4f(position)
 					.mul(rotation)

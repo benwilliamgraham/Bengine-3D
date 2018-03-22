@@ -32,10 +32,15 @@ public class TestEntity extends Entity {
 	public void onCreated(Scene scene) {
 		super.onCreated(scene);
 		
-		this.model = scene.getAssets().getAsset("robotModel");
+		this.model = scene.getAssets().getAsset("chickenModel");
 		this.scale = new Vector3f(0.1f, 0.1f, 0.1f);
 		
 		//this.transform.rotate(new Vector3f(-(float) Math.PI / 2.0f, 0.0f, 0.0f));
+		
+		this.material = new Material(scene.getAssets().getAsset("defaultShader"));
+		this.material.texture = scene.getAssets().getAsset("chickenTexture");
+		
+		this.model.bindMaterial(this.material);
 		
 		for (Animation a : this.model.getAnimations()) {
 			System.out.println(a.getName());

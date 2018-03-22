@@ -34,7 +34,8 @@ public class Mesh implements Drawable {
 	public int materialIndex;
 	
 	private VAO renderObject;
-	private VBO positionObject, normalObject, texCoordObject, jointWeightObject, jointObject;
+	private VBO positionObject, normalObject, jointWeightObject, jointObject;
+	private VBO[] texCoords;
 	
 	public Mesh() {}
 	
@@ -43,10 +44,16 @@ public class Mesh implements Drawable {
 		this.indices = store(indices);
 	}
 	
+	public void setUVChannel(int channel) {
+		if (channel < texCoords.length) {
+			renderObject.attach(2, texCoords[channel], GL_FLOAT, 3);
+		}
+	}
+	
 	public void create() {
 		Vector3f[] positions = new Vector3f[vertices.length];
 		Vector3f[] normals = new Vector3f[vertices.length];
-		Vector3f[] texCoords = new Vector3f[vertices.length];
+		Vector3f[][] uvData = new Vector3f[vertices[0].uvData.length][vertices.length];
 		Vector4f[] jointWeights = new Vector4f[vertices.length];
 		Vector4i[] jointIDS = new Vector4i[vertices.length];
 		
@@ -57,7 +64,10 @@ public class Mesh implements Drawable {
 			
 			positions[x] = v.position;
 			normals[x] = v.normal;
-			texCoords[x] = v.texCoord;
+			
+			for (int y = 0; y < vertices[x].uvData.length; y++) {		
+				uvData[y][x] = vertices[x].uvData[y];
+			}
 			
 			if (v.skinData != null) {
 				jointWeights[x] = v.skinData.getWeightData();
@@ -71,11 +81,17 @@ public class Mesh implements Drawable {
 		
 		positionObject = new VBO(store(positions), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 		normalObject = new VBO(store(normals), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-		texCoordObject = new VBO(store(texCoords), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+		
+		texCoords = new VBO[uvData.length];
+		
+		for (int t = 0; t < uvData.length; t++) {
+			texCoords[t] = new VBO(store(uvData[t]), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+		}
+		
 		
 		renderObject.attach(0, positionObject, GL_FLOAT, 3);
 		renderObject.attach(1, normalObject, GL_FLOAT, 3);
-		renderObject.attach(2, texCoordObject, GL_FLOAT, 3);
+		setUVChannel(0);
 		
 		if (hasSkinData) {
 			
@@ -91,9 +107,12 @@ public class Mesh implements Drawable {
 		this.renderObject.destroy();
 		this.positionObject.destroy();
 		this.normalObject.destroy();
-		this.texCoordObject.destroy();
 		this.jointObject.destroy();
 		this.jointWeightObject.destroy();
+		
+		for (VBO v : texCoords) {
+			v.destroy();
+		}
 	}
 	
 	public void update() {

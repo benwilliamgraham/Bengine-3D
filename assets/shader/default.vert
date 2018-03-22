@@ -2,17 +2,38 @@
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
-layout(location = 2) in vec3 texCoords;
+layout(location = 2) in vec3 texCoord;
+layout(location = 3) in vec4 weights;
+layout(location = 4) in ivec4 joints;
 
-out vec3 pass_textureCoords;
-out vec3 pass_normal;
-out vec3 pass_position;
+uniform mat4 viewMatrix;
+uniform mat4 transformMatrix;
+uniform mat4 boneTransforms[50];
 
-uniform mat4 viewmodelMatrix;
+out vec4 pass_position;
+out vec4 pass_normal;
+out vec3 pass_texCoord;
+out vec4 pass_weights;
 
-void main(void){
-	pass_textureCoords = texCoords;
-	pass_normal = normal;
-	pass_position = position;
-	gl_Position = viewmodelMatrix * vec4(position, 1.0);
+vec4 animate(vec4 input) {
+	return (((boneTransforms[joints.x]) * input) * weights.x +
+			((boneTransforms[joints.y]) * input) * weights.y +
+			((boneTransforms[joints.z]) * input) * weights.z +
+			((boneTransforms[joints.w]) * input) * weights.w);
+}
+
+void main(void) {
+
+	if (joints.x == -1) {
+		pass_position = vec4(position, 1.0);
+	} else {
+		pass_position = animate(vec4(position, 1.0));
+	}
+
+
+	pass_normal = vec4(normal, 0.0);
+	pass_texCoord = texCoord;
+	pass_weights = weights;
+
+	gl_Position = viewMatrix * transformMatrix * pass_position;
 }
