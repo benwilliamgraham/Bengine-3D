@@ -19,7 +19,7 @@ public class SphereEntity extends Entity {
 		this.model = s.getAssets().getAsset("sphereModel");
 		
 		this.material = new Material(s.getAssets().getAsset("defaultShader"));
-		this.material.ambientColor = new Vector3f(1.0f, 0.0f, 0.0f);
+		this.material.ambientColor = new Vector3f(0.7f, 0.7f, 0.7f);
 		
 		this.model.bindMaterial(this.material);
 	}

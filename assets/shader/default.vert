@@ -15,11 +15,11 @@ out vec4 pass_normal;
 out vec3 pass_texCoord;
 out vec4 pass_weights;
 
-vec4 animate(vec4 input) {
-	return (((boneTransforms[joints.x]) * input) * weights.x +
-			((boneTransforms[joints.y]) * input) * weights.y +
-			((boneTransforms[joints.z]) * input) * weights.z +
-			((boneTransforms[joints.w]) * input) * weights.w);
+vec4 animate(vec4 pos) {
+	return (((boneTransforms[joints.x]) * pos) * weights.x +
+			((boneTransforms[joints.y]) * pos) * weights.y +
+			((boneTransforms[joints.z]) * pos) * weights.z +
+			((boneTransforms[joints.w]) * pos) * weights.w);
 }
 
 void main(void) {

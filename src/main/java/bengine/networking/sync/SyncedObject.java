@@ -53,7 +53,10 @@ public abstract class SyncedObject {
 	}
 	
 	protected boolean isLocalAuthority() {
-		return (getEndpoint().getEndpointId() == getOwner() && !getEndpoint().isRemote());
+		if (getEndpoint() != null) {
+			return (getEndpoint().getEndpointId() == getOwner() && !getEndpoint().isRemote());
+		}
+		return true;
 	}
 	
 	void setEndpoint(Endpoint endpoint) {

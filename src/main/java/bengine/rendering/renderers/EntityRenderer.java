@@ -80,8 +80,6 @@ public class EntityRenderer {
 	private void drawMesh(Mesh m, Entity e, Matrix4f viewMatrix, Matrix4f transformMatrix) {
 		int matIndex = m.materialIndex;
 		
-		Animation anim = e.getActiveAnimation();
-		
 		Skeleton s = m.skeleton;
 		
 		Material mat = (e.model.getMaterial(matIndex) == null)? defaultMaterial : e.model.getMaterial(matIndex);
@@ -91,11 +89,16 @@ public class EntityRenderer {
 		
 		mat.bind();
 		
-		if (m.skeleton != null && anim != null) {
-			anim.attach(m.skeleton);
-			mat.animate(anim);
+		if (m.skeleton != null && e.animator != null) {
+			Animation anim = e.animator.getActiveAnimation();
 			
-			mat.camera(viewMatrix, e.transform.generateMatrix());
+			if (anim != null) {
+				anim.attach(m.skeleton);
+				mat.animate(anim);
+				mat.camera(viewMatrix, e.transform.generateMatrix());
+			} else {
+				mat.camera(viewMatrix, transformMatrix);
+			}
 		} else {
 			mat.camera(viewMatrix, transformMatrix);
 		}

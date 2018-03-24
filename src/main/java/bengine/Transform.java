@@ -28,25 +28,34 @@ public class Transform {
 		this.rotation.rotateAxis(euler.z, forwards());
 	}
 	
+	public void lookAt(Vector3f pos) {
+		Vector3f lookDirection = new Vector3f(pos).sub(this.position).normalize();
+		
+		new Quaternionf().lookAlong(lookDirection, new Vector3f(0.0f, 1.0f, 0.0f), this.rotation);
+	}
+	
 	public Vector3f forwards() {
-		Quaternionf invRot = new Quaternionf();
-		this.rotation.invert(invRot);
-		return new Vector3f(0.0f, 0.0f, 1.0f)
-				.rotate(invRot);
+		Vector3f direction = new Vector3f();
+		
+		this.rotation.transformPositiveZ(direction);
+		
+		return direction;
 	}
 	
 	public Vector3f right() {
-		Quaternionf invRot = new Quaternionf();
-		this.rotation.invert(invRot);
-		return new Vector3f(1.0f, 0.0f, 0.0f)
-				.rotate(invRot);
+		Vector3f direction = new Vector3f();
+		
+		this.rotation.transformPositiveX(direction);
+		
+		return direction;
 	}
 	
 	public Vector3f up() {
-		Quaternionf invRot = new Quaternionf();
-		this.rotation.invert(invRot);
-		return new Vector3f(0.0f, 1.0f, 0.0f)
-				.rotate(invRot);
+		Vector3f direction = new Vector3f();
+		
+		this.rotation.transformPositiveY(direction);
+		
+		return direction;
 	}
 	
 	public Matrix4f generateMatrix() {

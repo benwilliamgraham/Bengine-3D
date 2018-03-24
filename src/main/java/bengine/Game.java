@@ -102,6 +102,7 @@ public abstract class Game {
 			}
 			
 			Mouse.update();
+			Keyboard.update();
 			glfwSwapBuffers(windowHandle);
 			glfwPollEvents();
 			if (glfwWindowShouldClose(windowHandle)) {

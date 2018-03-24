@@ -3,6 +3,8 @@ package magica;
 import static org.lwjgl.glfw.GLFW.*;
 
 import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 
 import org.joml.Matrix4f;
@@ -30,6 +32,8 @@ import bengine.networking.serialization.serializers.LongSerializer;
 import bengine.networking.serialization.serializers.PermissionSerializer;
 import bengine.networking.serialization.serializers.StringSerializer;
 import bengine.networking.serialization.serializers.Vector3fSerializer;
+import bengine.networking.sync.SyncedObjectManager;
+import magica.entities.Chicken;
 import magica.states.TestState;
 
 public class Magica extends Game {
@@ -38,6 +42,9 @@ public class Magica extends Game {
 	
 	private int width, height;
 	private boolean isFullscreen;
+	
+	String playerName;
+	SocketAddress addr;
 	
 	public Magica(int width, int height, boolean isFullscreen) {
 		super();
@@ -60,7 +67,7 @@ public class Magica extends Game {
 
 			@Override
 			protected void onLoaded(AssetManager assets) {
-				State newState = new TestState(assets);
+				State newState = new TestState(assets, playerName, addr);
 				
 				
 				switchState(newState);
@@ -108,8 +115,14 @@ public class Magica extends Game {
 		ObjectParser.registerType(PermissionManager.class, new PermissionSerializer());
 		ObjectParser.registerType(Vector3f.class, new Vector3fSerializer());
 		
+		SyncedObjectManager.registerTrackedType(Chicken.class);
+		
 		MagicaLauncher launcher = new MagicaLauncher((int width, int height, boolean isFullscreen, String serverAddress, String name) -> {
-			Game game = new Magica(width, height, isFullscreen);
+			Magica game = new Magica(width, height, isFullscreen);
+			
+			game.playerName = name;
+			game.addr = new InetSocketAddress(serverAddress, 2290);
+			
 			
 			game.create();
 		});

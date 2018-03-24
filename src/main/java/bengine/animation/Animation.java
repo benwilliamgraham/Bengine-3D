@@ -29,8 +29,6 @@ public class Animation {
 	protected AIAnimation animationData;
 	protected AIScene scene;
 	
-	private boolean isPlaying;
-	
 	private Matrix4f globalInverseTransform;
 	
 	public Animation(AIAnimation animation, AIScene scene) {
@@ -46,26 +44,13 @@ public class Animation {
 		}
 	}
 	
-	public void play() {
-		isPlaying = true;
-	}
-	
-	public void pause() {
-		isPlaying = false;
-	}
-	
-	public void update(float delta) {
-		if (isPlaying) {
-			time += delta;
-		}
-	}
-	
-	public void reset() {
-		time = 0;
+	public float convertAnimTime(float time) {
+		float ticksPerSecond = (animationData.mTicksPerSecond() == 0)? 24: (float) animationData.mTicksPerSecond();
+		return time * ticksPerSecond;
 	}
 	
 	public Matrix4f[] GetBoneData() {
-		float animTime = convertAnimTime(time);
+		float animTime = time;
 		
 		if (animTime > duration) {
 			if (doLoop) {
@@ -292,11 +277,6 @@ public class Animation {
 		}
 		
 		return mat;
-	}
-	
-	private float convertAnimTime(float time) {
-		float ticksPerSecond = (animationData.mTicksPerSecond() == 0)? 24: (float) animationData.mTicksPerSecond();
-		return time * ticksPerSecond;
 	}
 	
 	private Matrix4f convertMat(AIMatrix4x4 mat) {

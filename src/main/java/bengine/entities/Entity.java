@@ -7,6 +7,7 @@ import org.joml.Vector3f;
 import bengine.Scene;
 import bengine.Transform;
 import bengine.animation.Animation;
+import bengine.animation.Animator;
 import bengine.assets.Model;
 import bengine.networking.sync.SyncedObject;
 import bengine.rendering.Material;
@@ -21,7 +22,7 @@ public abstract class Entity extends SyncedObject {
 	
 	public Model model;
 	
-	public boolean collidable;
+	public Animator animator;
 	
 	@SyncedField("health")
 	public float health = 0;
@@ -45,8 +46,8 @@ public abstract class Entity extends SyncedObject {
 	
 	public abstract void onDestroyed();
 	
-	public Animation getActiveAnimation() {
-		return null;
+	public Animator getAnimator() {
+		return animator;
 	}
 	
 	public Model getModel() {

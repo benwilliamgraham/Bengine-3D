@@ -2,21 +2,25 @@ package magica.states;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+import java.net.SocketAddress;
+
 import org.joml.Vector3f;
 
 import bengine.Game;
 import bengine.Scene;
 import bengine.State;
 import bengine.assets.AssetManager;
+import bengine.entities.Entity;
 import bengine.input.Keyboard;
 import bengine.input.Mouse;
+import bengine.networking.client.Client;
+import bengine.networking.sync.SyncedObject;
 import bengine.rendering.Material;
 import bengine.rendering.Renderer;
-import magica.entities.CubeEntity;
 import magica.entities.SphereEntity;
-import magica.entities.TestEntity;
+import magica.entities.Chicken;
 
-public class TestState implements State {
+public class TestState extends Client implements State  {
 	
 	protected Game game;
 	
@@ -27,9 +31,10 @@ public class TestState implements State {
 	
 	private Material defaultMaterial;
 	
-	private boolean isPaused, lockCamera;
+	private Entity chicken;
 	
-	public TestState(AssetManager assets) {
+	public TestState(AssetManager assets, String name, SocketAddress addr) {
+		super(name, addr);
 		this.assets = assets;
 		
 		defaultMaterial = new Material(assets.getAsset("defaultShader"));
@@ -44,61 +49,15 @@ public class TestState implements State {
 		
 		Mouse.lockCursor();
 		
-		scene.getCamera().transform.move(new Vector3f(0, 0, 10));
+		scene.getCamera().transform.move(new Vector3f(-20, 20, 20));
 		
-		TestEntity robotEntity = new TestEntity();
-		robotEntity.transform.position.x += 2;
-		
-		this.scene.addEntity(robotEntity);
-		
-		SphereEntity sphere = new SphereEntity();
-		sphere.transform.position.x -= 2;
-		
-		scene.addEntity(sphere);
+		this.chicken = new Chicken();
 	}
 
 	@Override
 	public void onUpdate(float delta) {
-		
-		float speed = 2;
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_LEFT_SHIFT)) {
-			speed = 5;
-		}
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_W)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul(-speed * delta));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_S)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul( speed * delta));
-		}
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_A)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.right().mul(-speed * delta));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_D)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.right().mul( speed * delta));
-		}
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_SPACE)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.up().mul( speed * delta));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_LEFT_CONTROL)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.up().mul(-speed * delta));
-		}
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_C)) {
-			Mouse.unlockCursor();
-			lockCamera = true;
-		} else if (Keyboard.isKeyDown(GLFW_KEY_V)) {
-			Mouse.lockCursor();
-			lockCamera = false;
-		}
-		
 		if (Keyboard.isKeyDown(GLFW_KEY_ESCAPE)) {
 			game.destroy();
-		}
-		
-		if (!lockCamera) {
-			scene.getCamera().transform.rotation.rotateLocalX(Mouse.getDY() * delta);
-			scene.getCamera().transform.rotation.rotateY(Mouse.getDX() * delta);
 		}
 		
 		scene.update(delta);
@@ -119,5 +78,24 @@ public class TestState implements State {
 	
 	public Renderer getRenderer() {
 		return renderer;
+	}
+
+	@Override
+	public void onConnected() {
+		System.out.println("Connected to server.");
+		objectManager.registerObject(chicken, getConnection());
+		
+	}
+
+	@Override
+	public void onNewObject(SyncedObject obj) {
+		if (obj instanceof Entity) {
+			scene.addEntity((Entity) obj);
+		}
+	}
+
+	@Override
+	public void onDisconnected() {
+		
 	}
 }
