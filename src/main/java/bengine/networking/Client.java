@@ -1,4 +1,4 @@
-package bengine.networking.client;
+package bengine.networking;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -7,14 +7,11 @@ import java.nio.channels.Selector;
 import java.util.Date;
 import java.util.Iterator;
 
-import bengine.networking.Connection;
-import bengine.networking.Endpoint;
 import bengine.networking.messages.DebugMessage;
 import bengine.networking.messages.HandshakeMessage;
 import bengine.networking.messages.NetworkMessage;
 import bengine.networking.messages.ObjectMessage;
 import bengine.networking.messages.RPCMessage;
-import bengine.networking.server.Server;
 import bengine.networking.sync.SyncedObject;
 import bengine.networking.sync.SyncedObjectManager;
 

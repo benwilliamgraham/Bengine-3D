@@ -8,6 +8,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import bengine.Game;
@@ -30,6 +31,7 @@ import bengine.networking.serialization.serializers.FloatSerializer;
 import bengine.networking.serialization.serializers.IntSerializer;
 import bengine.networking.serialization.serializers.LongSerializer;
 import bengine.networking.serialization.serializers.PermissionSerializer;
+import bengine.networking.serialization.serializers.QuaternionfSerializer;
 import bengine.networking.serialization.serializers.StringSerializer;
 import bengine.networking.serialization.serializers.Vector3fSerializer;
 import bengine.networking.sync.SyncedObjectManager;
@@ -38,7 +40,7 @@ import magica.states.TestState;
 
 public class Magica extends Game {
 	
-	public static final String WINDOW_TITLE = "Magica: The game about sand.";
+	public static final String WINDOW_TITLE = "Chicken Simulator: 2018";
 	
 	private int width, height;
 	private boolean isFullscreen;
@@ -60,9 +62,6 @@ public class Magica extends Game {
 	
 	@Override
 	protected void onCreated() {
-		
-		//System.out.println(new Matrix4f().identity().translate(new Vector3f(1.0f, 0.0f, 0.0f)));
-		
 		AssetLoader loader = new AssetLoader(this) {
 
 			@Override
@@ -75,11 +74,16 @@ public class Magica extends Game {
 			
 		};
 		
+		
 		loader.addAsset("defaultShader", new Shader(new File("./assets/shader/default.json")));
 		loader.addAsset("chickenModel", new Model(new File("./assets/misc/chicken.fbx")));
+		loader.addAsset("barnModel", new Model(new File("./assets/misc/barn.obj")));
 		loader.addAsset("cubeModel", new Model(new File("./assets/misc/Cube.fbx")));
 		loader.addAsset("sphereModel", new Model(new File("./assets/misc/sphere.fbx")));
+		loader.addAsset("planeModel", new Model(new File("./assets/misc/plane.obj")));
 		loader.addAsset("chickenTexture", new Texture(new File("./assets/textures/chicken.png")));
+		loader.addAsset("barnTexture", new Texture(new File("./assets/textures/barn.jpg")));
+		loader.addAsset("grassTexture", new Texture(new File("./assets/textures/Grass.png")));
 		
 		switchState(loader.load()); //Switch to the loading state while we load the assets.
 	}
@@ -94,7 +98,7 @@ public class Magica extends Game {
 	protected void onDestroyed() {
 		if (currentState != null) {
 			//TODO: Once i've finished reverting all this stuff from debugging, cuz this is probably a mem leak and i don't know cuz my gpu has like 12 gb of vram, and it's not significant enough to do anything to my computer.
-			//currentState.onDestroyed();
+			currentState.onDestroyed();
 		}
 	}
 	
@@ -114,6 +118,7 @@ public class Magica extends Game {
 		ObjectParser.registerType(ArrayList.class, new CollectionSerializer());
 		ObjectParser.registerType(PermissionManager.class, new PermissionSerializer());
 		ObjectParser.registerType(Vector3f.class, new Vector3fSerializer());
+		ObjectParser.registerType(Quaternionf.class, new QuaternionfSerializer());
 		
 		SyncedObjectManager.registerTrackedType(Chicken.class);
 		

@@ -9,8 +9,8 @@ import java.util.Map.Entry;
 
 import bengine.networking.NDBT;
 import bengine.networking.PermissionManager;
+import bengine.networking.Server;
 import bengine.networking.serialization.ObjectParser;
-import bengine.networking.server.Server;
 import bengine.networking.sync.SyncedObject;
 import bengine.networking.sync.SyncedObjectManager;
 
@@ -38,7 +38,6 @@ public class ObjectMessage extends NetworkMessage {
     public ObjectMessage() {}
     
     public ObjectMessage(SyncedObject obj) {
-    	
     	this.objectType = obj.getType();
     	this.objectInstanceId = obj.getInstanceID();
     	this.objectOwner = obj.getOwner();

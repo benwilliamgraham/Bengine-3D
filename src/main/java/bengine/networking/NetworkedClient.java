@@ -1,11 +1,9 @@
-package bengine.networking.server;
+package bengine.networking;
 
 import static bengine.networking.Util.generateId;
 
 import java.net.SocketAddress;
 
-import bengine.networking.Connection;
-import bengine.networking.Endpoint;
 import bengine.networking.messages.DebugMessage;
 import bengine.networking.messages.HandshakeMessage;
 import bengine.networking.messages.NetworkMessage;
@@ -99,16 +97,28 @@ public class NetworkedClient implements Endpoint {
 		} else if (message instanceof RPCMessage) {
 			RPCMessage msg = (RPCMessage) message;
 			
+			System.out.println("Recieved RPC message with mode: " + msg.rpcMode);
+			
 			if (msg.rpcMode == SyncedObject.RPC.SERVER_ONLY) {
 				server.objectManager.handleRPC(msg);
 			} else if (msg.rpcMode == SyncedObject.RPC.ALL_REMOTES) {
 				SyncedObject obj = server.objectManager.getObject(msg.objectInstanceId);
-				if (obj.mutability.hasPermission(msg.getEndpoint().getEndpointId())) {
+				if ((obj.mutability.hasPermission(msg.getEndpoint().getEndpointId()) || obj.getOwner() == msg.getEndpoint().getEndpointId())) {
 					for (NetworkedClient c : server.getClients()) {
 						if (obj.visibility.hasPermission(c.getEndpointId())) {
 							c.connection.send(msg);
 						}
 					}
+				}
+			} else if (msg.rpcMode == SyncedObject.RPC.ALL_REMOTES_AND_LOCAL) {
+				SyncedObject obj = server.objectManager.getObject(msg.objectInstanceId);
+				if ((obj.mutability.hasPermission(msg.getEndpoint().getEndpointId()) || obj.getOwner() == msg.getEndpoint().getEndpointId())) {
+					for (NetworkedClient c : server.getClients()) {
+						if (obj.visibility.hasPermission(c.getEndpointId())) {
+							c.connection.send(msg);
+						}
+					}
+					server.clients.get(obj.getOwner()).connection.send(msg);
 				}
 			}
 		}

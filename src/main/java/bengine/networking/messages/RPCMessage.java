@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import bengine.networking.NDBT;
+import bengine.networking.Server;
 import bengine.networking.serialization.ObjectParser;
-import bengine.networking.server.Server;
 import bengine.networking.sync.SyncedObject;
 
 public class RPCMessage extends NetworkMessage {
@@ -54,6 +54,8 @@ public class RPCMessage extends NetworkMessage {
 		data.add(RPC_MODE, this.rpcMode);
 		data.add(FUNCTION_NAME, this.functionName);
 		data.add(PARAMS, writeParams(this.params));
+		
+		data.pack();
 		
 		return data.toBytes();
 	}

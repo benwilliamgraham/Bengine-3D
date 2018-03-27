@@ -3,6 +3,8 @@ package bengine;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.joml.Vector3f;
@@ -21,8 +23,8 @@ public class Scene {
 	
 	public Scene(AssetManager assets) {
 		this.assets = assets;
-		this.entities = new HashMap<Long, Entity>();
-		this.camera = new Camera(new Vector3f(0, 0, -2.0f), 120.0f, 150.0f); //Create a camera at the origin.
+		this.entities = new ConcurrentHashMap<Long, Entity>();
+		this.camera = new Camera(new Vector3f(0, 0, -2.0f), 75f, Float.POSITIVE_INFINITY); //Create a camera at the origin.
 		this.camera.name = "DefaultCamera";
 	}
 	
@@ -36,9 +38,14 @@ public class Scene {
 	}
 	
 	public void addEntity(Entity e) {
-		this.entities.put(e.getInstanceID(), e);
-		
 		e.onCreated(this);
+		this.entities.put(e.getInstanceID(), e);
+	}
+	
+	public void removeEntity(Entity e) {
+		if (this.entities.containsKey(e.getInstanceID())) {
+			this.entities.remove(e.getInstanceID()).onDestroyed();
+		}
 	}
 	
 	public void destroy() {

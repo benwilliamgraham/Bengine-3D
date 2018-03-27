@@ -13,12 +13,14 @@ import bengine.assets.AssetManager;
 import bengine.entities.Entity;
 import bengine.input.Keyboard;
 import bengine.input.Mouse;
-import bengine.networking.client.Client;
+import bengine.networking.Client;
 import bengine.networking.sync.SyncedObject;
 import bengine.rendering.Material;
 import bengine.rendering.Renderer;
 import magica.entities.SphereEntity;
+import magica.entities.Barn;
 import magica.entities.Chicken;
+import magica.entities.GrassPlane;
 
 public class TestState extends Client implements State  {
 	
@@ -47,11 +49,25 @@ public class TestState extends Client implements State  {
 		this.game = game;
 		this.scene = new Scene(assets);
 		
-		Mouse.lockCursor();
+		//Mouse.lockCursor();
 		
-		scene.getCamera().transform.move(new Vector3f(-20, 20, 20));
+		scene.getCamera().transform.move(new Vector3f(-75, 50, 50));
 		
 		this.chicken = new Chicken();
+		
+		this.chicken.transform.position = new Vector3f((float) Math.random() * 90 - 45, 0.0f,(float)  Math.random() * 90 - 45);
+		
+		Barn barn = new Barn();
+		barn.transform.position = new Vector3f(0.0f, 60f, -175.0f);
+		
+		GrassPlane grass = new GrassPlane();
+		
+		
+		
+		this.scene.addEntity(barn);
+		this.scene.addEntity(grass);
+		
+		this.open();
 	}
 
 	@Override
@@ -59,7 +75,6 @@ public class TestState extends Client implements State  {
 		if (Keyboard.isKeyDown(GLFW_KEY_ESCAPE)) {
 			game.destroy();
 		}
-		
 		scene.update(delta);
 	}
 
@@ -72,6 +87,8 @@ public class TestState extends Client implements State  {
 
 	@Override
 	public void onDestroyed() {
+		//objectManager.destroyObject(this.chicken);
+		this.close();
 		assets.destroy();
 	}
 
@@ -84,7 +101,6 @@ public class TestState extends Client implements State  {
 	public void onConnected() {
 		System.out.println("Connected to server.");
 		objectManager.registerObject(chicken, getConnection());
-		
 	}
 
 	@Override

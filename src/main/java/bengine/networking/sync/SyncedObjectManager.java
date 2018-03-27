@@ -2,12 +2,13 @@ package bengine.networking.sync;
 
 import java.util.Map.Entry;
 
+import bengine.networking.Client;
 import bengine.networking.Connection;
-import bengine.networking.client.Client;
+import bengine.networking.NetworkedClient;
+import bengine.networking.Server;
+import bengine.networking.messages.DestroyObjectMessage;
 import bengine.networking.messages.ObjectMessage;
 import bengine.networking.messages.RPCMessage;
-import bengine.networking.server.NetworkedClient;
-import bengine.networking.server.Server;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -35,6 +36,10 @@ public class SyncedObjectManager {
 		
 		connection.send(om);
 	}
+	
+	public void deregisterObject(SyncedObject obj, Connection connection) {
+		DestroyObjectMessage msg = new DestroyObjectMessage(obj);
+	}
 
 	public boolean isRegistered(ObjectMessage om) {
 		return trackedObjects.containsKey(om.objectInstanceId);
@@ -48,7 +53,7 @@ public class SyncedObjectManager {
 		if (trackedObjects.containsKey(m.objectInstanceId)) {
 			SyncedObject obj = trackedObjects.get(m.objectInstanceId);
 			
-			if (m.getEndpoint().isRemote() && !obj.mutability.hasPermission(m.getEndpoint().getEndpointId())) {
+			if (m.getEndpoint().isRemote() && !(obj.mutability.hasPermission(m.getEndpoint().getEndpointId()) || obj.getOwner() == m.getEndpoint().getEndpointId())) {
 				return ;
 			}
 			
@@ -60,6 +65,28 @@ public class SyncedObjectManager {
 				method.invoke(obj, m.params);
 			} catch (Exception e) {
 				//TODO: When we get a logger.
+			}
+		}
+	}
+	
+	public void onMessage(DestroyObjectMessage msg) {
+		if (trackedObjects.containsKey(msg.objectId)) { //Are we tracking the object that's being destroyed?
+			SyncedObject obj = trackedObjects.get(msg.objectId);
+			
+			if (msg.getEndpoint().isRemote()) { //Executes if we're on the server.
+				if (msg.getEndpoint().getEndpointId() == obj.getOwner()) {
+					trackedObjects.remove(msg.objectId);
+					
+					for (NetworkedClient c : msg.getEndpoint().getServer().getClients()) {
+						
+					}
+				}
+			} else { //Executes if we're on the client.
+				if (trackedObjects.containsKey(msg.objectId)) {
+					trackedObjects.remove(msg.objectId);
+					
+					obj.onDeregistered();
+				}
 			}
 		}
 	}
@@ -211,7 +238,6 @@ public class SyncedObjectManager {
 	public static void registerTrackedType(Class<? extends SyncedObject> t) {
 		try {
 			int objectType = t.getField("OBJECT_TYPE").getInt(null);
-			
 			
 			HashMap<String, Field> objTrackedFields = new HashMap<String, Field>();
 			

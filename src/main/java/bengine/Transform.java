@@ -5,17 +5,19 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 public class Transform {
-	public Vector3f position;
+	public Vector3f position, scale;
 	public Quaternionf rotation;
 
 	public Transform() {
 		this.position = new Vector3f();
 		this.rotation = new Quaternionf();
+		this.scale = new Vector3f(1.0f, 1.0f, 1.0f);
 	}
 	
 	public Transform(Vector3f position, Quaternionf rotation) {
 		this.position = position;
 		this.rotation = rotation;
+		this.scale = new Vector3f(1.0f, 1.0f, 1.0f);
 	}
 	
 	public void move(Vector3f delta) {
@@ -59,7 +61,7 @@ public class Transform {
 	}
 	
 	public Matrix4f generateMatrix() {
-		return new Matrix4f().identity().translate(this.position).rotate(this.rotation);
+		return new Matrix4f().identity().translate(this.position).rotate(this.rotation).scale(this.scale);
 	}
 	
 	public Matrix4f generateCameraMatrix() {

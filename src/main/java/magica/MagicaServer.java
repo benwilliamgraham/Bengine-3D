@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import bengine.entities.Entity;
+import bengine.networking.NetworkedClient;
 import bengine.networking.PermissionManager;
+import bengine.networking.Server;
 import bengine.networking.messages.DebugMessage;
 import bengine.networking.messages.HandshakeMessage;
 import bengine.networking.messages.NetworkMessage;
@@ -22,11 +25,12 @@ import bengine.networking.serialization.serializers.FloatSerializer;
 import bengine.networking.serialization.serializers.IntSerializer;
 import bengine.networking.serialization.serializers.LongSerializer;
 import bengine.networking.serialization.serializers.PermissionSerializer;
+import bengine.networking.serialization.serializers.QuaternionfSerializer;
 import bengine.networking.serialization.serializers.StringSerializer;
 import bengine.networking.serialization.serializers.Vector3fSerializer;
-import bengine.networking.server.NetworkedClient;
-import bengine.networking.server.Server;
 import bengine.networking.sync.SyncedObject;
+import bengine.networking.sync.SyncedObjectManager;
+import magica.entities.Chicken;
 
 public class MagicaServer extends Server {
 
@@ -88,8 +92,9 @@ public class MagicaServer extends Server {
 		ObjectParser.registerType(List.class, new CollectionSerializer());
 		ObjectParser.registerType(PermissionManager.class, new PermissionSerializer());
 		ObjectParser.registerType(Vector3f.class, new Vector3fSerializer());
+		ObjectParser.registerType(Quaternionf.class, new QuaternionfSerializer());
 		
-		//SyncedObjectManager.registerTrackedType(Player.class);
+		SyncedObjectManager.registerTrackedType(Chicken.class);
 		//SyncedObjectManager.registerTrackedType(Bullet.class);
 		
 		MagicaServer gameServer = new MagicaServer();

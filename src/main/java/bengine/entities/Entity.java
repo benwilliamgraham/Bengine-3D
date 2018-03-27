@@ -1,28 +1,20 @@
 package bengine.entities;
 
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-
+import org.joml.Spheref;
 import bengine.Scene;
 import bengine.Transform;
-import bengine.animation.Animation;
 import bengine.animation.Animator;
 import bengine.assets.Model;
 import bengine.networking.sync.SyncedObject;
 import bengine.rendering.Material;
-import bengine.rendering.Mesh;
-import bengine.rendering.Renderer;
 
 public abstract class Entity extends SyncedObject {
 	
 	public Transform transform;
 	
-	public Vector3f scale;
+	protected Model model;
 	
-	public Model model;
-	
-	public Animator animator;
+	protected Animator animator;
 	
 	@SyncedField("health")
 	public float health = 0;
@@ -32,8 +24,8 @@ public abstract class Entity extends SyncedObject {
 	private Scene scene;
 	
 	public Entity() {
+		super();
 		this.transform = new Transform();
-		this.scale = new Vector3f(1.0f, 1.0f, 1.0f);
 	}
 	
 	public void onCreated(Scene scene) {
@@ -45,6 +37,10 @@ public abstract class Entity extends SyncedObject {
 	public void onDraw() {}
 	
 	public abstract void onDestroyed();
+	
+	public void destroy() {
+		this.scene.removeEntity(this);
+	}
 	
 	public Animator getAnimator() {
 		return animator;

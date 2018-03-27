@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import bengine.networking.server.Server;
-
 //Stands for Non-Descript Binary Tag
 
 public class NDBT {

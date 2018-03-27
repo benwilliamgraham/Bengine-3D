@@ -6,45 +6,43 @@ import bengine.Scene;
 import bengine.entities.Entity;
 import bengine.rendering.Material;
 
-public class SphereEntity extends Entity {
+public class Barn extends Entity {
 
-	public SphereEntity() {
-		super();
+	public Barn() {
+		
 	}
 	
 	@Override
 	public void onCreated(Scene s) {
 		super.onCreated(s);
 		
-		this.model = s.getAssets().getAsset("sphereModel");
+		this.model = s.getAssets().getAsset("barnModel");
 		
 		this.material = new Material(s.getAssets().getAsset("defaultShader"));
-		this.material.ambientColor = new Vector3f(0.7f, 0.7f, 0.7f);
+		this.material.texture = s.getAssets().getAsset("barnTexture");
 		
 		this.model.bindMaterial(this.material);
+		
+		this.transform.scale = new Vector3f(20.0f, 20.0f, 20.0f);
 	}
 	
 	@Override
 	public void onUpdate(float delta) {
 		
-		
 	}
 
 	@Override
 	public void onDestroyed() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void onRegistered() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void onObjectUpdate() {
-		// TODO Auto-generated method stub
 		
 	}
 	
@@ -57,5 +55,5 @@ public class SphereEntity extends Entity {
 	public int getType() {
 		return 0;
 	}
-	
+
 }

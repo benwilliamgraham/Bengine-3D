@@ -47,13 +47,13 @@ public class EntityRenderer {
 		
 		transformMatrix.mul(e.transform.generateMatrix());
 		
-		drawNode(e.model.getRootNode(), e, viewMatrix, transformMatrix);
+		drawNode(e.getModel().getRootNode(), e, viewMatrix, transformMatrix);
 		
 		e.onDraw();
 	}
 	
 	private void drawNode(AINode node, Entity e, Matrix4f viewMatrix, Matrix4f transformMatrix) {
-		Mesh[] meshes = e.model.getMeshes();
+		Mesh[] meshes = e.getModel().getMeshes();
 		
 		Matrix4f offset = new Matrix4f(transformMatrix).mul(convertMat(node.mTransformation()));
 		
@@ -82,15 +82,15 @@ public class EntityRenderer {
 		
 		Skeleton s = m.skeleton;
 		
-		Material mat = (e.model.getMaterial(matIndex) == null)? defaultMaterial : e.model.getMaterial(matIndex);
+		Material mat = (e.getModel().getMaterial(matIndex) == null)? defaultMaterial : e.getModel().getMaterial(matIndex);
 		
 		VAO renderObject = m.getRenderable();
 		IntBuffer indices = m.getIndices();
 		
 		mat.bind();
 		
-		if (m.skeleton != null && e.animator != null) {
-			Animation anim = e.animator.getActiveAnimation();
+		if (m.skeleton != null && e.getAnimator() != null) {
+			Animation anim = e.getAnimator().getActiveAnimation();
 			
 			if (anim != null) {
 				anim.attach(m.skeleton);

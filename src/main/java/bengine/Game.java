@@ -151,7 +151,11 @@ public abstract class Game {
 		
 		glfwShowWindow(windowHandle);
 		
+		glfwSwapInterval(0);
+		
 		aspectRatio = (float) width / height;
+		
+		System.out.println(aspectRatio);
 		
 		this.width = width;
 		this.height = height;
@@ -160,9 +164,9 @@ public abstract class Game {
 		
 		glViewport(0, 0, width, height);
 		
-		glEnable(GL_BLEND);
+		//glEnable(GL_BLEND);
 		
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		glEnable(GL_DEPTH_TEST);
 		

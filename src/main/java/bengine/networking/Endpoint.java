@@ -1,7 +1,6 @@
 package bengine.networking;
 
 import bengine.networking.messages.NetworkMessage;
-import bengine.networking.server.Server;
 
 public interface Endpoint {
 	public Connection getConnection();

@@ -91,7 +91,14 @@ public class Animator {
 	private void setAnimation(Animation a) {
 		timer = 0;
 		activeAnimation = a;
-		System.out.println("Playing: " + a.name);
+	}
+	
+	public void setTime(float time) {
+		this.timer = time;
+	}
+	
+	public float getTime() {
+		return timer;
 	}
 	
 	public Animation getAnimation(String name) {

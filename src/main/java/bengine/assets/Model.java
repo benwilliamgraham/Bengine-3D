@@ -161,7 +161,7 @@ public class Model extends Asset {
 				AIFace face = aMesh.mFaces().get(f);
 				
 				for (int in = 0; in < face.mNumIndices(); in++) {
-					indices[f * 3 + in] = face.mIndices().get(in);
+					indices[f * aMesh.mFaces().get(0).mNumIndices() + in] = face.mIndices().get(in);
 				}
 			}
 			

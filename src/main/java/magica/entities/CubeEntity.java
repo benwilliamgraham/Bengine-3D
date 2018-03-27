@@ -39,7 +39,12 @@ public class CubeEntity extends Entity {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	@Override
+	public void onDeregistered() {
+		
+	}
+	
 	@Override
 	public int getType() {
 		return generateTypeId();

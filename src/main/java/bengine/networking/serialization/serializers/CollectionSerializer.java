@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import bengine.networking.Server;
 import bengine.networking.serialization.ObjectParser;
-import bengine.networking.server.Server;
 
 public class CollectionSerializer extends Serializer<Collection<?>> {
 

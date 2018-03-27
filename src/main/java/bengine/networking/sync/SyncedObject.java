@@ -33,6 +33,7 @@ public abstract class SyncedObject {
 		
 		public static final int SERVER_ONLY = 0;
 		public static final int ALL_REMOTES = 1;
+		public static final int ALL_REMOTES_AND_LOCAL = 2;
 	}
 	
 	
@@ -45,6 +46,7 @@ public abstract class SyncedObject {
 	
 	public abstract void onRegistered();
 	public abstract void onObjectUpdate();
+	public abstract void onDeregistered();
 	
 	protected void RPC(String function, int rpcMode, Object ...params) {
 		RPCMessage message = new RPCMessage(this, function, params, rpcMode);

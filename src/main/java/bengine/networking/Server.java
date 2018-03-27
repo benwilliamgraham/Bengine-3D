@@ -1,4 +1,4 @@
-package bengine.networking.server;
+package bengine.networking;
 
 import java.util.Collection;
 import java.util.Date;
@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import bengine.networking.Connection;
-import bengine.networking.Endpoint;
 import bengine.networking.messages.HandshakeMessage;
 import bengine.networking.messages.NetworkMessage;
 import bengine.networking.sync.SyncedObject;

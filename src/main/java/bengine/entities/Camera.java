@@ -20,7 +20,7 @@ public class Camera {
 	public Camera(Vector3f position, float fov, float farPlane) {
 		this.transform = new Transform(position, new Quaternionf());
 		viewMatrix = new Matrix4f()
-				.perspective(fov, Game.getCurrent().getAspect(), 0.1f, farPlane);
+				.perspective((float) (fov * Math.PI / 180.0f), Game.getCurrent().getAspect(), 0.1f, farPlane);
 		
 		this.clearColor = new Vector3f(0.4f, 0.6f, 0.9f);
 	}
