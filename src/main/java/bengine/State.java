@@ -1,6 +1,6 @@
 package bengine;
 
-import bengine.rendering.Renderer;
+import bengine.rendering.renderers.Renderer;
 
 public interface State {
 	public void onCreated(Game game);

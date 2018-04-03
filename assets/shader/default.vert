@@ -9,6 +9,7 @@ layout(location = 4) in ivec4 joints;
 uniform mat4 viewMatrix;
 uniform mat4 transformMatrix;
 uniform mat4 boneTransforms[50];
+uniform mat4 lightMatrix;
 
 out vec4 pass_position;
 out vec4 pass_normal;

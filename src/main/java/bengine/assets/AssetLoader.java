@@ -1,19 +1,34 @@
 package bengine.assets;
 
-import java.util.HashMap;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.joml.Vector3f;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
+
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 import bengine.Game;
 import bengine.State;
 import bengine.assets.Asset.AssetImportance;
-import bengine.rendering.Renderer;
+import bengine.rendering.renderers.Renderer;
+import bengine.rendering.renderers.SceneRenderer;
 
 public abstract class AssetLoader {
 	private static final Logger LOGGER = Logger.getLogger(AssetLoader.class.getName());
@@ -29,6 +44,66 @@ public abstract class AssetLoader {
 		this.game = game;
 	}
 	
+	public void addAssets(File jsonFile) { //Seriously, just don't worry about it.
+		Function<JsonValue, List<String>> parseAssetList = (JsonValue assetList) -> {
+			ArrayList<String> listPaths = new ArrayList<String>();
+			
+			if (assetList.isArray()) {
+				JsonArray jListPaths = assetList.asArray();
+				
+				jListPaths.forEach((JsonValue v) -> {
+					if (v.isString()) {
+						listPaths.add(v.asString());
+					}
+				});
+				
+			} else if (assetList.isString()) {
+				listPaths.add(assetList.asString());
+			}
+			
+			return listPaths;
+		};
+		
+		try {
+			JsonValue assetsFile = Json.parse(new FileReader(jsonFile));
+			
+			if (!assetsFile.isArray()) return;
+			
+			JsonArray assets = assetsFile.asArray();
+			
+			assets.forEach((JsonValue a) -> {
+				if (!a.isObject()) return;
+				
+				JsonObject assetObject = a.asObject();
+				
+				if (assetObject.get("name") == null) return;
+				if (assetObject.get("path") == null) return;
+				if (assetObject.get("type") == null) return;
+				
+				String assetName = assetObject.getString("name", "");
+				String assetPath = assetObject.getString("path", "");
+				String assetType = assetObject.getString("type", "");
+				
+				switch (assetType) {
+				case "texture":
+					addAsset(assetName, new Texture(new File(assetPath)));
+					break;
+				case "model":
+					addAsset(assetName, new Model(new File(assetPath)));
+					break;
+				case "shader":
+					addAsset(assetName, new Shader(new File(assetPath)));
+					break;
+				}
+				
+				
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	public void addAsset(String name, Asset asset) {
 		this.assets.put(name, asset);
 		asset.setGame(game);
@@ -42,7 +117,7 @@ public abstract class AssetLoader {
 		
 		return new State() {
 			
-			Renderer r = new Renderer(null);
+			Renderer r = new SceneRenderer(null);
 			Game g;
 			
 			@Override
@@ -86,7 +161,7 @@ public abstract class AssetLoader {
 
 			@Override
 			public void onDraw() {
-				r.clear(new Vector3f(1.0f, 1.0f, 1.0f));
+				r.clear();
 				
 				//TODO: Loading screen.
 			}

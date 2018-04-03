@@ -1,0 +1,9 @@
+[
+	{"type": "texture", "name": "chickenTexture", "path": "./assets/textures/chicken.png"},
+	{"type": "texture", "name": "grassTexture", "path": "./assets/textures/Grass.png"},
+	{"type": "texture", "name": "barnTexture", "path": "./assets/textures/barn.jpg"},
+	{"type": "model", "name": "planeModel", "path": "./assets/misc/plane.obj"},
+	{"type": "model", "name": "barnModel", "path": "./assets/misc/barn.obj"},
+	{"type": "model", "name": "chickenModel", "path": "./assets/misc/chicken.fbx"},
+	{"type": "shader", "name": "defaultShader", "path": "./assets/shader/default.json"}
+]

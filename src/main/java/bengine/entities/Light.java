@@ -3,16 +3,12 @@ package bengine.entities;
 import org.joml.Vector3f;
 
 public class Light {
-	public Vector3f position;
-	public float lightDist;
-	public float brightness;
-	//<1: fast initial brightness drop, slower overtime; >1: low initial brightness drop, more toward end
-	public float dropOff;
+	public Vector3f position, ambient, diffuse, specular;
 	
-	public Light(Vector3f position, float lightDist, float brightness, float dropOff) {
+	public Light(Vector3f position) {
 		this.position = position;
-		this.lightDist = lightDist;
-		this.brightness = brightness;
-		this.dropOff = dropOff;
+		this.ambient = new Vector3f(1, 1, 1);
+		this.diffuse = new Vector3f(1, 1, 1);
+		this.specular = new Vector3f(1, 1, 1);
 	}
 }

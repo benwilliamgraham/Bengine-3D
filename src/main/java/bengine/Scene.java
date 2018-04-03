@@ -12,6 +12,7 @@ import org.joml.Vector3f;
 import bengine.assets.AssetManager;
 import bengine.entities.Camera;
 import bengine.entities.Entity;
+import bengine.entities.Light;
 
 public class Scene {
 	private static final Logger LOGGER = Logger.getLogger(Scene.class.getName());
@@ -21,11 +22,14 @@ public class Scene {
 	protected Map<Long, Entity> entities;
 	protected AssetManager assets;
 	
+	protected Light sun;
+	
 	public Scene(AssetManager assets) {
 		this.assets = assets;
 		this.entities = new ConcurrentHashMap<Long, Entity>();
-		this.camera = new Camera(new Vector3f(0, 0, -2.0f), 75f, Float.POSITIVE_INFINITY); //Create a camera at the origin.
+		this.camera = new Camera(new Vector3f(0, 0, 0), 75f, 100.0f); //Create a camera at the origin.
 		this.camera.name = "DefaultCamera";
+		this.sun = new Light(new Vector3f(3, 3, -3));
 	}
 	
 	public void update(float timeStep) {
@@ -59,8 +63,16 @@ public class Scene {
 		this.camera = camera;
 	}
 	
+	public void setSun(Light sun) {
+		this.sun = sun;
+	}
+	
 	public Camera getCamera() {
 		return camera;
+	}
+	
+	public Light getSun() {
+		return sun;
 	}
 	
 	public Entity getEntity(long entityId) {

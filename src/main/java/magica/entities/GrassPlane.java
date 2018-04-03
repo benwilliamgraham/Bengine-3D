@@ -23,7 +23,7 @@ public class GrassPlane extends Entity {
 		
 		this.model.bindMaterial(this.material);
 		
-		this.transform.scale = new Vector3f(100.0f, 1.0f, 100.0f);
+		this.transform.scale = new Vector3f(10.0f, 1.0f, 10.0f);
 	}
 	
 	@Override

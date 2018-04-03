@@ -9,6 +9,8 @@ import org.lwjgl.opengl.GL13;
 import bengine.animation.Animation;
 import bengine.assets.Shader;
 import bengine.assets.Texture;
+import bengine.entities.Camera;
+import bengine.entities.Light;
 
 public class Material {
 	
@@ -41,9 +43,17 @@ public class Material {
 		shader.push("boneTransforms", boneTransforms);
 	}
 	
-	public void camera(Matrix4f viewMatrix, Matrix4f transformMatrix) {
-		shader.push("viewMatrix", viewMatrix);
+	public void sun(Light sun) {
+		shader.push("sun.position", sun.position);
+		shader.push("sun.ambient", sun.ambient);
+		shader.push("sun.diffuse", sun.diffuse);
+		shader.push("sun.specular", sun.specular);
+	}
+	
+	public void camera(Camera c, Matrix4f transformMatrix) {
+		shader.push("viewMatrix", c.generateView());
 		shader.push("transformMatrix", transformMatrix);
+		shader.push("cameraPosition", c.transform.position);
 		
 		Matrix4f normalMatrix = new Matrix4f(transformMatrix);
 		

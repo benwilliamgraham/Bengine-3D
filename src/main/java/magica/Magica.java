@@ -36,7 +36,8 @@ import bengine.networking.serialization.serializers.StringSerializer;
 import bengine.networking.serialization.serializers.Vector3fSerializer;
 import bengine.networking.sync.SyncedObjectManager;
 import magica.entities.Chicken;
-import magica.states.TestState;
+import magica.states.ChickenDemoState;
+import magica.states.LightingTestState;
 
 public class Magica extends Game {
 	
@@ -66,8 +67,8 @@ public class Magica extends Game {
 
 			@Override
 			protected void onLoaded(AssetManager assets) {
-				State newState = new TestState(assets, playerName, addr);
-				
+				//State newState = new ChickenDemoState(assets, playerName, addr);
+				State newState = new LightingTestState(assets);
 				
 				switchState(newState);
 			}
@@ -75,15 +76,20 @@ public class Magica extends Game {
 		};
 		
 		
-		loader.addAsset("defaultShader", new Shader(new File("./assets/shader/default.json")));
-		loader.addAsset("chickenModel", new Model(new File("./assets/misc/chicken.fbx")));
-		loader.addAsset("barnModel", new Model(new File("./assets/misc/barn.obj")));
-		loader.addAsset("cubeModel", new Model(new File("./assets/misc/Cube.fbx")));
+		loader.addAsset("simpleShader", new Shader(new File("./assets/shader/simple.json")));
+		//loader.addAsset("defaultShader", new Shader(new File("./assets/shader/default.json")));
+		//loader.addAsset("chickenModel", new Model(new File("./assets/misc/chicken.fbx")));
+		//loader.addAsset("barnModel", new Model(new File("./assets/misc/barn.obj")));
 		loader.addAsset("sphereModel", new Model(new File("./assets/misc/sphere.fbx")));
-		loader.addAsset("planeModel", new Model(new File("./assets/misc/plane.obj")));
-		loader.addAsset("chickenTexture", new Texture(new File("./assets/textures/chicken.png")));
-		loader.addAsset("barnTexture", new Texture(new File("./assets/textures/barn.jpg")));
-		loader.addAsset("grassTexture", new Texture(new File("./assets/textures/Grass.png")));
+		//loader.addAsset("planeModel", new Model(new File("./assets/misc/plane.obj")));
+		loader.addAsset("cubeModel", new Model(new File("./assets/misc/cube.obj")));
+		//loader.addAsset("chickenTexture", new Texture(new File("./assets/textures/chicken.png")));
+		//loader.addAsset("barnTexture", new Texture(new File("./assets/textures/barn.jpg")));
+		//loader.addAsset("grassTexture", new Texture(new File("./assets/textures/Grass.png")));
+		
+		loader.addAsset("shadowShader", new Shader(new File("./assets/shader/shadow.json")));
+		
+		loader.addAssets(new File("./assets/chickendemo.assets"));
 		
 		switchState(loader.load()); //Switch to the loading state while we load the assets.
 	}

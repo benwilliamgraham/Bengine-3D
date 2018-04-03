@@ -1,6 +1,7 @@
 package magica.entities;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -14,11 +15,13 @@ import bengine.animation.Animation;
 import bengine.animation.Animator;
 import bengine.animation.Bone;
 import bengine.animation.Skeleton;
+import bengine.assets.Shader;
+import bengine.entities.Camera;
 import bengine.entities.Entity;
 import bengine.input.Keyboard;
 import bengine.rendering.Material;
 import bengine.rendering.Mesh;
-import bengine.rendering.Renderer;
+import bengine.rendering.renderers.Renderer;
 
 public class Chicken extends Entity {
 	
@@ -74,6 +77,8 @@ public class Chicken extends Entity {
 		}
 		
 		if (isLocalAuthority()) {
+			//transform.position = getScene().getCamera().transform.position;
+			//transform.rotation = getScene().getCamera().transform.rotation;
 			if (animator.getActiveAnimation().getName().equals("Armature|Walk")) {
 				transform.move(transform.forwards().mul(1.8f * delta));
 			}
@@ -92,14 +97,49 @@ public class Chicken extends Entity {
 				transform.rotate(new Vector3f(0, (float) ( delta * Math.PI / 4.0), 0));
 			}
 			
-			getScene().getCamera().transform.lookAt(new Vector3f(transform.position).add(new Vector3f(0, 5, 0)));
+			//getScene().getCamera().transform.lookAt(new Vector3f(transform.position).add(new Vector3f(0, 5, 0)));
 			
 			networkedPosition = new Vector3f(transform.position);
 			networkedRotation = new Quaternionf(transform.rotation);
 			animationName = animator.getActiveAnimation().getName();
 			animationTime = animator.getTime();
-			//System.out.println("Setting: " + networkedPosition.toString());
+			System.out.println("Setting: " + networkedPosition.toString());
 		}
+	}
+	
+	@Override
+	public void onDraw() {
+		Shader simpleShader = getScene().getAssets().getAsset("simpleShader");
+		
+		Camera c  = getScene().getCamera();
+		
+		simpleShader.bind();
+		
+		simpleShader.push("viewMatrix", c.generateView());
+		simpleShader.push("transformMatrix", transform.generateMatrix());
+		
+		simpleShader.push("fragColor", new Vector3f(0, 0, 1));
+		
+		glBegin(GL_LINES);
+			glVertex3f(0, 0, 0);
+			glVertex3f(0, 0, 1);
+		glEnd();
+		
+		simpleShader.push("fragColor", new Vector3f(0, 1, 0));
+		
+		glBegin(GL_LINES);
+			glVertex3f(0, 0, 0);
+			glVertex3f(0, 1, 0);
+		glEnd();
+		
+		simpleShader.push("fragColor", new Vector3f(1, 0, 0));
+		
+		glBegin(GL_LINES);
+			glVertex3f(0, 0, 0);
+			glVertex3f(1, 0, 0);
+		glEnd();
+		
+		simpleShader.unbind();
 	}
 	
 	@Override

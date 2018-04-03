@@ -28,6 +28,15 @@ public class Texture extends Asset {
 		this.glFilterMode = glFilterMode;
 	}
 	
+	public Texture(int textureHandle, int width, int height) {
+		super(null);
+		
+		this.textureHandle = textureHandle;
+		this.width = width;
+		this.height = height;
+		
+	}
+	
 	@Override
 	public void create() {
 		textureHandle = glGenTextures();

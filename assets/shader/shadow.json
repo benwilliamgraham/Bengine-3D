@@ -1,0 +1,4 @@
+{
+		"vertexShader": "./assets/shader/default.vert",
+		"fragmentShader": "./assets/shader/shadow.frag"
+}

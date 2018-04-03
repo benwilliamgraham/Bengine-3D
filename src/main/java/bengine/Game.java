@@ -164,17 +164,23 @@ public abstract class Game {
 		
 		glViewport(0, 0, width, height);
 		
-		//glEnable(GL_BLEND);
+		glEnable(GL_BLEND);
 		
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_CULL_FACE);
+		
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		glEnable(GL_DEPTH_TEST);
 		
 		glDepthFunc(GL_LEQUAL);
 		
-		glFrontFace(GL_CCW);
+		//glFrontFace(GL_CCW);
 		
-		glCullFace(GL_FRONT);
+		glFrontFace(GL_CW);
+		
+		//glCullFace(GL_FRONT);
+		
+		glEnable(GL_FRAMEBUFFER_SRGB); 
 		
 		glVertexAttrib4iv(4, new int[] {-1, -1, -1, -1});
 		
@@ -266,6 +272,14 @@ public abstract class Game {
 	
 	public float getAspect() {
 		return aspectRatio;
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
 	}
 	
 	protected long getWindow() {

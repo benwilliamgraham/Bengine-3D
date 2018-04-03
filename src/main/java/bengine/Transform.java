@@ -31,7 +31,7 @@ public class Transform {
 	}
 	
 	public void lookAt(Vector3f pos) {
-		Vector3f lookDirection = new Vector3f(pos).sub(this.position).normalize();
+		Vector3f lookDirection = new Vector3f(this.position).sub(pos).normalize();
 		
 		new Quaternionf().lookAlong(lookDirection, new Vector3f(0.0f, 1.0f, 0.0f), this.rotation);
 	}
@@ -39,7 +39,7 @@ public class Transform {
 	public Vector3f forwards() {
 		Vector3f direction = new Vector3f();
 		
-		this.rotation.transformPositiveZ(direction);
+		this.rotation.positiveZ(direction);
 		
 		return direction;
 	}
@@ -47,7 +47,7 @@ public class Transform {
 	public Vector3f right() {
 		Vector3f direction = new Vector3f();
 		
-		this.rotation.transformPositiveX(direction);
+		this.rotation.positiveX(direction);
 		
 		return direction;
 	}
@@ -55,7 +55,7 @@ public class Transform {
 	public Vector3f up() {
 		Vector3f direction = new Vector3f();
 		
-		this.rotation.transformPositiveY(direction);
+		this.rotation.positiveY(direction);
 		
 		return direction;
 	}
@@ -65,6 +65,7 @@ public class Transform {
 	}
 	
 	public Matrix4f generateCameraMatrix() {
-		return new Matrix4f().identity().rotate(this.rotation).translate(new Vector3f(this.position).mul(-1));
+		
+		return new Matrix4f().rotate(this.rotation).translate(new Vector3f(this.position).mul(-1));
 	}
 }
