@@ -1,0 +1,8 @@
+{
+	"top": "./assets/skybox/ely_cloudtop/cloudtop_up.tga",
+	"bottom": "./assets/skybox/ely_cloudtop/cloudtop_dn.tga",
+	"left": "./assets/skybox/ely_cloudtop/cloudtop_lf.tga",
+	"right": "./assets/skybox/ely_cloudtop/cloudtop_rt.tga",
+	"front": "./assets/skybox/ely_cloudtop/cloudtop_ft.tga",
+	"back": "./assets/skybox/ely_cloudtop/cloudtop_bk.tga"
+}

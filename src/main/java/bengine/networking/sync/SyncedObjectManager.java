@@ -38,7 +38,12 @@ public class SyncedObjectManager {
 	}
 	
 	public void deregisterObject(SyncedObject obj, Connection connection) {
-		DestroyObjectMessage msg = new DestroyObjectMessage(obj);
+		if (cachedObjects.containsKey(obj.getInstanceID())) {
+			DestroyObjectMessage msg = new DestroyObjectMessage(obj);
+			cachedObjects.remove(obj.getInstanceID());
+			connection.send(msg);
+		}
+		
 	}
 
 	public boolean isRegistered(ObjectMessage om) {
@@ -69,6 +74,24 @@ public class SyncedObjectManager {
 		}
 	}
 	
+	public void handleDisconnect(NetworkedClient client) {
+		for (SyncedObject obj : getObjects()) {
+			if (obj.getOwner() == client.getEndpointId()) {
+				if (obj.destroyOnDisconnect) {
+					trackedObjects.remove(obj.getInstanceID());
+					
+					DestroyObjectMessage msg = new DestroyObjectMessage(obj);
+					
+					for (NetworkedClient c : client.getServer().getClients()) {
+						c.getConnection().send(msg);
+					}
+				} else {
+					obj.setOwner(client.getServer().getEndpointId());
+				}
+			}
+		}
+	}
+	
 	public void onMessage(DestroyObjectMessage msg) {
 		if (trackedObjects.containsKey(msg.objectId)) { //Are we tracking the object that's being destroyed?
 			SyncedObject obj = trackedObjects.get(msg.objectId);
@@ -78,7 +101,7 @@ public class SyncedObjectManager {
 					trackedObjects.remove(msg.objectId);
 					
 					for (NetworkedClient c : msg.getEndpoint().getServer().getClients()) {
-						
+						c.getConnection().send(msg);
 					}
 				}
 			} else { //Executes if we're on the client.

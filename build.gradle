@@ -24,6 +24,8 @@ repositories {
     mavenCentral()
     jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/"  }
 }
 
 dependencies {
@@ -40,9 +42,11 @@ dependencies {
 	compile "org.lwjgl:lwjgl-opengl:$lwjglVersion:$lwjglNatives"
 	compile "org.lwjgl:lwjgl-stb:$lwjglVersion:$lwjglNatives"
 	
-	compile group: 'org.joml', name: 'joml', version: '1.9.8'
+	compile group: 'org.joml', name: 'joml', version: '1.9.9'
 	compile group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.5'
 	compile group: 'com.sudoplay.joise', name: 'joise', version: '1.1.0'
+	
+	compile "com.badlogicgames.ashley:ashley:1.7.0"
 }
 
 task runClient(dependsOn: ['classes'], type: JavaExec) {
@@ -54,12 +58,6 @@ task runClient(dependsOn: ['classes'], type: JavaExec) {
 task runServer(dependsOn: ['classes'], type: JavaExec) {
 	main = 'magica.MagicaServer'
 	classpath = sourceSets.main.runtimeClasspath;
-}
-
-tasks.withType(JavaExec) {
-    if (System.getProperty('DEBUG', 'false') == 'true') {
-        jvmArgs '-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9099'
-    }
 }
 
 // Define the main class for the application

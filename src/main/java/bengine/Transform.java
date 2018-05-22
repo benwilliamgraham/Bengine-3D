@@ -61,7 +61,7 @@ public class Transform {
 	}
 	
 	public Matrix4f generateMatrix() {
-		return new Matrix4f().identity().translate(this.position).rotate(this.rotation).scale(this.scale);
+		return new Matrix4f().identity().translate(this.position).rotate(new Quaternionf(this.rotation).invert()).scale(this.scale);
 	}
 	
 	public Matrix4f generateCameraMatrix() {

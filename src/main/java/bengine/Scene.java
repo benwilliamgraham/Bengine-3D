@@ -13,6 +13,8 @@ import bengine.assets.AssetManager;
 import bengine.entities.Camera;
 import bengine.entities.Entity;
 import bengine.entities.Light;
+import bengine.entities.Skybox;
+import bengine.physics.World;
 
 public class Scene {
 	private static final Logger LOGGER = Logger.getLogger(Scene.class.getName());
@@ -24,12 +26,17 @@ public class Scene {
 	
 	protected Light sun;
 	
+	protected Skybox sky;
+	
+	protected World world;
+	
 	public Scene(AssetManager assets) {
 		this.assets = assets;
 		this.entities = new ConcurrentHashMap<Long, Entity>();
 		this.camera = new Camera(new Vector3f(0, 0, 0), 75f, 100.0f); //Create a camera at the origin.
 		this.camera.name = "DefaultCamera";
 		this.sun = new Light(new Vector3f(3, 3, -3));
+		this.world = new World();
 	}
 	
 	public void update(float timeStep) {
@@ -67,12 +74,25 @@ public class Scene {
 		this.sun = sun;
 	}
 	
+	public void setSky(Skybox sky) {
+		this.sky = sky;
+		sky.setScene(this);
+	}
+	
 	public Camera getCamera() {
 		return camera;
 	}
 	
 	public Light getSun() {
 		return sun;
+	}
+	
+	public Skybox getSky() {
+		return sky;
+	}
+	
+	public World getWorld() {
+		return world;
 	}
 	
 	public Entity getEntity(long entityId) {

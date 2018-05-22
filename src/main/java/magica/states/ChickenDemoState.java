@@ -58,14 +58,14 @@ public class ChickenDemoState extends Client implements State  {
 		
 		//Mouse.lockCursor();
 		
-		scene.getCamera().transform.move(new Vector3f(0, 0, -5));
+		scene.getCamera().transform.move(new Vector3f(5, 5, 5));
 		
 		this.chicken = new Chicken();
 		
 		//this.chicken.transform.position = new Vector3f((float) Math.random() * 90 - 45, 0.0f,(float)  Math.random() * 90 - 45);
 		
 		Barn barn = new Barn();
-		barn.transform.position = new Vector3f(0.0f, 60f, -175.0f);
+		barn.transform.position = new Vector3f(0f, 3f, -10f);
 		
 		GrassPlane grass = new GrassPlane();
 		
@@ -79,7 +79,7 @@ public class ChickenDemoState extends Client implements State  {
 	public void onUpdate(float delta) {
 		scene.update(delta);
 		
-		if (Keyboard.isKeyDown(GLFW_KEY_W)) {
+		/*if (Keyboard.isKeyDown(GLFW_KEY_W)) {
 			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul( freecamSpeed * delta));
 		} else if (Keyboard.isKeyDown(GLFW_KEY_S)) {
 			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul(-freecamSpeed * delta));
@@ -110,7 +110,7 @@ public class ChickenDemoState extends Client implements State  {
 			} else {
 				Mouse.unlockCursor();
 			}
-		}
+		}*/
 		
 		if (Keyboard.isKeyJustPressed(GLFW_KEY_ESCAPE)) {
 			this.game.destroy();
@@ -126,7 +126,7 @@ public class ChickenDemoState extends Client implements State  {
 
 	@Override
 	public void onDestroyed() {
-		//objectManager.destroyObject(this.chicken);
+		objectManager.deregisterObject(this.chicken, getConnection());
 		this.close();
 		assets.destroy();
 	}

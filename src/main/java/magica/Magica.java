@@ -15,6 +15,7 @@ import bengine.Game;
 import bengine.State;
 import bengine.assets.AssetLoader;
 import bengine.assets.AssetManager;
+import bengine.assets.CubeMap;
 import bengine.assets.Model;
 import bengine.assets.Shader;
 import bengine.assets.Texture;
@@ -36,8 +37,10 @@ import bengine.networking.serialization.serializers.StringSerializer;
 import bengine.networking.serialization.serializers.Vector3fSerializer;
 import bengine.networking.sync.SyncedObjectManager;
 import magica.entities.Chicken;
+import magica.states.ChickenAnimationTestState;
 import magica.states.ChickenDemoState;
 import magica.states.LightingTestState;
+import magica.states.MagicaGame;
 
 public class Magica extends Game {
 	
@@ -68,7 +71,7 @@ public class Magica extends Game {
 			@Override
 			protected void onLoaded(AssetManager assets) {
 				//State newState = new ChickenDemoState(assets, playerName, addr);
-				State newState = new LightingTestState(assets);
+				State newState = new ChickenAnimationTestState(assets);
 				
 				switchState(newState);
 			}
@@ -86,8 +89,10 @@ public class Magica extends Game {
 		//loader.addAsset("chickenTexture", new Texture(new File("./assets/textures/chicken.png")));
 		//loader.addAsset("barnTexture", new Texture(new File("./assets/textures/barn.jpg")));
 		//loader.addAsset("grassTexture", new Texture(new File("./assets/textures/Grass.png")));
-		
 		loader.addAsset("shadowShader", new Shader(new File("./assets/shader/shadow.json")));
+		loader.addAsset("skyboxShader", new Shader(new File("./assets/shader/skybox.json")));
+		loader.addAsset("skybox", new CubeMap(new File("./assets/skybox/ely_cloudtop.json")));
+		
 		
 		loader.addAssets(new File("./assets/chickendemo.assets"));
 		

@@ -15,14 +15,21 @@ import bengine.rendering.renderers.steps.ShadowEntityStep;
 public class SceneRenderer extends Renderer<Scene> {
 	
 	EntityRenderer renderer;
+	SkyboxRenderer skyRenderer;
 	
 	public SceneRenderer(Material defaultMaterial) {
 		super(defaultMaterial);
 		
 		renderer = new EntityRenderer(defaultMaterial);
+		skyRenderer = new SkyboxRenderer();
 	}
 	
 	public void render(Scene scene) {
+		
+		if (scene.getSky() != null) skyRenderer.render(scene.getSky());
+		
+		glClear(GL_DEPTH_BUFFER_BIT);
+		
 		for (Entity e : scene.getEntities()) {
 			renderer.render(e);
 		}

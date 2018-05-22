@@ -1,0 +1,8 @@
+{
+	"top": "./assets/skybox/bluecloud/bluecloud_up.jpg",
+	"bottom": "./assets/skybox/bluecloud/bluecloud_dn.jpg",
+	"left": "./assets/skybox/bluecloud/bluecloud_lf.jpg",
+	"right": "./assets/skybox/bluecloud/bluecloud_rt.jpg",
+	"front": "./assets/skybox/bluecloud/bluecloud_ft.jpg",
+	"back": "./assets/skybox/bluecloud/bluecloud_bk.jpg"
+}

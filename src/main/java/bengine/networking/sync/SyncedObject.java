@@ -11,6 +11,8 @@ import bengine.networking.messages.RPCMessage;
 
 public abstract class SyncedObject {
 	
+	public final boolean destroyOnDisconnect;
+	
 	private static int currentTypeId = 0;
 	
 	public PermissionManager visibility = new PermissionManager();
@@ -41,7 +43,12 @@ public abstract class SyncedObject {
 	private long objectId;
 	
 	public SyncedObject() {
+		this(true);
 		this.objectId = generateId();
+	}
+	
+	public SyncedObject(boolean destroyOnDisconnect) {
+		this.destroyOnDisconnect = destroyOnDisconnect;
 	}
 	
 	public abstract void onRegistered();

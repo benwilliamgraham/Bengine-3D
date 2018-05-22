@@ -1,27 +1,18 @@
 package magica.entities;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_Q;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_E;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 
-import static org.lwjgl.glfw.GLFW.*;
-
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import bengine.Scene;
-import bengine.animation.Animation;
 import bengine.animation.Animator;
-import bengine.animation.Bone;
-import bengine.animation.Skeleton;
-import bengine.assets.Shader;
-import bengine.entities.Camera;
 import bengine.entities.Entity;
 import bengine.input.Keyboard;
 import bengine.rendering.Material;
-import bengine.rendering.Mesh;
-import bengine.rendering.renderers.Renderer;
 
 public class Chicken extends Entity {
 	
@@ -35,12 +26,6 @@ public class Chicken extends Entity {
 	@SyncedField("rotation")
 	public Quaternionf networkedRotation = new Quaternionf();
 	
-	@SyncedField("animation")
-	public String animationName = "";
-	
-	@SyncedField("animationTime")
-	public float animationTime = 0.0f;
-	
 	public Chicken() {
 		super();
 		this.visibility.allowAll = true;
@@ -53,7 +38,7 @@ public class Chicken extends Entity {
 		this.networkedPosition = this.transform.position;
 		
 		this.model = scene.getAssets().getAsset("chickenModel");
-		//this.scale = new Vector3f(0.1f, 0.1f, 0.1f);
+		this.transform.scale = new Vector3f(0.1f, 0.1f, 0.1f);
 		
 		this.material = new Material(scene.getAssets().getAsset("defaultShader"));
 		this.material.texture = scene.getAssets().getAsset("chickenTexture");
@@ -72,74 +57,75 @@ public class Chicken extends Entity {
 	@Override
 	public void onUpdate(float delta) {
 		
-		if (!this.getEndpoint().isRemote()) { //TODO: fix an issue where an object can be updated before it is created.
+		//if (!this.getEndpoint().isRemote()) { //TODO: fix an issue where an object can be updated before it is created.
 			animator.update(delta);
-		}
+		//}
 		
-		if (isLocalAuthority()) {
+		if (/*isLocalAuthority()*/true) {
 			//transform.position = getScene().getCamera().transform.position;
 			//transform.rotation = getScene().getCamera().transform.rotation;
 			if (animator.getActiveAnimation().getName().equals("Armature|Walk")) {
-				transform.move(transform.forwards().mul(1.8f * delta));
+				transform.move(transform.forwards().mul(0.5f * delta));
 			}
 			
-			if (Keyboard.isKeyJustPressed(GLFW_KEY_SPACE)) {
+			/*if (Keyboard.isKeyJustPressed(GLFW_KEY_SPACE)) {
 				RPC("playAnimation", RPC.ALL_REMOTES, "Armature|Eating");
 			}
 			
 			if (Keyboard.isKeyJustPressed(GLFW_KEY_W)) {
 				RPC("playAnimation", RPC.ALL_REMOTES_AND_LOCAL, "Armature|Walk");
-			}
+			}*/
 			
-			if (Keyboard.isKeyDown(GLFW_KEY_D)) {
+			if (Keyboard.isKeyDown(GLFW_KEY_Q)) {
 				transform.rotate(new Vector3f(0, (float) (-delta * Math.PI / 4.0), 0));
-			} else if (Keyboard.isKeyDown(GLFW_KEY_A)) {
+			} else if (Keyboard.isKeyDown(GLFW_KEY_E)) {
 				transform.rotate(new Vector3f(0, (float) ( delta * Math.PI / 4.0), 0));
 			}
 			
-			//getScene().getCamera().transform.lookAt(new Vector3f(transform.position).add(new Vector3f(0, 5, 0)));
+			//getScene().getCamera().transform.lookAt(new Vector3f(transform.position));
 			
 			networkedPosition = new Vector3f(transform.position);
 			networkedRotation = new Quaternionf(transform.rotation);
-			animationName = animator.getActiveAnimation().getName();
-			animationTime = animator.getTime();
-			System.out.println("Setting: " + networkedPosition.toString());
 		}
 	}
 	
 	@Override
 	public void onDraw() {
-		Shader simpleShader = getScene().getAssets().getAsset("simpleShader");
+		/*Shader simpleShader = getScene().getAssets().getAsset("simpleShader");
 		
 		Camera c  = getScene().getCamera();
 		
 		simpleShader.bind();
 		
 		simpleShader.push("viewMatrix", c.generateView());
-		simpleShader.push("transformMatrix", transform.generateMatrix());
+		simpleShader.push("transformMatrix", new Matrix4f().translate(transform.position));
 		
 		simpleShader.push("fragColor", new Vector3f(0, 0, 1));
 		
+		Vector3f lineX = transform.right().normalize();
+		Vector3f lineY = transform.up().normalize();
+		Vector3f lineZ = transform.forwards().normalize();
+		
 		glBegin(GL_LINES);
 			glVertex3f(0, 0, 0);
-			glVertex3f(0, 0, 1);
+			glVertex3f(lineZ.x, lineZ.y, lineZ.z);
 		glEnd();
 		
 		simpleShader.push("fragColor", new Vector3f(0, 1, 0));
 		
 		glBegin(GL_LINES);
 			glVertex3f(0, 0, 0);
-			glVertex3f(0, 1, 0);
+			glVertex3f(lineY.x, lineY.y, lineY.z);
 		glEnd();
 		
 		simpleShader.push("fragColor", new Vector3f(1, 0, 0));
 		
 		glBegin(GL_LINES);
 			glVertex3f(0, 0, 0);
-			glVertex3f(1, 0, 0);
+			glVertex3f(lineX.x, lineX.y, lineX.z);
 		glEnd();
 		
-		simpleShader.unbind();
+		simpleShader.unbind();*/
 	}
 	
 	@Override
@@ -156,11 +142,8 @@ public class Chicken extends Entity {
 	@Override
 	public void onObjectUpdate() {
 		if (!isLocalAuthority() && !getEndpoint().isRemote()) {
-			//System.out.println("Getting: " + networkedPosition.toString());
 			this.transform.position = new Vector3f(networkedPosition);
 			this.transform.rotation = new Quaternionf(networkedRotation);
-			this.animator.playNow(animationName);
-			this.animator.setTime(animationTime);
 		}
 	}
 

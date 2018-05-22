@@ -1,6 +1,9 @@
 package bengine.entities;
 
+import org.joml.AABBf;
 import org.joml.Spheref;
+import org.joml.Vector3f;
+
 import bengine.Scene;
 import bengine.Transform;
 import bengine.animation.Animator;
@@ -40,6 +43,11 @@ public abstract class Entity extends SyncedObject {
 	
 	public void destroy() {
 		this.scene.removeEntity(this);
+	}
+	
+	public AABBf getBounds() {
+		return new AABBf(new Vector3f(transform.position).sub(new Vector3f(transform.scale).div(2)),
+				new Vector3f(transform.position).add(new Vector3f(transform.scale).div(2)));
 	}
 	
 	public Animator getAnimator() {

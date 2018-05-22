@@ -8,7 +8,9 @@ import bengine.Game;
 import bengine.Scene;
 import bengine.State;
 import bengine.assets.AssetManager;
+import bengine.assets.Model;
 import bengine.entities.Entity;
+import bengine.entities.Skybox;
 import bengine.input.Keyboard;
 import bengine.input.Mouse;
 import bengine.rendering.Material;
@@ -46,9 +48,15 @@ public class LightingTestState implements State {
 		this.defaultMaterial = new Material(assets.getAsset("defaultShader"));
 		
 		this.renderer = new SceneRenderer(defaultMaterial);
-		this.renderer.getEntityRenderer().addStep(new ShadowEntityStep(assets.getAsset("shadowShader")));
+		//this.renderer.getEntityRenderer().addStep(new ShadowEntityStep(assets.getAsset("shadowShader")));
 		
 		this.scene = new Scene(assets);
+		
+		Skybox sky = new Skybox(
+			assets.getAsset("skybox"),
+			assets.getAsset("skyboxShader"),
+			((Model) assets.getAsset("cubeModel")).getMeshes()[0]
+		);
 		
 		Entity cube = new CubeEntity();
 		cube.transform.position.z += 4;
@@ -56,6 +64,7 @@ public class LightingTestState implements State {
 		
 		Entity plane = new GrassPlane();
 		
+		this.scene.setSky(sky);
 		this.scene.addEntity(cube);
 		this.scene.addEntity(plane);
 		

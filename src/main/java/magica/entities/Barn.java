@@ -23,7 +23,7 @@ public class Barn extends Entity {
 		
 		this.model.bindMaterial(this.material);
 		
-		this.transform.scale = new Vector3f(20.0f, 20.0f, 20.0f);
+		this.transform.scale = new Vector3f(1.0f, 1.0f, 1.0f);
 	}
 	
 	@Override

@@ -1,15 +1,27 @@
 package magica.entities;
 
+import org.joml.AABBf;
+import org.joml.Planef;
 import org.joml.Vector3f;
 
 import bengine.Scene;
 import bengine.entities.Entity;
+import bengine.physics.Body;
+import bengine.physics.Collider;
 import bengine.rendering.Material;
 
 public class GrassPlane extends Entity {
 	
+	private Body body;
+	
 	public GrassPlane() {
-		
+		super();
+		this.body = new Body(
+				new Collider(
+						new AABBf(
+								new Vector3f(-10f, -0.05f, -10f),
+								new Vector3f( 10f,  0.05f,  10f)
+				)));
 	}
 	
 	@Override
@@ -23,7 +35,9 @@ public class GrassPlane extends Entity {
 		
 		this.model.bindMaterial(this.material);
 		
-		this.transform.scale = new Vector3f(10.0f, 1.0f, 10.0f);
+		this.transform.scale = new Vector3f(10.0f, 0.1f, 10.0f);
+		
+		scene.getWorld().addBody(body);
 	}
 	
 	@Override
@@ -57,5 +71,4 @@ public class GrassPlane extends Entity {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
 }

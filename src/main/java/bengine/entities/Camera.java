@@ -31,4 +31,8 @@ public class Camera {
 	public Matrix4f generateView() {
 		return new Matrix4f(viewMatrix).mul(transform.generateCameraMatrix());
 	}
+	
+	public Matrix4f generateProjection() {
+		return new Matrix4f(viewMatrix);
+	}
 }

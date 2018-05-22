@@ -32,7 +32,7 @@ public class NetworkedClient implements Endpoint {
 	}
 	
 	public void onDisconnect() {
-		
+		getServer().objectManager.handleDisconnect(this);
 	}
 	
 	@Override

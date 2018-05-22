@@ -13,9 +13,9 @@ public class Texture extends Asset {
 
 	protected int textureHandle, width, height;
 
-	protected ByteBuffer textureData;
+	private ByteBuffer textureData;
 	
-	private int glWrapMode, glFilterMode;
+	protected int glWrapMode, glFilterMode;
 	
 	public Texture(File file) {
 		this(file, GL_REPEAT, GL_LINEAR);
