@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.DefaultComboBoxModel;
 
 public class MagicaLauncher extends JFrame {
 	
@@ -84,7 +85,8 @@ public class MagicaLauncher extends JFrame {
 				new DisplayMode(800, 600),
 				new DisplayMode(1024, 768),
 				new DisplayMode(1280, 1024),
-				new DisplayMode(1366, 768)
+				new DisplayMode(1366, 768),
+				new DisplayMode(1920, 1080)
 		};
 		
 		JComboBox resolution = new JComboBox(displayModes);
@@ -95,16 +97,25 @@ public class MagicaLauncher extends JFrame {
 		lblResolut.setBounds(5, 67, 87, 14);
 		contentPane.add(lblResolut);
 		
+		JLabel lblDemo = new JLabel("Demo:");
+		lblDemo.setBounds(5, 89, 46, 14);
+		contentPane.add(lblDemo);
+		
+		JComboBox demoName = new JComboBox();
+		demoName.setModel(new DefaultComboBoxModel(new String[] {"Skeletal Animation", "Chicken Demo", "Collision Demo"}));
+		demoName.setBounds(115, 86, 174, 20);
+		contentPane.add(demoName);
+		
 		btnStartGame.addActionListener((ActionEvent e) -> {
 			
 			DisplayMode displayMode = displayModes[resolution.getSelectedIndex()];
 			setVisible(false);
-			callback.start(displayMode.getWidth(), displayMode.getHeight(), chckbxFullscreen.isSelected(), serverAddress.getText(), name.getText());
+			callback.start(displayMode.getWidth(), displayMode.getHeight(), chckbxFullscreen.isSelected(), (String) demoName.getSelectedItem(), serverAddress.getText(), name.getText());
 		});
 	}
 	
 	public static interface MagicaCallback {
-		public void start(int width, int height, boolean isFullscreen, String serverAddress, String playerName);
+		public void start(int width, int height, boolean isFullscreen, String demoName, String serverAddress, String playerName);
 	}
 	
 	public static class DisplayMode {

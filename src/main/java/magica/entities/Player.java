@@ -21,7 +21,9 @@ public class Player extends Entity {
 	
 	private static final float collisionSkin = 0.001f;
 	
-	protected float movementSpeed = 3.5f;
+	protected float movementSpeed = 4f;
+	
+	protected float mouseSensitivty = 2f;
 	
 	private Body body;
 	
@@ -100,9 +102,9 @@ public class Player extends Entity {
 		 
 		transform.position = body.position;
 		
-		transform.rotation.rotateY(-Mouse.getDX() * delta);
-		c.transform.rotation.rotateY(-Mouse.getDX() * delta);
-		c.transform.rotation.rotateLocalX(-Mouse.getDY() * delta);
+		transform.rotation.rotateY(-Mouse.getDX() * mouseSensitivty * delta);
+		c.transform.rotation.rotateY(-Mouse.getDX() * mouseSensitivty * delta);
+		c.transform.rotation.rotateLocalX(-Mouse.getDY() * mouseSensitivty * delta);
 		 
 		c.transform.position = new Vector3f(this.transform.position).add(0, 2, 0);
 	}

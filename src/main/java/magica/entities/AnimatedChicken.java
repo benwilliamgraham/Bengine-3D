@@ -9,7 +9,6 @@ import bengine.animation.Animation;
 import bengine.animation.Animator;
 import bengine.entities.Entity;
 import bengine.rendering.Material;
-import magica.ChickenController;
 
 import javax.swing.JComboBox;
 
@@ -18,7 +17,7 @@ public class AnimatedChicken extends Entity {
 	public static final int OBJECT_TYPE = generateTypeId();
 	
 	public AnimatedChicken() {	
-		
+		super();
 	}
 	
 	@Override
@@ -34,11 +33,21 @@ public class AnimatedChicken extends Entity {
 		this.model.bindMaterial(this.material);
 		
 		this.animator = new Animator(this.model.getAnimations());
+		
+		animator.doLoop = false;
+		
+		for (Animation a : this.model.getAnimations()) {
+			animator.addIdleAnimation(a.getName());
+		}
+		
 	}
 	
 	@Override
 	public void onUpdate(float delta) {
 		animator.update(delta);
+		
+		
+		transform.rotate(new Vector3f(0, (float) Math.PI / 8 * delta, 0));
 	}
 
 	@Override

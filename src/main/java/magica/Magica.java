@@ -52,11 +52,14 @@ public class Magica extends Game {
 	String playerName;
 	SocketAddress addr;
 	
-	public Magica(int width, int height, boolean isFullscreen) {
+	String demo;
+	
+	public Magica(int width, int height, boolean isFullscreen, String demoName) {
 		super();
 		this.width = width;
 		this.height = height;
 		this.isFullscreen = isFullscreen;
+		this.demo = demoName;
 	}
 	
 	@Override
@@ -70,8 +73,17 @@ public class Magica extends Game {
 
 			@Override
 			protected void onLoaded(AssetManager assets) {
-				//State newState = new ChickenDemoState(assets, playerName, addr);
-				State newState = new ChickenAnimationTestState(assets);
+				State newState = null;
+				
+				System.out.println(demo);
+				
+				if (demo == "Skeletal Animation") {
+					newState = new ChickenAnimationTestState(assets);
+				} else if (demo == "Chicken Demo") {
+					newState = new ChickenDemoState(assets, playerName, addr);
+				} else if (demo == "Collision Demo") {
+					newState = new MagicaGame(assets);
+				}
 				
 				switchState(newState);
 			}
@@ -133,8 +145,8 @@ public class Magica extends Game {
 		
 		SyncedObjectManager.registerTrackedType(Chicken.class);
 		
-		MagicaLauncher launcher = new MagicaLauncher((int width, int height, boolean isFullscreen, String serverAddress, String name) -> {
-			Magica game = new Magica(width, height, isFullscreen);
+		MagicaLauncher launcher = new MagicaLauncher((int width, int height, boolean isFullscreen, String demoName, String serverAddress, String name) -> {
+			Magica game = new Magica(width, height, isFullscreen, demoName);
 			
 			game.playerName = name;
 			game.addr = new InetSocketAddress(serverAddress, 2290);

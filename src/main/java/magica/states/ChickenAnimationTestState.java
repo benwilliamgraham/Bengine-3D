@@ -1,16 +1,13 @@
 package magica.states;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 
 import bengine.Game;
 import bengine.Scene;
 import bengine.State;
 import bengine.assets.AssetManager;
+import bengine.assets.Model;
+import bengine.entities.Skybox;
 import bengine.input.Keyboard;
 import bengine.rendering.Material;
 import bengine.rendering.renderers.Renderer;
@@ -43,33 +40,28 @@ public class ChickenAnimationTestState implements State {
 	public void onCreated(Game game) {
 		this.scene = new Scene(assets);
 		
-		//scene.getCamera().transform.position.z = 10;
+		scene.getCamera().transform.position.z = -1.3f;
+		scene.getCamera().transform.position.y = 0.7f;
 		
-		//scene.addEntity(new CubeEntity());
+		Skybox sky = new Skybox(
+				assets.getAsset("skybox"),
+				assets.getAsset("skyboxShader"),
+				((Model) assets.getAsset("cubeModel")).getMeshes()[0]
+			);
 		
-		scene.addEntity(new Chicken());
+		
+		scene.setSky(sky);
+		
+		scene.addEntity(new AnimatedChicken());
+		//scene.addEntity(new AnimatedChicken());
 	}
 
 	@Override
 	public void onUpdate(float delta) {
 		scene.update(delta);
 		
-		if (Keyboard.isKeyDown(GLFW_KEY_W)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul( freecamSpeed * delta));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_S)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.forwards().mul(-freecamSpeed * delta));
-		}
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_D)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.right().mul( freecamSpeed * delta));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_A)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.right().mul(-freecamSpeed * delta));
-		}
-		
-		if (Keyboard.isKeyDown(GLFW_KEY_SPACE)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.up().mul( freecamSpeed * delta));
-		} else if (Keyboard.isKeyDown(GLFW_KEY_LEFT_CONTROL)) {
-			scene.getCamera().transform.move(scene.getCamera().transform.up().mul(-freecamSpeed * delta));
+		if (Keyboard.isKeyDown(GLFW_KEY_ESCAPE)) {
+			Game.getCurrent().destroy();
 		}
 		
 	}

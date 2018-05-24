@@ -1,9 +1,10 @@
 package magica.entities;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_Q;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_E;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -57,32 +58,30 @@ public class Chicken extends Entity {
 	@Override
 	public void onUpdate(float delta) {
 		
-		//if (!this.getEndpoint().isRemote()) { //TODO: fix an issue where an object can be updated before it is created.
+		if (!this.getEndpoint().isRemote()) { //TODO: fix an issue where an object can be updated before it is created.
 			animator.update(delta);
-		//}
+		}
 		
-		if (/*isLocalAuthority()*/true) {
-			//transform.position = getScene().getCamera().transform.position;
-			//transform.rotation = getScene().getCamera().transform.rotation;
+		if (isLocalAuthority()) {
 			if (animator.getActiveAnimation().getName().equals("Armature|Walk")) {
 				transform.move(transform.forwards().mul(0.5f * delta));
 			}
 			
-			/*if (Keyboard.isKeyJustPressed(GLFW_KEY_SPACE)) {
-				RPC("playAnimation", RPC.ALL_REMOTES, "Armature|Eating");
+			if (Keyboard.isKeyJustPressed(GLFW_KEY_SPACE)) {
+				RPC("playAnimation", RPC.ALL_REMOTES_AND_LOCAL, "Armature|Eating");
 			}
 			
 			if (Keyboard.isKeyJustPressed(GLFW_KEY_W)) {
 				RPC("playAnimation", RPC.ALL_REMOTES_AND_LOCAL, "Armature|Walk");
-			}*/
+			}
 			
-			if (Keyboard.isKeyDown(GLFW_KEY_Q)) {
+			if (Keyboard.isKeyDown(GLFW_KEY_A)) {
 				transform.rotate(new Vector3f(0, (float) (-delta * Math.PI / 4.0), 0));
-			} else if (Keyboard.isKeyDown(GLFW_KEY_E)) {
+			} else if (Keyboard.isKeyDown(GLFW_KEY_D)) {
 				transform.rotate(new Vector3f(0, (float) ( delta * Math.PI / 4.0), 0));
 			}
 			
-			//getScene().getCamera().transform.lookAt(new Vector3f(transform.position));
+			getScene().getCamera().transform.lookAt(new Vector3f(transform.position));
 			
 			networkedPosition = new Vector3f(transform.position);
 			networkedRotation = new Quaternionf(transform.rotation);
@@ -143,7 +142,7 @@ public class Chicken extends Entity {
 	public void onObjectUpdate() {
 		if (!isLocalAuthority() && !getEndpoint().isRemote()) {
 			this.transform.position = new Vector3f(networkedPosition);
-			this.transform.rotation = new Quaternionf(networkedRotation);
+			//this.transform.rotation = new Quaternionf(networkedRotation);
 		}
 	}
 

@@ -130,7 +130,7 @@ public abstract class Game {
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 		
-		windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
+		windowHandle = glfwCreateWindow(width, height, title, fullscreen? glfwGetPrimaryMonitor() : NULL, NULL);
 		
 		try ( MemoryStack stack = MemoryStack.stackPush() ) {
 			IntBuffer pWidth = stack.mallocInt(1); // int*
@@ -154,8 +154,6 @@ public abstract class Game {
 		glfwSwapInterval(0);
 		
 		aspectRatio = (float) width / height;
-		
-		System.out.println(aspectRatio);
 		
 		this.width = width;
 		this.height = height;

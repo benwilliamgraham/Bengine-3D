@@ -10,7 +10,9 @@ import bengine.Game;
 import bengine.Scene;
 import bengine.State;
 import bengine.assets.AssetManager;
+import bengine.assets.Model;
 import bengine.entities.Entity;
+import bengine.entities.Skybox;
 import bengine.input.Keyboard;
 import bengine.input.Mouse;
 import bengine.networking.Client;
@@ -36,7 +38,7 @@ public class ChickenDemoState extends Client implements State  {
 	
 	private Entity chicken;
 	
-	private boolean grabMouse = false;
+	private boolean grabMouse = true;
 	
 	private float freecamSpeed = 3.0f;
 	
@@ -62,7 +64,7 @@ public class ChickenDemoState extends Client implements State  {
 		
 		this.chicken = new Chicken();
 		
-		//this.chicken.transform.position = new Vector3f((float) Math.random() * 90 - 45, 0.0f,(float)  Math.random() * 90 - 45);
+		this.chicken.transform.position = new Vector3f((float) Math.random() * 10 - 5, 0.0f,(float)  Math.random() * 8 - 4);
 		
 		Barn barn = new Barn();
 		barn.transform.position = new Vector3f(0f, 3f, -10f);
@@ -71,6 +73,15 @@ public class ChickenDemoState extends Client implements State  {
 		
 		this.scene.addEntity(barn);
 		this.scene.addEntity(grass);
+		
+		Skybox sky = new Skybox(
+				assets.getAsset("skybox"),
+				assets.getAsset("skyboxShader"),
+				((Model) assets.getAsset("cubeModel")).getMeshes()[0]
+			);
+		
+		
+		scene.setSky(sky);
 		
 		this.open();
 	}
@@ -138,7 +149,7 @@ public class ChickenDemoState extends Client implements State  {
 
 	@Override
 	public void onConnected() {
-		System.out.println("Connected to server.");
+		System.out.println("Connected to server as: " + this.name);
 		objectManager.registerObject(chicken, getConnection());
 	}
 
@@ -151,6 +162,6 @@ public class ChickenDemoState extends Client implements State  {
 
 	@Override
 	public void onDisconnected() {
-		
+		this.game.destroy();
 	}
 }

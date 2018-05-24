@@ -68,6 +68,7 @@ public class SyncedObjectManager {
 			
 			try {
 				method.invoke(obj, m.params);
+				System.out.println("Invoking RPC for object: " + obj.getInstanceID());
 			} catch (Exception e) {
 				//TODO: When we get a logger.
 			}

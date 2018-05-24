@@ -72,7 +72,7 @@ public class Body {
 					 thisBounds.maxX, thisBounds.maxY + movement.y, thisBounds.maxZ);
 			 
 			 if (thisBoundsY.testAABB(groundBounds)) {
-				 if (b.position.y < b.position.y) {
+				 if (position.y < b.position.y) {
 					 movement.y = Math.min(groundBounds.minY - thisBounds.maxY - collisionSkin, movement.y);
 				 } else {
 					 movement.y = Math.max(groundBounds.maxY - thisBounds.minY + collisionSkin, movement.y);
@@ -83,7 +83,7 @@ public class Body {
 					 thisBounds.maxX, thisBounds.maxY, thisBounds.maxZ + movement.z);
 			 
 			 if (thisBoundsZ.testAABB(groundBounds)) {
-				 if (b.position.z < b.position.z) {
+				 if (position.z < b.position.z) {
 					 movement.z = Math.min(groundBounds.minZ - thisBounds.maxZ - collisionSkin, movement.z);
 				 } else {
 					 movement.z = Math.max(groundBounds.maxZ - thisBounds.minZ + collisionSkin, movement.z);
